@@ -16,6 +16,7 @@ Player::Player(void)
 
 	animationController_ = nullptr;
 	state_ = STATE::NONE;
+	statePlPos_ = STATE_PLPOS::LAND;
 
 	speed_ = 0.0f;
 	moveDir_ = AsoUtility::VECTOR_ZERO;
@@ -176,13 +177,19 @@ void Player::UpdateNone(void)
 
 void Player::UpdatePlay(void)
 {
+	switch (statePlPos_)
+	{
+	case Player::STATE_PLPOS::LAND:
+		UpdateLand();
+		break;
+	case Player::STATE_PLPOS::AIR:
+		UpdateAir();
+		break;
+	default:
+		break;
+	}
+	ChangeLandAir();
 
-	ProcessMove();
-	ProcessMoveFly();
-
-	// ジャンプ処理
-	ProcessJump();
-	ProcessFly();
 	// 移動方向に応じた回転
 	Rotate();
 
@@ -194,6 +201,7 @@ void Player::UpdatePlay(void)
 
 	// 回転させる
 	transform_.quaRot = playerRotY_;
+
 
 }
 
@@ -291,12 +299,35 @@ void Player::DrawShadow(void)
 
 }
 
-void Player::ProcessMove(void)
+void Player::UpdateLand(void)
+{
+	ProcessMove();
+	// ジャンプ処理
+	ProcessJump();
+	ProcessFly();
+
+}
+
+void Player::UpdateAir(void)
+{
+	ProcessMoveFly();
+
+}
+
+void Player::ChangeLandAir(void)
 {
 	if (isFly_)
 	{
-		return;
+		statePlPos_ = STATE_PLPOS::AIR;
 	}
+	else
+	{
+		statePlPos_ = STATE_PLPOS::LAND;
+	}
+}
+
+void Player::ProcessMove(void)
+{
 
 	auto& ins = InputManager::GetInstance();
 
@@ -377,11 +408,6 @@ void Player::ProcessMove(void)
 void Player::ProcessJump(void)
 {
 
-	if (isFly_)
-	{
-		return;
-	}
-
 	bool isHit = CheckHitKey(KEY_INPUT_BACKSLASH);
 
 	// ジャンプ
@@ -430,7 +456,12 @@ void Player::ProcessFly(void)
 	bool isHit = ins.IsTrgDown(KEY_INPUT_SPACE);
 
 	// ジャンプ
-	if (isHit && (isJump_ && !IsEndLanding()))
+	if (isHit)
+	{
+		int a = 0;
+	}
+
+ 	if (isHit && (isJump_ && !IsEndLanding()))
 	{
 
 		if (!isFly_)
@@ -454,10 +485,6 @@ void Player::ProcessFly(void)
 
 void Player::ProcessMoveFly(void)
 {
-	if (!isFly_)
-	{
-		return;
-	}
 
 	auto& ins = InputManager::GetInstance();
 
@@ -500,12 +527,13 @@ void Player::ProcessMoveFly(void)
 		dir = cameraRot.GetLeft();
 	}
 
-	// カメラ方向から左側へ移動したい
+	//	絶対的な上方へ移動したい
 	if (ins.IsNew(KEY_INPUT_SPACE))
 	{
 		dir = AsoUtility::AXIS_Y;
 	}
-	// カメラ方向から左側へ移動したい
+
+	//	下降したい
 	if (ins.IsNew(KEY_INPUT_LCONTROL))
 	{
 		isFly_ = false;
@@ -612,9 +640,10 @@ void Player::CollisionGravity(void)
 	gravHitPosUp_ = VAdd(movedPos_, VScale(dirUpGravity, gravityPow));
 	gravHitPosUp_ = VAdd(gravHitPosUp_, VScale(dirUpGravity, checkPow * 2.0f));
 	gravHitPosDown_ = VAdd(movedPos_, VScale(dirGravity, checkPow));
+
 	for (const auto c : colliders_)
 	{
-
+		
 		// 地面との衝突
 		auto hit = MV1CollCheck_Line(
 			c->modelId_, -1, gravHitPosUp_, gravHitPosDown_);
@@ -732,7 +761,7 @@ bool Player::IsEndLanding(void)
 	bool ret = true;
 
 	// アニメーションがジャンプではない
-	if (animationController_->GetPlayType() != (int)ANIM_TYPE::JUMP)
+	if (animationController_->GetPlayType() != (int)ANIM_TYPE::JUMP && animationController_->GetPlayType() != (int)ANIM_TYPE::FLY)
 	{
 		return ret;
 	}

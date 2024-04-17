@@ -15,7 +15,7 @@ public:
 	static constexpr float SPEED_RUN = 10.0f;
 
 	// 回転完了までの時間
-	static constexpr float TIME_ROT = 1.0f;
+	static constexpr float TIME_ROT = 0.3f;
 
 	// ジャンプ力
 	static constexpr float POW_JUMP = 35.0f;
@@ -28,13 +28,28 @@ public:
 	{
 		NONE,
 		PLAY,
-		WARP_RESERVE,
-		WARP_MOVE,
 		DEAD,
 		VICTORY,
 		END
 	};
 
+	// 空中にいたいか地上にいたいかで処理を変えたい(不可抗力で空中にいてしまってる場合は(落下とか)LANDで、自分から浮いてるときはAIR)
+	enum class STATE_PLPOS
+	{
+		LAND,
+		AIR
+	};
+
+	//	STATE::PLAY中のSTATE
+	enum class STATE_INPLAY
+	{
+		NONE,
+		IDLE,
+		MOVE,
+		ATTACK,
+		SHOT,
+		STUN,
+	};
 
 	// アニメーション種別
 	enum class ANIM_TYPE
@@ -73,6 +88,9 @@ private:
 
 	// 状態管理
 	STATE state_;
+
+	//	プレイヤーがいるのが地上か空中かを可視化
+	STATE_PLPOS statePlPos_;
 
 	// 移動スピード
 	float speed_;
@@ -128,6 +146,13 @@ private:
 	// 描画系
 	void DrawShadow(void);
 
+	//	地上、空中別の処理
+	void UpdateLand(void);
+	void UpdateAir(void);
+
+	//
+	void ChangeLandAir(void);
+
 	// 操作
 	void ProcessMove(void);
 	void ProcessJump(void);
@@ -142,6 +167,7 @@ private:
 	void Collision(void);
 	void CollisionGravity(void);
 	void CollisionCapsule(void);
+
 
 	// 移動量の計算
 	void CalcGravityPow(void);
