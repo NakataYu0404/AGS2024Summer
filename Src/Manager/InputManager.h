@@ -115,6 +115,8 @@ public:
 	bool IsPadBtnTrgDown(JOYPAD_NO no, JOYPAD_BTN btn) const;
 	bool IsPadBtnTrgUp(JOYPAD_NO no, JOYPAD_BTN btn) const;
 
+
+	bool IsDoubleClick(int key);
 private:
 
 	// キー情報
@@ -186,5 +188,18 @@ private:
 
 	// コントローラの入力情報を更新する
 	void SetJPadInState(JOYPAD_NO jpNo);
+
+
+	//	ダブルクリック関数のhitFlag
+	bool hitFlagDC_;
+	//	ダブルクリック関数のhitFlag旧
+	bool hitFlagOldDC_;
+	//	ダブルクリック関数の押してる時間Cnt
+	int hitCntDC_;
+	//	ダブルクリック関数の押してる時間Cnt旧
+	int hitCntOldDC_;
+	//	ダブルクリック関数の押してる時間Cnt
+	int releaseCntDC_;
+	int releaseCntOldDC_;
 
 };

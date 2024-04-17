@@ -108,9 +108,6 @@
     <ClCompile Include="Src\Manager\Camera.cpp">
       <Filter>ソース ファイル\Manager</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Object\Common\AnimationController.cpp">
-      <Filter>ソース ファイル\Object\Common</Filter>
-    </ClCompile>
     <ClCompile Include="Src\Object\Common\Capsule.cpp">
       <Filter>ソース ファイル\Object\Common</Filter>
     </ClCompile>
@@ -130,6 +127,9 @@
       <Filter>ソース ファイル\Common</Filter>
     </ClCompile>
     <ClCompile Include="Src\Object\ActorBase.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Object\Common\AnimationController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -179,9 +179,6 @@
     <ClInclude Include="Src\Manager\Camera.h">
       <Filter>ヘッダー ファイル\Manager</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Object\Common\AnimationController.h">
-      <Filter>ヘッダー ファイル\Object\Common</Filter>
-    </ClInclude>
     <ClInclude Include="Src\Object\Common\Capsule.h">
       <Filter>ヘッダー ファイル\Object\Common</Filter>
     </ClInclude>
@@ -207,6 +204,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Src\Object\ActorBase.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Object\Common\AnimationController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

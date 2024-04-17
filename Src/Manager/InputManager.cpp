@@ -67,6 +67,12 @@ void InputManager::Init(void)
 	info.keyTrgUp = false;
 	mouseInfos_.emplace(info.key, info);
 
+	hitFlagDC_ = false;
+	hitCntDC_ = 0;
+	hitCntOldDC_ = 0;
+	releaseCntDC_ = 0;
+	releaseCntOldDC_ = 0;
+
 }
 
 void InputManager::Update(void)
@@ -365,6 +371,54 @@ bool InputManager::IsPadBtnTrgDown(JOYPAD_NO no, JOYPAD_BTN btn) const
 bool InputManager::IsPadBtnTrgUp(JOYPAD_NO no, JOYPAD_BTN btn) const
 {
 	return padInfos_[static_cast<int>(no)].IsTrgUp[static_cast<int>(btn)];
+}
+
+bool InputManager::IsDoubleClick(int key) 
+{
+	bool ret = false;
+
+	hitFlagOldDC_ = hitFlagDC_;
+
+	if (IsTrgDown(key))
+	{
+		//	クリックされたので、カウントの保存と初期化
+		hitCntOldDC_ = hitCntDC_;
+		hitCntDC_ = 0;
+		releaseCntOldDC_ = releaseCntDC_;
+		releaseCntDC_ = 0;
+	}
+
+	if (IsNew(key))
+	{
+		//	今クリックされ続けてるか
+		hitFlagDC_ = true;
+	}
+	else
+	{
+		hitFlagDC_ = false;
+	}
+
+	//	クリックされてるフレーム数を測る
+	if (hitFlagDC_ && hitFlagOldDC_)
+	{
+		hitCntDC_++;
+	}
+
+	//	離されてるフレーム数を測る
+	if (!hitFlagDC_)
+	{
+		releaseCntDC_++;
+	}
+
+	//	それぞれのCntが(0< Cnt <= 許容時間)だったら
+	if ((0 < hitCntOldDC_ && hitCntOldDC_ <= 10) && (0 < hitCntDC_ && hitCntDC_ <= 10) && (0 < releaseCntOldDC_ && releaseCntOldDC_ <= 10))
+	{
+		hitCntOldDC_ = 0;
+		releaseCntOldDC_ = 0;
+ 		ret = true;
+	}
+
+	return ret;
 }
 
 

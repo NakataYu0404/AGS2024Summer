@@ -36,9 +36,12 @@ public:
 	// ‹ó’†‚É‚¢‚½‚¢‚©’nã‚É‚¢‚½‚¢‚©‚Åˆ—‚ð•Ï‚¦‚½‚¢(•s‰ÂR—Í‚Å‹ó’†‚É‚¢‚Ä‚µ‚Ü‚Á‚Ä‚éê‡‚Í(—Ž‰º‚Æ‚©)LAND‚ÅAŽ©•ª‚©‚ç•‚‚¢‚Ä‚é‚Æ‚«‚ÍAIR)
 	enum class STATE_PLPOS
 	{
+		NONE,
 		LAND,
-		AIR
+		AIR,
 	};
+
+
 
 	//	STATE::PLAY’†‚ÌSTATE
 	enum class STATE_INPLAY

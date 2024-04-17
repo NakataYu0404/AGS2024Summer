@@ -527,16 +527,16 @@ void Player::ProcessMoveFly(void)
 		dir = cameraRot.GetLeft();
 	}
 
-	//	絶対的な上方へ移動したい
-	if (ins.IsNew(KEY_INPUT_SPACE))
-	{
-		dir = AsoUtility::AXIS_Y;
-	}
 
 	//	下降したい
-	if (ins.IsNew(KEY_INPUT_LCONTROL))
+	if (ins.IsDoubleClick(KEY_INPUT_SPACE))
 	{
 		isFly_ = false;
+	}
+	//	絶対的な上方へ移動したい
+	else if (ins.IsNew(KEY_INPUT_SPACE))
+	{
+		dir = AsoUtility::AXIS_Y;
 	}
 
 	if (!AsoUtility::EqualsVZero(dir) && (isJump_ || IsEndLanding())) {
@@ -663,8 +663,7 @@ void Player::CollisionGravity(void)
 			if (isJump_)
 			{
 				// 着地モーション
-				animationController_->Play(
-					(int)ANIM_TYPE::JUMP, false, 29.0f, 45.0f, false, true);
+				animationController_->Play((int)ANIM_TYPE::JUMP, false, 29.0f, 45.0f, false, true);
 			}
 
 			isJump_ = false;
