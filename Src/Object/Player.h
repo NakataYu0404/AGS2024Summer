@@ -13,6 +13,7 @@ public:
 
 	// スピード
 	static constexpr float SPEED_RUN = 10.0f;
+	static constexpr float SPEED_FLY = 15.0f;
 
 	// 回転完了までの時間
 	static constexpr float TIME_ROT = 0.3f;
@@ -41,17 +42,17 @@ public:
 		AIR,
 	};
 
-
-
 	//	STATE::PLAY中のSTATE
 	enum class STATE_INPLAY
 	{
 		NONE,
 		IDLE,
 		MOVE,
+		JUMP,
 		ATTACK,
 		SHOT,
 		STUN,
+		FALL,
 	};
 
 	// アニメーション種別
@@ -94,6 +95,9 @@ private:
 
 	//	プレイヤーがいるのが地上か空中かを可視化
 	STATE_PLPOS statePlPos_;
+
+	//	STATE::PLAYの中のステート
+	STATE_INPLAY statePlay_;
 
 	// 移動スピード
 	float speed_;
@@ -153,8 +157,11 @@ private:
 	void UpdateLand(void);
 	void UpdateAir(void);
 
-	//
+	//	地上、空中の切り替え
 	void ChangeLandAir(void);
+
+	//	地上、空中関係ないSTATE::PLAY中ステートの切り替え
+	void ChangeStateInPlay(STATE_INPLAY state);
 
 	// 操作
 	void ProcessMove(void);

@@ -17,6 +17,7 @@ Player::Player(void)
 	animationController_ = nullptr;
 	state_ = STATE::NONE;
 	statePlPos_ = STATE_PLPOS::LAND;
+	statePlay_ = STATE_INPLAY::IDLE;
 
 	speed_ = 0.0f;
 	moveDir_ = AsoUtility::VECTOR_ZERO;
@@ -137,7 +138,7 @@ void Player::InitAnimation(void)
 	animationController_->Add((int)ANIM_TYPE::JUMP, path + "Jump.mv1", 60.0f);
 	animationController_->Add((int)ANIM_TYPE::WARP_PAUSE, path + "WarpPose.mv1", 60.0f);
 	animationController_->Add((int)ANIM_TYPE::FLY, path + "Flying.mv1", 60.0f);
-	animationController_->Add((int)ANIM_TYPE::FALLING, path + "Falling.mv1", 80.0f);
+	animationController_->Add((int)ANIM_TYPE::FALLING, path + "FallIdle.mv1", 80.0f);
 	animationController_->Add((int)ANIM_TYPE::VICTORY, path + "Victory.mv1", 60.0f);
 
 	animationController_->Play((int)ANIM_TYPE::IDLE);
@@ -326,6 +327,11 @@ void Player::ChangeLandAir(void)
 	}
 }
 
+void Player::ChangeStateInPlay(STATE_INPLAY state)
+{
+	statePlay_ = state;
+}
+
 void Player::ProcessMove(void)
 {
 
@@ -383,15 +389,7 @@ void Player::ProcessMove(void)
 
 		if (!isJump_ && IsEndLanding())
 		{
-			// アニメーション
-			if (ins.IsNew(KEY_INPUT_RSHIFT))
-			{
-				animationController_->Play((int)ANIM_TYPE::FAST_RUN);
-			}
-			else
-			{
-				animationController_->Play((int)ANIM_TYPE::RUN);
-			}
+			ChangeStateInPlay(STATE_INPLAY::MOVE);
 		}
 		
 	}
@@ -399,7 +397,7 @@ void Player::ProcessMove(void)
 	{
 		if (!isJump_ && IsEndLanding())
 		{
-			animationController_->Play((int)ANIM_TYPE::IDLE);
+			ChangeStateInPlay(STATE_INPLAY::IDLE);
 		}
 	}
 
@@ -411,7 +409,7 @@ void Player::ProcessJump(void)
 	bool isHit = CheckHitKey(KEY_INPUT_BACKSLASH);
 
 	// ジャンプ
-	if (isHit && (isJump_ || IsEndLanding()))
+ 	if ((isHit && (isJump_ || IsEndLanding())) || isJump_ && !IsEndLanding())
 	{
 
 		if (!isJump_)
@@ -435,18 +433,9 @@ void Player::ProcessJump(void)
 		{
 			jumpPow_ = VScale(AsoUtility::DIR_U, POW_JUMP);
 		}
-		else
-		{
-			int a = 0;
-		}
 
 	}
 
-	// ボタンを離したらジャンプ力に加算しない
-	if (!isHit)
-	{
-		stepJump_ = TIME_JUMP_IN;
-	}
 
 }
 
@@ -455,30 +444,14 @@ void Player::ProcessFly(void)
 	auto& ins = InputManager::GetInstance();
 	bool isHit = ins.IsTrgDown(KEY_INPUT_SPACE);
 
-	// ジャンプ
-	if (isHit)
+  	if (isHit && (isJump_ && !IsEndLanding()))
 	{
-		int a = 0;
+		isFly_ = true;
 	}
 
- 	if (isHit && (isJump_ && !IsEndLanding()))
+	if (isFly_)
 	{
-
-		if (!isFly_)
-		{
-			// 制御無しジャンプ
-			//mAnimationController->Play((int)ANIM_TYPE::JUMP);
-			// ループしないジャンプ
-			//mAnimationController->Play((int)ANIM_TYPE::JUMP, false);
-			// 切り取りアニメーション
-			//mAnimationController->Play((int)ANIM_TYPE::JUMP, false, 13.0f, 24.0f);
-			// 無理やりアニメーション
-			animationController_->Play((int)ANIM_TYPE::FLY, true, 13.0f, 25.0f);
-			animationController_->SetEndLoop(23.0f, 25.0f, 5.0f);
-		}
-
-		isFly_ = true;
-
+		ChangeStateInPlay(STATE_INPLAY::MOVE);
 	}
 
 }
@@ -542,7 +515,7 @@ void Player::ProcessMoveFly(void)
 	if (!AsoUtility::EqualsVZero(dir) && (isJump_ || IsEndLanding())) {
 
 		// 移動処理
-		speed_ = SPEED_RUN;
+		speed_ = SPEED_FLY;
 
 		moveDir_ = dir;
 		movePow_ = VScale(dir, speed_);
@@ -550,28 +523,24 @@ void Player::ProcessMoveFly(void)
 		// 回転処理
 		SetGoalRotate(rotRad);
 
-		if (!isJump_ && IsEndLanding())
+		if (isFly_)
 		{
 			// アニメーション
-			if (ins.IsNew(KEY_INPUT_RSHIFT))
-			{
-				animationController_->Play((int)ANIM_TYPE::FLY);
-			}
-			else
-			{
-				animationController_->Play((int)ANIM_TYPE::FLY);
-			}
+			ChangeStateInPlay(STATE_INPLAY::MOVE);
 		}
 
-	}
-	else
-	{
-		if (!isJump_ && IsEndLanding())
+		//上方向にのみいどうしてたら（上昇操作）
+		if (dir.y == 1.0f && AsoUtility::EqualsVZero({ dir.x,0.0f,dir.z }))
 		{
-			animationController_->Play((int)ANIM_TYPE::IDLE);
+			ChangeStateInPlay(STATE_INPLAY::FALL);
+		}
+		//移動してなかったら
+		else if (AsoUtility::EqualsVZero(dir))
+		{
+			//	空中Idleに
+			ChangeStateInPlay(STATE_INPLAY::IDLE);
 		}
 	}
-
 }
 
 void Player::SetGoalRotate(double rotRad)
@@ -654,7 +623,7 @@ void Player::CollisionGravity(void)
 		{
 
 			// 衝突地点から、少し上に移動
-			movedPos_ = VAdd(hit.HitPosition, VScale(dirUpGravity, 2.0f));
+			movedPos_ = VAdd(hit.HitPosition, VScale(dirUpGravity, 5.0f));
 
 			// ジャンプリセット
 			jumpPow_ = AsoUtility::VECTOR_ZERO;
@@ -760,7 +729,7 @@ bool Player::IsEndLanding(void)
 	bool ret = true;
 
 	// アニメーションがジャンプではない
-	if (animationController_->GetPlayType() != (int)ANIM_TYPE::JUMP && animationController_->GetPlayType() != (int)ANIM_TYPE::FLY)
+	if (animationController_->GetPlayType() != (int)ANIM_TYPE::JUMP && animationController_->GetPlayType() != (int)ANIM_TYPE::FLY && animationController_->GetPlayType() != (int)ANIM_TYPE::FALLING)
 	{
 		return ret;
 	}
