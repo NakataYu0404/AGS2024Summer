@@ -10,7 +10,7 @@ class SceneManager
 
 public:
 
-	// シーン管理用
+	//	シーン管理用
 	enum class SCENE_ID
 	{
 		NONE,
@@ -18,10 +18,10 @@ public:
 		GAME
 	};
 	
-	// インスタンスの生成
+	//	インスタンスの生成
 	static void CreateInstance(void);
 
-	// インスタンスの取得
+	//	インスタンスの取得
 	static SceneManager& GetInstance(void);
 
 	void Init(void);
@@ -29,60 +29,60 @@ public:
 	void Update(void);
 	void Draw(void);
 
-	// リソースの破棄
+	//	リソースの破棄
 	void Destroy(void);
 
-	// 状態遷移
+	//	状態遷移
 	void ChangeScene(SCENE_ID nextId);
 
-	// シーンIDの取得
+	//	シーンIDの取得
 	SCENE_ID GetSceneID(void);
 
-	// デルタタイムの取得
+	//	デルタタイムの取得
 	float GetDeltaTime(void) const;
 
-	// カメラの取得
+	//	カメラの取得
 	Camera* GetCamera(void) const;
 
 private:
 
-	// 静的インスタンス
+	//	静的インスタンス
 	static SceneManager* instance_;
 
 	SCENE_ID sceneId_;
 	SCENE_ID waitSceneId_;
 
-	// 各種シーン
+	//	各種シーン
 	SceneBase* scene_;
 
-	// フェード
+	//	フェード
 	Fader* fader_;
 
-	// カメラ
+	//	カメラ
 	Camera* camera_;
 
-	// シーン遷移中判定
+	//	シーン遷移中判定
 	bool isSceneChanging_;
 
-	// デルタタイム
+	//	デルタタイム
 	std::chrono::system_clock::time_point preTime_;
 	float deltaTime_;
 	
-	// デフォルトコンストラクタをprivateにして、
-	// 外部から生成できない様にする
+	//	デフォルトコンストラクタをprivateにして、
+	//	外部から生成できない様にする
 	SceneManager(void);
-	// コピーコンストラクタも同様
+	//	コピーコンストラクタも同様
 	SceneManager(const SceneManager& manager) = default;
-	// デストラクタも同様
+	//	デストラクタも同様
 	~SceneManager(void) = default;
 
-	// デルタタイムをリセットする
+	//	デルタタイムをリセットする
 	void ResetDeltaTime(void);
 
-	// シーン遷移
+	//	シーン遷移
 	void DoChangeScene(SCENE_ID sceneId);
 
-	// フェード
+	//	フェード
 	void Fade(void);
 
 };

@@ -18,7 +18,7 @@ SkyDome::~SkyDome(void)
 void SkyDome::Init(void)
 {
 
-	// モデル制御の基本情報
+	//	モデル制御の基本情報
 	transform_.SetModel(
 		resMng_.LoadModelDuplicate(
 			ResourceManager::SRC::SKY_DOME));
@@ -32,11 +32,11 @@ void SkyDome::Init(void)
 	transform_.quaRotLocal = Quaternion();
 	transform_.Update();
 
-	// Zバッファ無効(突き抜け対策)
+	//	Zバッファ無効(突き抜け対策)
 	MV1SetUseZBuffer(transform_.modelId, false);
 	MV1SetWriteZBuffer(transform_.modelId, false);
 
-	// 状態遷移
+	//	状態遷移
 	auto sceneId = scnMng_.GetSceneID();
 	if(sceneId == SceneManager::SCENE_ID::TITLE)
 	{
@@ -52,7 +52,7 @@ void SkyDome::Init(void)
 void SkyDome::Update(void)
 {
 
-	// 更新ステップ
+	//	更新ステップ
 	switch (state_)
 	{
 	case SkyDome::STATE::NONE:
@@ -76,10 +76,10 @@ void SkyDome::Draw(void)
 void SkyDome::ChangeState(STATE state)
 {
 
-	// 状態変更
+	//	状態変更
 	state_ = state;
 
-	// 各状態遷移の初期処理
+	//	各状態遷移の初期処理
 	switch (state_)
 	{
 	case SkyDome::STATE::NONE:

@@ -86,16 +86,16 @@ int AsoUtility::DirNearAroundRad(float from, float to)
     if (diff >= 0.0f)
     {
 
-        // 比較元よりも時計回りに位置する
+        //	比較元よりも時計回りに位置する
 
         if (diff > DX_PI_F)
         {
-            // でも、180度以上離れているので、反時計回りの方が近い
+            //	でも、180度以上離れているので、反時計回りの方が近い
             ret = -1.0f;
         }
         else
         {
-            // 時計回り
+            //	時計回り
             ret = 1.0f;
         }
 
@@ -103,16 +103,16 @@ int AsoUtility::DirNearAroundRad(float from, float to)
     else
     {
 
-        // 比較元よりも反時計回りに位置する
+        //	比較元よりも反時計回りに位置する
 
         if (diff < -DX_PI_F)
         {
-            // でも、180度以上離れているので、時計回りの方が近い
+            //	でも、180度以上離れているので、時計回りの方が近い
             ret = 1.0f;
         }
         else
         {
-            // 反時計回り
+            //	反時計回り
             ret = -1.0f;
         }
 
@@ -132,16 +132,16 @@ int AsoUtility::DirNearAroundDeg(float from, float to)
     if (diff >= 0.0f)
     {
 
-        // 比較元よりも時計回りに位置する
+        //	比較元よりも時計回りに位置する
 
         if (diff > 180.0f)
         {
-            // でも、180度以上離れているので、反時計回りの方が近い
+            //	でも、180度以上離れているので、反時計回りの方が近い
             ret = -1.0f;
         }
         else
         {
-            // 時計回り
+            //	時計回り
             ret = 1.0f;
         }
 
@@ -149,16 +149,16 @@ int AsoUtility::DirNearAroundDeg(float from, float to)
     else
     {
 
-        // 比較元よりも反時計回りに位置する
+        //	比較元よりも反時計回りに位置する
 
         if (diff < -180.0f)
         {
-            // でも、180度以上離れているので、時計回りの方が近い
+            //	でも、180度以上離れているので、時計回りの方が近い
             ret = 1.0f;
         }
         else
         {
-            // 反時計回り
+            //	反時計回り
             ret = -1.0f;
         }
 
@@ -170,7 +170,7 @@ int AsoUtility::DirNearAroundDeg(float from, float to)
 
 int AsoUtility::Lerp(int start, int end, float t)
 {
-    // 線形補間
+    //	線形補間
     if (t >= 1.0f)
     {
         return end;
@@ -183,7 +183,7 @@ int AsoUtility::Lerp(int start, int end, float t)
 
 float AsoUtility::Lerp(float start, float end, float t)
 {
-    // 線形補間
+    //	線形補間
     if (t >= 1.0f)
     {
         return end;
@@ -196,7 +196,7 @@ float AsoUtility::Lerp(float start, float end, float t)
 
 double AsoUtility::Lerp(double start, double end, double t)
 {
-    // 線形補間
+    //	線形補間
     if (t >= 1.0)
     {
         return end;
@@ -209,7 +209,7 @@ double AsoUtility::Lerp(double start, double end, double t)
 
 Vector2 AsoUtility::Lerp(const Vector2& start, const Vector2& end, float t)
 {
-    // 線形補間
+    //	線形補間
     if (t >= 1.0f)
     {
         return end;
@@ -223,7 +223,7 @@ Vector2 AsoUtility::Lerp(const Vector2& start, const Vector2& end, float t)
 
 VECTOR AsoUtility::Lerp(const VECTOR& start, const VECTOR& end, float t)
 {
-    // 線形補間
+    //	線形補間
     if (t >= 1.0f)
     {
         return end;
@@ -272,7 +272,7 @@ double AsoUtility::LerpDeg(double start, double end, double t)
 
 COLOR_F AsoUtility::Lerp(const COLOR_F& start, const COLOR_F& end, float t)
 {
-    // 線形補間
+    //	線形補間
     if (t >= 1.0f)
     {
         return end;
@@ -354,16 +354,16 @@ double AsoUtility::Distance(const VECTOR& v1, const VECTOR& v2)
 
 bool AsoUtility::IsHitSpheres(const VECTOR& pos1, float radius1, const VECTOR& pos2, float radius2)
 {
-    // 球体同士の衝突判定
+    //	球体同士の衝突判定
     bool ret = false;
 
-    // お互いの半径の合計
+    //	お互いの半径の合計
     float radius = radius1 + radius2;
 
-    // 座標の差からお互いの距離を取る
+    //	座標の差からお互いの距離を取る
     VECTOR diff = VSub(pos2, pos1);
 
-    // 三平方の定理で比較(SqrMagnitudeと同じ)
+    //	三平方の定理で比較(SqrMagnitudeと同じ)
     float dis = (diff.x * diff.x) + (diff.y * diff.y) + (diff.z * diff.z);
     if (dis < (radius * radius))
     {
@@ -380,49 +380,49 @@ bool AsoUtility::IsHitSphereCapsule(
 
     bool ret = false;
 
-    // カプセル球体の中心を繋ぐベクトル
+    //	カプセル球体の中心を繋ぐベクトル
     VECTOR cap1to2 = VSub(capPos2, capPos1);
 
-    // ベクトルを正規化
+    //	ベクトルを正規化
     VECTOR cap1to2ENor = VNorm(cap1to2);
 
-    // カプセル繋ぎの単位ベクトルと、
-    // そのベクトル元から球体へのベクトルの内積を取る
+    //	カプセル繋ぎの単位ベクトルと、
+    //	そのベクトル元から球体へのベクトルの内積を取る
     float dot = VDot(cap1to2ENor, VSub(sphPos, capPos1));
 
-    // 内積で求めた射影距離を使って、カプセル繋ぎ上の座標を取る
+    //	内積で求めた射影距離を使って、カプセル繋ぎ上の座標を取る
     VECTOR capRidePos = VAdd(capPos1, VScale(cap1to2ENor, dot));
 
-    // カプセル繋ぎのベクトルの長さを取る
+    //	カプセル繋ぎのベクトルの長さを取る
     float len = AsoUtility::MagnitudeF(cap1to2);
 
-    // 球体がカプセル繋ぎ上にいるか判別するため、比率を取る
+    //	球体がカプセル繋ぎ上にいるか判別するため、比率を取る
     float rate = dot / len;
 
     VECTOR centerPos;
 
-    // 球体の位置が３エリアに分割されたカプセル形状のどこにいるか判別
+    //	球体の位置が３エリアに分割されたカプセル形状のどこにいるか判別
     if (rate > 0.0f && rate <= 1.0f)
     {
-        // ①球体がカプセル繋ぎ上にいる
+        //	①球体がカプセル繋ぎ上にいる
         centerPos = VAdd(capPos1, VScale(cap1to2ENor, dot));
     }
     else if (rate > 1.0f)
     {
-        // ②球体がカプセルの終点側にいる
+        //	②球体がカプセルの終点側にいる
         centerPos = capPos2;
     }
     else if (rate < 0.0f)
     {
-        // ③球体がカプセルの始点側にいる
+        //	③球体がカプセルの始点側にいる
         centerPos = capPos1;
     }
     else
     {
-        // ここにきてはいけない
+        //	ここにきてはいけない
     }
 
-    // 球体同士の当たり判定
+    //	球体同士の当たり判定
     if (AsoUtility::IsHitSpheres(centerPos, capRadius, sphPos, sphRadius))
     {
         ret = true;
@@ -473,8 +473,8 @@ VECTOR AsoUtility::VNormalize(const VECTOR& v)
 {
     if (AsoUtility::EqualsVZero(v))
     {
-        // Quaternion計算でゼロを渡して、
-        // エラー(-1, -1, -1)が返ってくると困る
+        //	Quaternion計算でゼロを渡して、
+        //	エラー(-1, -1, -1)が返ってくると困る
         return v;
     }
     return VNorm(v);
@@ -482,7 +482,7 @@ VECTOR AsoUtility::VNormalize(const VECTOR& v)
 
 double AsoUtility::AngleDeg(const VECTOR& from, const VECTOR& to)
 {
-    // sqrt(a) * sqrt(b) = sqrt(a * b) -- valid for real numbers
+    //	sqrt(a) * sqrt(b) = sqrt(a * b) -- valid for real numbers
     auto fLen = SqrMagnitude(from);
     auto tLen = SqrMagnitude(to);
     auto denominator = sqrt(fLen * tLen);
@@ -520,15 +520,15 @@ void AsoUtility::DrawLineXYZ(const VECTOR& pos, const MATRIX& rot, float len)
 
     VECTOR dir;
 
-    // X
+    //	X
     dir = VTransform(AsoUtility::DIR_R, rot);
     DrawLineDir(pos, dir, 0xff0000, len);
 
-    // Y
+    //	Y
     dir = VTransform(AsoUtility::DIR_U, rot);
     DrawLineDir(pos, dir, 0x00ff00, len);
 
-    // Z
+    //	Z
     dir = VTransform(AsoUtility::DIR_F, rot);
     DrawLineDir(pos, dir, 0x0000ff, len);
 
@@ -539,15 +539,15 @@ void AsoUtility::DrawLineXYZ(const VECTOR& pos, const Quaternion& rot, float len
 
     VECTOR dir;
 
-    // X
+    //	X
     dir = rot.GetRight();
     DrawLineDir(pos, dir, 0xff0000, len);
 
-    // Y
+    //	Y
     dir = rot.GetUp();
     DrawLineDir(pos, dir, 0x00ff00, len);
 
-    // Z
+    //	Z
     dir = rot.GetForward();
     DrawLineDir(pos, dir, 0x0000ff, len);
 

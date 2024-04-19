@@ -11,7 +11,7 @@ public:
 	static constexpr float SCALE = 100.0f;
 	static constexpr VECTOR SCALES = { SCALE, SCALE, SCALE };
 
-	// 状態
+	//	状態
 	enum class STATE
 	{
 		NONE,
@@ -19,10 +19,10 @@ public:
 		FOLLOW
 	};
 
-	// コンストラクタ
+	//	コンストラクタ
 	SkyDome(const Transform& syncTransform);
 
-	// デストラクタ
+	//	デストラクタ
 	~SkyDome(void);
 
 	void Init(void) override;
@@ -31,19 +31,19 @@ public:
 
 private:
 
-	// 自機の情報
+	//	自機の情報
 	const Transform& syncTransform_;
 
-	// 状態
+	//	状態
 	STATE state_;
 
-	// 状態遷移
+	//	状態遷移
 	void ChangeState(STATE state);
 	void ChangeStateNone(void);
 	void ChangeStateStay(void);
 	void ChangeStateFollow(void);
 
-	// 更新ステップ
+	//	更新ステップ
 	void UpdateNone(void);
 	void UpdateStay(void);
 	void UpdateFollow(void);

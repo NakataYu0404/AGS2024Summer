@@ -8,7 +8,7 @@ class AnimationController
 	
 public :
 
-	// アニメーションデータ
+	//	アニメーションデータ
 	struct Animation
 	{
 		int model = -1;
@@ -19,52 +19,52 @@ public :
 		float step = 0.0f;
 	};
 
-	// コンストラクタ
+	//	コンストラクタ
 	AnimationController(int modelId);
-	// デストラクタ
+	//	デストラクタ
 	~AnimationController(void);
 
-	// アニメーション追加
+	//	アニメーション追加
 	void Add(int type, const std::string& path, float speed);
 
-	// アニメーション再生
+	//	アニメーション再生
 	void Play(int type, bool isLoop = true, 
 		float startStep = 0.0f, float endStep = -1.0f, bool isStop = false, bool isForce = false);
 
 	void Update(void);
 
-	// アニメーション終了後に繰り返すループステップ
+	//	アニメーション終了後に繰り返すループステップ
 	void SetEndLoop(float startStep, float endStep, float speed);
 
-	// 再生中のアニメーション
+	//	再生中のアニメーション
 	int GetPlayType(void) const;
 
-	// 再生終了
+	//	再生終了
 	bool IsEnd(void) const;
 
 private :
 
-	// モデルのハンドルID
+	//	モデルのハンドルID
 	int modelId_;
 
-	// 種類別のアニメーションデータ
+	//	種類別のアニメーションデータ
 	std::map<int, Animation> animations_;
 
 	int playType_;
 	Animation playAnim_;
 
-	// アニメーションをループするかしないか
+	//	アニメーションをループするかしないか
 	bool isLoop_;
 
-	// アニメーションを止めたままにする
+	//	アニメーションを止めたままにする
 	bool isStop_;
 
-	// アニメーション終了後に繰り返すループステップ
+	//	アニメーション終了後に繰り返すループステップ
 	float stepEndLoopStart_;
 	float stepEndLoopEnd_;
 	float endLoopSpeed_;
 
-	// 逆再生
+	//	逆再生
 	float switchLoopReverse_;
 
 };

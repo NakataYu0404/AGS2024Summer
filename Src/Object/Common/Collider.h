@@ -4,22 +4,22 @@ class Collider
 
 public :
 
-	// 衝突種別
+	//	衝突種別
 	enum class TYPE
 	{
 		STAGE,
 	};
 
-	// コンストラクタ
+	//	コンストラクタ
 	Collider(TYPE type, int modelId);
 
-	// デストラクタ
+	//	デストラクタ
 	~Collider(void);
 
-	// 衝突種別
+	//	衝突種別
 	TYPE type_;
 
-	// モデルのハンドルID
+	//	モデルのハンドルID
 	int modelId_;
 
 };

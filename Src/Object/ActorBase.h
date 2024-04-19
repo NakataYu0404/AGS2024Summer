@@ -8,10 +8,10 @@ class ActorBase
 
 public:
 
-	// コンストラクタ
+	//	コンストラクタ
 	ActorBase(void);
 
-	// デストラクタ
+	//	デストラクタ
 	virtual ~ActorBase(void);
 
 	virtual void Init(void) = 0;
@@ -22,11 +22,11 @@ public:
 
 protected:
 
-	// シングルトン参照
+	//	シングルトン参照
 	ResourceManager& resMng_;
 	SceneManager& scnMng_;
 
-	// モデル制御の基本情報
+	//	モデル制御の基本情報
 	Transform transform_;
 
 };

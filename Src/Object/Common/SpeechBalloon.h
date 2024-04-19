@@ -9,17 +9,17 @@ class SpeechBalloon
 
 public:
 
-	// 表示種別
+	//	表示種別
 	enum class TYPE
 	{
 		TEXT,
 		SPEECH
 	};
 
-	// コンストラクタ
+	//	コンストラクタ
 	SpeechBalloon(TYPE type, const Transform& parent);
 
-	// デストラクタ
+	//	デストラクタ
 	~SpeechBalloon(void);
 
 	void Draw(void);
@@ -40,20 +40,20 @@ private:
 
 	int image_;
 
-	// trueの場合、永続的に表示する
+	//	trueの場合、永続的に表示する
 	bool isVisiblePermanent_;
 	double visibleTime_;
 
-	// 吹き出しを付ける親オブジェクト
+	//	吹き出しを付ける親オブジェクト
 	const Transform& transformParent_;
 
-	// 表示座標
+	//	表示座標
 	VECTOR pos_;
 
-	// 表示位置の調整用
+	//	表示位置の調整用
 	VECTOR localPos_;
 
-	// 表示文字
+	//	表示文字
 	std::string text_;
 
 };

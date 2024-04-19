@@ -38,7 +38,7 @@ void SpeechBalloon::Draw(void)
 		}
 	}
 
-	// 対象物の姿勢から見た、上方向に3D座標をずらす
+	//	対象物の姿勢から見た、上方向に3D座標をずらす
 	VECTOR relativePos = transformParent_.quaRot.PosAxis(localPos_);
 	VECTOR pos = VAdd(transformParent_.pos, relativePos);
 	pos_ = ConvWorldPosToScreenPos(pos);
@@ -58,7 +58,7 @@ void SpeechBalloon::Draw(void)
 void SpeechBalloon::DrawTextOrg(void)
 {
 
-	// カメラのSetCameraNearFarから外れていた場合、表示しない
+	//	カメラのSetCameraNearFarから外れていた場合、表示しない
 	if (pos_.z > 0.0f && pos_.z < 1.0f)
 	{
 		DrawFormatString(
@@ -71,7 +71,7 @@ void SpeechBalloon::DrawTextOrg(void)
 void SpeechBalloon::DrawSpeech(void)
 {
 
-	// カメラのSetCameraNearFarから外れていた場合、表示しない
+	//	カメラのSetCameraNearFarから外れていた場合、表示しない
 	if (pos_.z > 0.0f && pos_.z < 1.0f)
 	{
 		int x = AsoUtility::Round(pos_.x);

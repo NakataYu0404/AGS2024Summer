@@ -45,30 +45,30 @@ Transform::~Transform(void)
 void Transform::Update(void)
 {
 
-	// 大きさ
+	//	大きさ
 	matScl = MGetScale(scl);
 
-	// 回転
+	//	回転
 	rot = quaRot.ToEuler();
 	matRot = quaRot.ToMatrix();
 
-	// 位置
+	//	位置
 	matPos = MGetTranslate(pos);
 
-	// 行列の合成
+	//	行列の合成
 	MATRIX mat = MGetIdent();
 	mat = MMult(mat, matScl);
 	Quaternion q = quaRot.Mult(quaRotLocal);
 	mat = MMult(mat, q.ToMatrix());
 	mat = MMult(mat, matPos);
 
-	// 行列をモデルに判定
+	//	行列をモデルに判定
 	if (modelId != -1)
 	{
 		MV1SetMatrix(modelId, mat);
 	}
 
-	// 衝突判定の更新
+	//	衝突判定の更新
 	if (collider != nullptr)
 	{
 		MV1RefreshCollInfo(modelId);

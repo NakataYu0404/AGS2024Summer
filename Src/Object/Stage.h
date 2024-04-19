@@ -11,10 +11,10 @@ class Stage
 
 public:
 
-	// ステージの切り替え間隔
+	//	ステージの切り替え間隔
 	static constexpr float TIME_STAGE_CHANGE = 1.0f;
 
-	// ステージ名
+	//	ステージ名
 	enum class NAME
 	{
 		MAIN_PLANET,
@@ -23,48 +23,48 @@ public:
 		FLAT_PLANET_ROT01,
 	};
 
-	// コンストラクタ
+	//	コンストラクタ
 	Stage(std::weak_ptr<Player> player);
 
-	// デストラクタ
+	//	デストラクタ
 	~Stage(void);
 
 	void Init(void);
 	void Update(void);
 	void Draw(void);
 
-	// ステージ変更
+	//	ステージ変更
 	void ChangeStage(NAME type);
 
-	// 対象ステージを取得
+	//	対象ステージを取得
 	Planet* GetPlanet(NAME type);
 
 private:
 
-	// シングルトン参照
+	//	シングルトン参照
 	ResourceManager& resMng_;
 
 	std::weak_ptr<Player> player_;
 
-	// ステージアクティブになっている惑星の情報
+	//	ステージアクティブになっている惑星の情報
 	NAME activeName_;
 	Planet* activePlanet_;
 
-	// 惑星
+	//	惑星
 	std::map<NAME, Planet*> planets_;
 
-	// ワープスター
+	//	ワープスター
 	std::vector<WarpStar*> warpStars_;
 
-	// 空のPlanet
+	//	空のPlanet
 	Planet* nullPlanet = nullptr;
 
 	float step_;
 
-	// 最初の惑星
+	//	最初の惑星
 	void MakeMainStage(void);
 
-	// ワープスター
+	//	ワープスター
 	void MakeWarpStar(void);
 
 };

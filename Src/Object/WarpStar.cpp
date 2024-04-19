@@ -23,7 +23,7 @@ WarpStar::~WarpStar(void)
 void WarpStar::Init(void)
 {
 
-	// モデルの基本情報
+	//	モデルの基本情報
 	transform_.SetModel(
 		resMng_.LoadModelDuplicate(
 			ResourceManager::SRC::WARP_STAR)
@@ -37,7 +37,7 @@ void WarpStar::Init(void)
 void WarpStar::Update(void)
 {
 
-	// 更新ステップ
+	//	更新ステップ
 	switch (state_)
 	{
 	case WarpStar::STATE::NONE:
@@ -64,10 +64,10 @@ void WarpStar::Draw(void)
 void WarpStar::ChangeState(STATE state)
 {
 
-	// 状態変更
+	//	状態変更
 	state_ = state;
 
-	// 各状態遷移の初期処理
+	//	各状態遷移の初期処理
 	switch (state_)
 	{
 	case WarpStar::STATE::NONE:

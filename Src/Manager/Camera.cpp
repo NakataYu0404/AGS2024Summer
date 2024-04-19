@@ -34,7 +34,7 @@ void Camera::Update(void)
 void Camera::SetBeforeDraw(void)
 {
 
-	// クリップ距離を設定する(SetDrawScreenでリセットされる)
+	//	クリップ距離を設定する(SetDrawScreenでリセットされる)
 	SetCameraNearFar(CAMERA_NEAR, CAMERA_FAR);
 
 	switch (mode_)
@@ -47,14 +47,14 @@ void Camera::SetBeforeDraw(void)
 		break;
 	}
 
-	// カメラの設定(位置と注視点による制御)
+	//	カメラの設定(位置と注視点による制御)
 	SetCameraPositionAndTargetAndUpVec(
 		pos_, 
 		targetPos_, 
 		cameraUp_
 	);
 
-	// DXライブラリのカメラとEffekseerのカメラを同期する。
+	//	DXライブラリのカメラとEffekseerのカメラを同期する。
 	Effekseer_Sync3DSetting();
 
 }
@@ -101,13 +101,13 @@ VECTOR Camera::GetForward(void) const
 void Camera::ChangeMode(MODE mode)
 {
 
-	// カメラの初期設定
+	//	カメラの初期設定
 	SetDefault();
 
-	// カメラモードの変更
+	//	カメラモードの変更
 	mode_ = mode;
 
-	// 変更時の初期化処理
+	//	変更時の初期化処理
 	switch (mode_)
 	{
 	case Camera::MODE::FIXED_POINT:
@@ -121,13 +121,13 @@ void Camera::ChangeMode(MODE mode)
 void Camera::SetDefault(void)
 {
 
-	// カメラの初期設定
+	//	カメラの初期設定
 	pos_ = DEFAULT_CAMERA_POS;
 
-	// 注視点
+	//	注視点
 	targetPos_ = AsoUtility::VECTOR_ZERO;
 
-	// カメラの上方向
+	//	カメラの上方向
 	cameraUp_ = AsoUtility::DIR_U;
 
 	angles_.x = AsoUtility::Deg2RadF(30.0f);
@@ -141,27 +141,27 @@ void Camera::SetDefault(void)
 void Camera::SyncFollow(void)
 {
 
-	// 同期先の位置
+	//	同期先の位置
 	VECTOR pos = followTransform_->pos;
 
-	// 重力の方向制御に従う
-	// 正面から設定されたY軸分、回転させる
+	//	重力の方向制御に従う
+	//	正面から設定されたY軸分、回転させる
 	rotOutX_ = Quaternion::AngleAxis(angles_.y, AsoUtility::AXIS_Y);
 
-	// 正面から設定されたX軸分、回転させる
+	//	正面から設定されたX軸分、回転させる
 	rot_ = rotOutX_.Mult(Quaternion::AngleAxis(angles_.x, AsoUtility::AXIS_X));
 
 	VECTOR localPos;
 
-	// 注視点(通常重力でいうところのY値を追従対象と同じにする)
+	//	注視点(通常重力でいうところのY値を追従対象と同じにする)
 	localPos = rotOutX_.PosAxis(LOCAL_F2T_POS);
 	targetPos_ = VAdd(pos, localPos);
 
-	// カメラ位置
+	//	カメラ位置
 	localPos = rot_.PosAxis(LOCAL_F2C_POS);
 	pos_ = VAdd(pos, localPos);
 
-	// カメラの上方向
+	//	カメラの上方向
 	cameraUp_ = AsoUtility::DIR_U;
 
 }
@@ -173,19 +173,19 @@ void Camera::ProcessRot(void)
 
 	float movePow = 5.0f;
 
-	// カメラ回転
+	//	カメラ回転
 	if (ins.IsNew(KEY_INPUT_RIGHT))
 	{
-		// 右回転
+		//	右回転
 		angles_.y += AsoUtility::Deg2RadF(1.0f);
 	}
 	if (ins.IsNew(KEY_INPUT_LEFT))
 	{
-		// 左回転
+		//	左回転
 		angles_.y += AsoUtility::Deg2RadF(-1.0f);
 	}
 
-	// 上回転
+	//	上回転
 	if (ins.IsNew(KEY_INPUT_UP))
 	{
 		angles_.x += AsoUtility::Deg2RadF(1.0f);
@@ -195,7 +195,7 @@ void Camera::ProcessRot(void)
 		}
 	}
 
-	// 下回転
+	//	下回転
 	if (ins.IsNew(KEY_INPUT_DOWN))
 	{
 		angles_.x += AsoUtility::Deg2RadF(-1.0f);
@@ -209,16 +209,16 @@ void Camera::ProcessRot(void)
 
 void Camera::SetBeforeDrawFixedPoint(void)
 {
-	// 何もしない
+	//	何もしない
 }
 
 void Camera::SetBeforeDrawFollow(void)
 {
 
-	// カメラ操作
+	//	カメラ操作
 	ProcessRot();
 
-	// 追従対象との相対位置を同期
+	//	追従対象との相対位置を同期
 	SyncFollow();
 
 }

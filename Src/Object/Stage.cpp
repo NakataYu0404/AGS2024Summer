@@ -22,14 +22,14 @@ Stage::Stage(std::weak_ptr<Player> player)
 Stage::~Stage(void)
 {
 	
-	// ワープスター
+	//	ワープスター
 	for (auto star : warpStars_)
 	{
 		delete star;
 	}
 	warpStars_.clear();
 	
-	// 惑星
+	//	惑星
 	for (auto pair : planets_)
 	{
 		delete pair.second;
@@ -49,13 +49,13 @@ void Stage::Init(void)
 void Stage::Update(void)
 {
 
-	// ワープスター
+	//	ワープスター
 	for (const auto& s : warpStars_)
 	{
 		s->Update();
 	}
 
-	// 惑星
+	//	惑星
 	for (const auto& s : planets_)
 	{
 		s.second->Update();
@@ -66,13 +66,13 @@ void Stage::Update(void)
 void Stage::Draw(void)
 {
 
-	// ワープスター
+	//	ワープスター
 	for (const auto& s : warpStars_)
 	{
 		s->Draw();
 	}
 
-	// 惑星
+	//	惑星
 	for (const auto& s : planets_)
 	{
 		s.second->Draw();
@@ -85,10 +85,10 @@ void Stage::ChangeStage(NAME type)
 
 	activeName_ = type;
 
-	// 対象のステージを取得する
+	//	対象のステージを取得する
 	activePlanet_ = GetPlanet(activeName_);
 
-	// ステージの当たり判定をプレイヤーに設定
+	//	ステージの当たり判定をプレイヤーに設定
 	player_.lock()->ClearCollider();
 	player_.lock()->AddCollider(activePlanet_->GetTransform().collider);
 
@@ -109,7 +109,7 @@ Planet* Stage::GetPlanet(NAME type)
 void Stage::MakeMainStage(void)
 {
 
-	// 最初の惑星
+	//	最初の惑星
 	//------------------------------------------------------------------------------
 	Transform planetTrans;
 	planetTrans.SetModel(
@@ -118,7 +118,7 @@ void Stage::MakeMainStage(void)
 	planetTrans.quaRot = Quaternion();
 	planetTrans.pos = { 0.0f, -100.0f, 0.0f };
 
-	// 当たり判定(コライダ)作成
+	//	当たり判定(コライダ)作成
 	planetTrans.MakeCollider(Collider::TYPE::STAGE);
 
 	planetTrans.Update();
@@ -139,7 +139,7 @@ void Stage::MakeWarpStar(void)
 	Transform trans;
 	WarpStar* star;
 
-	// 落とし穴惑星へのワープスター
+	//	落とし穴惑星へのワープスター
 	//------------------------------------------------------------------------------
 	trans.pos = { -910.0f, 200.0f, 894.0f };
 	trans.scl = { 0.6f, 0.6f, 0.6f };

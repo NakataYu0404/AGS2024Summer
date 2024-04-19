@@ -8,7 +8,7 @@
 #define new new(_NORMAL_BLOCK,__FILE__,__LINE__)
 #endif
 
-// WinMain関数
+//	WinMain関数
 //---------------------------------
 int WINAPI WinMain(
 	_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
@@ -22,7 +22,7 @@ int WINAPI WinMain(
 	//	int *test = new int();
 	//	delete test;
 	
-	// ②ユニークポインタ
+	//	②ユニークポインタ
 	std::unique_ptr<int> testI = std::make_unique<int>();
 	std::unique_ptr<std::string> testS = std::make_unique<std::string>();
 	

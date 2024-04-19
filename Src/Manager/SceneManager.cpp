@@ -33,19 +33,19 @@ void SceneManager::Init(void)
 	fader_ = new Fader();
 	fader_->Init();
 
-	// カメラ
+	//	カメラ
 	camera_ = new Camera();
 	camera_->Init();
 
 	isSceneChanging_ = false;
 
-	// デルタタイム
+	//	デルタタイム
 	preTime_ = std::chrono::system_clock::now();
 
-	// 3D用の設定
+	//	3D用の設定
 	Init3D();
 
-	// 初期シーンの設定
+	//	初期シーンの設定
 	DoChangeScene(SCENE_ID::TITLE);
 
 }
@@ -53,26 +53,26 @@ void SceneManager::Init(void)
 void SceneManager::Init3D(void)
 {
 
-	// 背景色設定
+	//	背景色設定
 	SetBackgroundColor(0, 139, 139);
 
-	// Zバッファを有効にする
+	//	Zバッファを有効にする
 	SetUseZBuffer3D(true);
 
-	// Zバッファへの書き込みを有効にする
+	//	Zバッファへの書き込みを有効にする
 	SetWriteZBuffer3D(true);
 
-	// バックカリングを有効にする
+	//	バックカリングを有効にする
 	SetUseBackCulling(true);
 
-	// ライトの設定
+	//	ライトの設定
 	SetUseLighting(true);
 	
-	// ライトの設定
+	//	ライトの設定
 	ChangeLightTypeDir({ 0.3f, -0.7f, 0.8f });
 
 
-	// フォグ設定
+	//	フォグ設定
 	SetFogEnable(true);
 	SetFogColor(5, 5, 5);
 	SetFogStartEnd(10000.0f, 20000.0f);
@@ -87,7 +87,7 @@ void SceneManager::Update(void)
 		return;
 	}
 
-	// デルタタイム
+	//	デルタタイム
 	auto nowTime = std::chrono::system_clock::now();
 	deltaTime_ = static_cast<float>(
 		std::chrono::duration_cast<std::chrono::nanoseconds>(nowTime - preTime_).count() / 1000000000.0);
@@ -103,7 +103,7 @@ void SceneManager::Update(void)
 		scene_->Update();
 	}
 
-	// カメラ更新
+	//	カメラ更新
 	camera_->Update();
 
 }
@@ -111,29 +111,29 @@ void SceneManager::Update(void)
 void SceneManager::Draw(void)
 {
 	
-	// 描画先グラフィック領域の指定
-	// (３Ｄ描画で使用するカメラの設定などがリセットされる)
+	//	描画先グラフィック領域の指定
+	//	(３Ｄ描画で使用するカメラの設定などがリセットされる)
 	SetDrawScreen(DX_SCREEN_BACK);
 
-	// 画面を初期化
+	//	画面を初期化
 	ClearDrawScreen();
 
-	// カメラ設定
+	//	カメラ設定
 	camera_->SetBeforeDraw();
 
-	// Effekseerにより再生中のエフェクトを更新する。
+	//	Effekseerにより再生中のエフェクトを更新する。
 	UpdateEffekseer3D();
 
-	// 描画
+	//	描画
 	scene_->Draw();
 
-	// 主にポストエフェクト用
+	//	主にポストエフェクト用
 	camera_->Draw();
 
-	// Effekseerにより再生中のエフェクトを描画する。
+	//	Effekseerにより再生中のエフェクトを描画する。
 	DrawEffekseer3D();
 	
-	// 暗転・明転
+	//	暗転・明転
 	fader_->Draw();
 
 }
@@ -156,11 +156,11 @@ void SceneManager::Destroy(void)
 void SceneManager::ChangeScene(SCENE_ID nextId)
 {
 
-	// フェード処理が終わってからシーンを変える場合もあるため、
-	// 遷移先シーンをメンバ変数に保持
+	//	フェード処理が終わってからシーンを変える場合もあるため、
+	//	遷移先シーンをメンバ変数に保持
 	waitSceneId_ = nextId;
 
-	// フェードアウト(暗転)を開始する
+	//	フェードアウト(暗転)を開始する
 	fader_->SetFade(Fader::STATE::FADE_OUT);
 	isSceneChanging_ = true;
 
@@ -193,7 +193,7 @@ SceneManager::SceneManager(void)
 
 	isSceneChanging_ = false;
 
-	// デルタタイム
+	//	デルタタイム
 	deltaTime_ = 1.0f / 60.0f;
 
 	camera_ = nullptr;
@@ -209,13 +209,13 @@ void SceneManager::ResetDeltaTime(void)
 void SceneManager::DoChangeScene(SCENE_ID sceneId)
 {
 
-	// リソースの解放
+	//	リソースの解放
 	ResourceManager::GetInstance().Release();
 
-	// シーンを変更する
+	//	シーンを変更する
 	sceneId_ = sceneId;
 
-	// 現在のシーンを解放
+	//	現在のシーンを解放
 	if (scene_ != nullptr)
 	{
 		delete scene_;
@@ -246,21 +246,21 @@ void SceneManager::Fade(void)
 	switch (fState)
 	{
 	case Fader::STATE::FADE_IN:
-		// 明転中
+		//	明転中
 		if (fader_->IsEnd())
 		{
-			// 明転が終了したら、フェード処理終了
+			//	明転が終了したら、フェード処理終了
 			fader_->SetFade(Fader::STATE::NONE);
 			isSceneChanging_ = false;
 		}
 		break;
 	case Fader::STATE::FADE_OUT:
-		// 暗転中
+		//	暗転中
 		if (fader_->IsEnd())
 		{
-			// 完全に暗転してからシーン遷移
+			//	完全に暗転してからシーン遷移
 			DoChangeScene(waitSceneId_);
-			// 暗転から明転へ
+			//	暗転から明転へ
 			fader_->SetFade(Fader::STATE::FADE_IN);
 		}
 		break;

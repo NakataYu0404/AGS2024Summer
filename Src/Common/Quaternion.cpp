@@ -71,28 +71,28 @@ Quaternion Quaternion::Mult(const Quaternion& q1, const Quaternion& q2)
     Quaternion ret = Quaternion();
     double d1, d2, d3, d4;
 
-    // wÇÃåvéZ 
+    //	wÇÃåvéZ 
     d1 = q1.w * q2.w;
     d2 = -q1.x * q2.x;
     d3 = -q1.y * q2.y;
     d4 = -q1.z * q2.z;
     ret.w = d1 + d2 + d3 + d4;
 
-    // xÇÃåvéZ 
+    //	xÇÃåvéZ 
     d1 = q1.w * q2.x;
     d2 = q2.w * q1.x;
     d3 = q1.y * q2.z;
     d4 = -q1.z * q2.y;
     ret.x = d1 + d2 + d3 + d4;
 
-    // yÇÃåvéZ
+    //	yÇÃåvéZ
     d1 = q1.w * q2.y;
     d2 = q2.w * q1.y;
     d3 = q1.z * q2.x;
     d4 = -q1.x * q2.z;
     ret.y = d1 + d2 + d3 + d4;
 
-    // zÇÃåvéZ
+    //	zÇÃåvéZ
     d1 = q1.w * q2.z;
     d2 = q2.w * q1.z;
     d3 = q1.x * q2.y;
@@ -116,7 +116,7 @@ Quaternion Quaternion::AngleAxis(double rad, VECTOR axis)
     double norm;
     double c, s;
 
-    // UnityÇ…çáÇÌÇπÇÈ
+    //	UnityÇ…çáÇÌÇπÇÈ
     //ret.w = ret.x = ret.y = ret.z = 0.0;
     ret.w = 1.0;
     ret.x = ret.y = ret.z = 0.0;
@@ -146,8 +146,8 @@ Quaternion Quaternion::AngleAxis(double rad, VECTOR axis)
 
 VECTOR Quaternion::PosAxis(const Quaternion& q, VECTOR pos)
 {
-    // à íuèÓïÒÇ…âÒì]èÓïÒÇîΩâfÇ≥ÇπÇÈ
-    // pos' = qÅEposÅEq(-1)
+    //	à íuèÓïÒÇ…âÒì]èÓïÒÇîΩâfÇ≥ÇπÇÈ
+    //	pos' = qÅEposÅEq(-1)
     Quaternion tmp = Quaternion();
     tmp = tmp.Mult(q);
     tmp = tmp.Mult(Quaternion(0.0f, pos.x, pos.y, pos.z));
@@ -286,7 +286,7 @@ Quaternion Quaternion::LookRotation(VECTOR dir, VECTOR up)
     }
     if ((m00 >= m11) && (m00 >= m22))
     {
-        // xÇ∆wÇ™ãtÅH
+        //	xÇ∆wÇ™ãtÅH
         //auto num7 = sqrt(((1.0f + m00) - m11) - m22);
         //auto num4 = 0.5f / num7;
         //quaternion.x = 0.5f * num7;
@@ -390,15 +390,15 @@ Quaternion Quaternion::GetRotation(MATRIX mat)
     //int biggestIdx = 0;
     //for (int i = 0; i < 4; i++)
     //{
-    //    if (elem[i] > elem[biggestIdx])
-    //    {
-    //        biggestIdx = i;
-    //    }
+    //	   if (elem[i] > elem[biggestIdx])
+    //	   {
+    //	       biggestIdx = i;
+    //	   }
     //}
 
     //if (elem[biggestIdx] < 0)
     //{
-    //    return Quaternion();
+    //	   return Quaternion();
     //}
 
     //float q[4];
@@ -409,25 +409,25 @@ Quaternion Quaternion::GetRotation(MATRIX mat)
     //switch (biggestIdx)
     //{
     //case 0:
-    //    q[1] = (mat.m[1][0] + mat.m[0][1]) * mult;
-    //    q[2] = (mat.m[0][2] + mat.m[2][0]) * mult;
-    //    q[3] = (mat.m[2][1] - mat.m[1][2]) * mult;
-    //    break;
+    //	   q[1] = (mat.m[1][0] + mat.m[0][1]) * mult;
+    //	   q[2] = (mat.m[0][2] + mat.m[2][0]) * mult;
+    //	   q[3] = (mat.m[2][1] - mat.m[1][2]) * mult;
+    //	   break;
     //case 1:
-    //    q[0] = (mat.m[1][0] + mat.m[0][1]) * mult;
-    //    q[2] = (mat.m[2][1] + mat.m[1][2]) * mult;
-    //    q[3] = (mat.m[0][2] - mat.m[2][0]) * mult;
-    //    break;
+    //	   q[0] = (mat.m[1][0] + mat.m[0][1]) * mult;
+    //	   q[2] = (mat.m[2][1] + mat.m[1][2]) * mult;
+    //	   q[3] = (mat.m[0][2] - mat.m[2][0]) * mult;
+    //	   break;
     //case 2:
-    //    q[0] = (mat.m[0][2] + mat.m[2][0]) * mult;
-    //    q[1] = (mat.m[2][1] + mat.m[1][2]) * mult;
-    //    q[3] = (mat.m[1][0] - mat.m[0][1]) * mult;
-    //    break;
+    //	   q[0] = (mat.m[0][2] + mat.m[2][0]) * mult;
+    //	   q[1] = (mat.m[2][1] + mat.m[1][2]) * mult;
+    //	   q[3] = (mat.m[1][0] - mat.m[0][1]) * mult;
+    //	   break;
     //case 3:
-    //    q[0] = (mat.m[2][1] - mat.m[1][2]) * mult;
-    //    q[1] = (mat.m[0][2] - mat.m[2][0]) * mult;
-    //    q[2] = (mat.m[1][0] - mat.m[0][1]) * mult;
-    //    break;
+    //	   q[0] = (mat.m[2][1] - mat.m[1][2]) * mult;
+    //	   q[1] = (mat.m[0][2] - mat.m[2][0]) * mult;
+    //	   q[2] = (mat.m[1][0] - mat.m[0][1]) * mult;
+    //	   break;
     //}
 
     //return Quaternion(q[3], q[0], q[1], q[2]);
@@ -575,7 +575,7 @@ double Quaternion::Angle(const Quaternion& q1, const Quaternion& q2)
 Quaternion Quaternion::SlerpUnclamped(Quaternion a, Quaternion b, float t)
 {
 
-    // if either input is zero, return the other.
+    //	if either input is zero, return the other.
     if (a.LengthSquared() == 0.0f)
     {
         if (b.LengthSquared() == 0.0f)
@@ -594,7 +594,7 @@ Quaternion Quaternion::SlerpUnclamped(Quaternion a, Quaternion b, float t)
 
     if (cosHalfAngle >= 1.0f || cosHalfAngle <= -1.0f)
     {
-        // angle = 0.0f, so just return one input.
+        //	angle = 0.0f, so just return one input.
         return a;
     }
     else if (cosHalfAngle < 0.0f)
@@ -611,7 +611,7 @@ Quaternion Quaternion::SlerpUnclamped(Quaternion a, Quaternion b, float t)
     float blendB;
     if (cosHalfAngle < 0.99f)
     {
-        // do proper slerp for big angles
+        //	do proper slerp for big angles
         float halfAngle = acosf(cosHalfAngle);
         float sinHalfAngle = sinf(halfAngle);
         float oneOverSinHalfAngle = 1.0f / sinHalfAngle;
@@ -620,7 +620,7 @@ Quaternion Quaternion::SlerpUnclamped(Quaternion a, Quaternion b, float t)
     }
     else
     {
-        // do lerp if angle is really small.
+        //	do lerp if angle is really small.
         blendA = 1.0f - t;
         blendB = t;
     }
@@ -667,7 +667,7 @@ void Quaternion::ToAngleAxis(float* angle, VECTOR* axis)
 	{
 		this->Normalize();
 	}
-	*angle = 2.0f * acosf((float)this->w); // angle
+	*angle = 2.0f * acosf((float)this->w); //	angle
 
     if (x == 0 && y == 0 && z == 0)
     {
@@ -685,8 +685,8 @@ void Quaternion::ToAngleAxis(float* angle, VECTOR* axis)
 	}
 	else
 	{
-		// This occurs when the angle is zero. 
-		// Not a problem: just set an arbitrary normalized axis.
+		//	This occurs when the angle is zero. 
+		//	Not a problem: just set an arbitrary normalized axis.
 		*axis = { 1.0f, 0.0f, 0.0f };
 	}
 

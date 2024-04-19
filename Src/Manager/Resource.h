@@ -7,7 +7,7 @@ class Resource
 
 public:
 	
-	// リソースタイプ
+	//	リソースタイプ
 	enum class TYPE
 	{
 		NONE,
@@ -17,42 +17,42 @@ public:
 		EFFEKSEER
 	};
 
-	// コンストラクタ
+	//	コンストラクタ
 	Resource(void);
-	// コンストラクタ
+	//	コンストラクタ
 	Resource(TYPE type, const std::string& path);
-	// コンストラクタ(IMGS用)
+	//	コンストラクタ(IMGS用)
 	Resource(TYPE type, const std::string& path, int numX, int numY, int sizeX, int sizeY);
 
-	// デストラクタ
+	//	デストラクタ
 	~Resource(void);
 
-	// 読み込み
+	//	読み込み
 	void Load(void);
 
-	// 解放
+	//	解放
 	void Release(void);
 
-	// 複数画像ハンドルを別配列にコピー
+	//	複数画像ハンドルを別配列にコピー
 	void CopyHandle(int* imgs);
 
-	// リソースタイプ
+	//	リソースタイプ
 	TYPE type_;
 
-	// リソースの読み込み先
+	//	リソースの読み込み先
 	std::string path_;
 
-	// 画像とモデルのハンドルID
+	//	画像とモデルのハンドルID
 	int handleId_;
 
-	// IMGS::LoadDivGraph用
+	//	IMGS::LoadDivGraph用
 	int* handleIds_;
 	int numX_;
 	int numY_;
 	int sizeX_;
 	int sizeY_;
 
-	// モデル複製用
+	//	モデル複製用
 	std::vector<int> duplicateModelIds_;
 
 };

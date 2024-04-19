@@ -47,11 +47,11 @@ void Fader::Update(void)
 		alpha_ += SPEED_ALPHA;
 		if (alpha_ > 255)
 		{
-			// フェード終了
+			//	フェード終了
 			alpha_ = 255;
 			if (isPreEnd_)
 			{
-				// 1フレーム後(Draw後)に終了とする
+				//	1フレーム後(Draw後)に終了とする
 				isEnd_ = true;
 			}
 			isPreEnd_ = true;
@@ -63,11 +63,11 @@ void Fader::Update(void)
 		alpha_ -= SPEED_ALPHA;
 		if (alpha_ < 0)
 		{
-			// フェード終了
+			//	フェード終了
 			alpha_ = 0;
 			if (isPreEnd_)
 			{
-				// 1フレーム後(Draw後)に終了とする
+				//	1フレーム後(Draw後)に終了とする
 				isEnd_ = true;
 			}
 			isPreEnd_ = true;

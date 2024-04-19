@@ -10,10 +10,10 @@ class TitleScene : public SceneBase
 
 public:
 
-	// コンストラクタ
+	//	コンストラクタ
 	TitleScene(void);
 
-	// デストラクタ
+	//	デストラクタ
 	~TitleScene(void);
 
 	void Init(void) override;
@@ -22,24 +22,24 @@ public:
 
 private:
 
-	// 画像
+	//	画像
 	int imgTitle_;
 	int imgPush_;
 
-	// スカイドーム用
+	//	スカイドーム用
 	Transform spaceDomeTran_;
 
-	// スカイドーム(背景)
+	//	スカイドーム(背景)
 	std::unique_ptr<SkyDome> skyDome_;
 
-	// 惑星
+	//	惑星
 	Transform planet_;
 	Transform movePlanet_;
 
-	// キャラクター
+	//	キャラクター
 	Transform charactor_;
 
-	// アニメーション
+	//	アニメーション
 	std::unique_ptr<AnimationController> animationController_;
 
 };

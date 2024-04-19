@@ -53,12 +53,12 @@ void Resource::Load(void)
 	switch (type_)
 	{
 	case Resource::TYPE::IMG:
-		// ‰æ‘œ
+		//	‰æ‘œ
 		handleId_ = LoadGraph(path_.c_str());
 		break;
 
 	case Resource::TYPE::IMGS:
-		// •¡”‰æ‘œ
+		//	•¡”‰æ‘œ
 		handleIds_ = new int[numX_ * numY_];
 		LoadDivGraph(
 			path_.c_str(),
@@ -69,7 +69,7 @@ void Resource::Load(void)
 		break;
 
 	case Resource::TYPE::MODEL:
-		// ƒ‚ƒfƒ‹
+		//	ƒ‚ƒfƒ‹
 		handleId_ = MV1LoadModel(path_.c_str());
 		break;
 

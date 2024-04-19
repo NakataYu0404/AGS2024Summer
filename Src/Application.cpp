@@ -28,14 +28,14 @@ Application& Application::GetInstance(void)
 void Application::Init(void)
 {
 
-	// アプリケーションの初期設定
+	//	アプリケーションの初期設定
 	SetWindowText("3DAction");
 
-	// ウィンドウサイズ
+	//	ウィンドウサイズ
 	SetGraphMode(SCREEN_SIZE_X, SCREEN_SIZE_Y, 32);
 	ChangeWindowMode(true);
 
-	// DxLibの初期化
+	//	DxLibの初期化
 	SetUseDirect3DVersion(DX_DIRECT3D_11);
 	isInitFail_ = false;
 	if (DxLib_Init() == -1)
@@ -44,17 +44,17 @@ void Application::Init(void)
 		return;
 	}
 
-	// Effekseerの初期化
+	//	Effekseerの初期化
 	InitEffekseer();
 
-	// キー制御初期化
+	//	キー制御初期化
 	SetUseDirectInputFlag(true);
 	InputManager::CreateInstance();
 
-	// リソース管理初期化
+	//	リソース管理初期化
 	ResourceManager::CreateInstance();
 
-	// シーン管理初期化
+	//	シーン管理初期化
 	SceneManager::CreateInstance();
 
 }
@@ -65,7 +65,7 @@ void Application::Run(void)
 	auto& inputManager = InputManager::GetInstance();
 	auto& sceneManager = SceneManager::GetInstance();
 
-	// ゲームループ
+	//	ゲームループ
 	while (ProcessMessage() == 0 && CheckHitKey(KEY_INPUT_ESCAPE) == 0)
 	{
 
@@ -87,10 +87,10 @@ void Application::Destroy(void)
 	ResourceManager::GetInstance().Destroy();
 	SceneManager::GetInstance().Destroy();
 
-	// Effekseerを終了する。
+	//	Effekseerを終了する。
 	Effkseer_End();
 
-	// DxLib終了
+	//	DxLib終了
 	if (DxLib_End() == -1)
 	{
 		isReleaseFail_ = true;
