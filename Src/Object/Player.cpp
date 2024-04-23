@@ -206,6 +206,9 @@ void Player::ChangeStateAnimation(void)
 		case Player::STATE_INPLAY::FALL:
 			animationController_->Play((int)ANIM_TYPE::FALLING);
 			break;
+		case Player::STATE_INPLAY::FLOAT:
+			animationController_->Play((int)ANIM_TYPE::FALLING);
+			break;
 		case Player::STATE_INPLAY::ATTACK:
 			break;
 		case Player::STATE_INPLAY::SHOT:
@@ -235,6 +238,9 @@ void Player::ChangeStateAnimation(void)
 			
 			break;
 		case Player::STATE_INPLAY::FALL:
+			animationController_->Play((int)ANIM_TYPE::FALLING);
+			break;
+		case Player::STATE_INPLAY::FLOAT:
 			animationController_->Play((int)ANIM_TYPE::FALLING);
 			break;
 		case Player::STATE_INPLAY::ATTACK:
@@ -552,40 +558,43 @@ void Player::ProcessMoveFly(void)
 
 	VECTOR dir = AsoUtility::VECTOR_ZERO;
 
-	//	カメラ方向に前進したい
-	if (ins.IsNew(KEY_INPUT_W))
+	if (!IsStateInPlay(STATE_INPLAY::FALL))
 	{
-		rotRad = AsoUtility::Deg2RadD(0.0);
-		dir = cameraRot.GetForward();
-	}
+		//	カメラ方向に前進したい
+		if (ins.IsNew(KEY_INPUT_W))
+		{
+			rotRad = AsoUtility::Deg2RadD(0.0);
+			dir = cameraRot.GetForward();
+		}
 
-	//	カメラ方向から後退したい
-	if (ins.IsNew(KEY_INPUT_S))
-	{
-		rotRad = AsoUtility::Deg2RadD(180.0);
-		dir = cameraRot.GetBack();
-	}
+		//	カメラ方向から後退したい
+		if (ins.IsNew(KEY_INPUT_S))
+		{
+			rotRad = AsoUtility::Deg2RadD(180.0);
+			dir = cameraRot.GetBack();
+		}
 
-	//	カメラ方向から右側へ移動したい
-	if (ins.IsNew(KEY_INPUT_D))
-	{
-		rotRad = AsoUtility::Deg2RadD(90.0);
-		dir = cameraRot.GetRight();
-	}
+		//	カメラ方向から右側へ移動したい
+		if (ins.IsNew(KEY_INPUT_D))
+		{
+			rotRad = AsoUtility::Deg2RadD(90.0);
+			dir = cameraRot.GetRight();
+		}
 
-	//	カメラ方向から左側へ移動したい
-	if (ins.IsNew(KEY_INPUT_A))
-	{
-		rotRad = AsoUtility::Deg2RadD(270.0);
-		dir = cameraRot.GetLeft();
+		//	カメラ方向から左側へ移動したい
+		if (ins.IsNew(KEY_INPUT_A))
+		{
+			rotRad = AsoUtility::Deg2RadD(270.0);
+			dir = cameraRot.GetLeft();
+		}
 	}
-
 
 	//	下降したい
 	if (ins.IsDoubleClick(KEY_INPUT_SPACE))
 	{
 		isFly_ = false;
 		statePlay_ = STATE_INPLAY::FALL;
+		SetGoalRotate(rotRad);
 	}
 	//	絶対的な上方へ移動したい
 	else if (ins.IsNew(KEY_INPUT_SPACE))
@@ -613,7 +622,7 @@ void Player::ProcessMoveFly(void)
 		//上方向にのみいどうしてたら（上昇操作）
 		if (dir.y == 1.0f && AsoUtility::EqualsVZero({ dir.x,0.0f,dir.z }))
 		{
-			ChangeStateInPlay(STATE_INPLAY::FALL);
+			ChangeStateInPlay(STATE_INPLAY::FLOAT);
 		}
 	}		//移動してなかったら
 		else if (AsoUtility::EqualsVZero(dir))
@@ -626,9 +635,40 @@ void Player::ProcessMoveFly(void)
 
 void Player::SetGoalRotate(double rotRad)
 {
+	VECTOR cameraRot;
+	Quaternion axis;
+	Quaternion axis2;
 
-	VECTOR cameraRot = SceneManager::GetInstance().GetCamera()->GetAngles();
-	Quaternion axis = Quaternion::AngleAxis((double)cameraRot.y + rotRad, AsoUtility::AXIS_Y);
+	switch (statePlPos_)
+	{
+	case Player::STATE_PLPOS::LAND:
+
+		cameraRot = SceneManager::GetInstance().GetCamera()->GetAngles();
+		axis = Quaternion::AngleAxis((double)cameraRot.y + rotRad, AsoUtility::AXIS_Y);
+
+		break;
+
+	case Player::STATE_PLPOS::AIR:
+
+		if (IsStateInPlay(STATE_INPLAY::FLOAT) || IsStateInPlay(STATE_INPLAY::FALL))
+		{
+			cameraRot = SceneManager::GetInstance().GetCamera()->GetAngles();
+			axis = Quaternion::AngleAxis((double)cameraRot.y + rotRad, AsoUtility::AXIS_Y);
+			break;
+		}
+
+		cameraRot = SceneManager::GetInstance().GetCamera()->GetAngles();
+		axis = Quaternion::AngleAxis((double)cameraRot.y + rotRad, AsoUtility::AXIS_Y);
+		if (rotRad <= AsoUtility::Deg2RadD(270.0) && rotRad >= AsoUtility::Deg2RadD(90.0))
+		{
+			cameraRot.x *= -1;
+		}
+
+		axis2 = Quaternion::AngleAxis((double)cameraRot.x, AsoUtility::AXIS_X);
+		axis = Quaternion::Mult(axis, axis2);
+		break;
+
+	}
 
 	//	現在設定されている回転との角度差を取る
 	double angleDiff = Quaternion::Angle(axis, goalQuaRot_);

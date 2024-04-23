@@ -13,6 +13,10 @@ ActorBase::~ActorBase(void)
 	transform_.Release();
 }
 
+void ActorBase::SetParam(void)
+{
+}
+
 const Transform& ActorBase::GetTransform(void) const
 {
 	return transform_;

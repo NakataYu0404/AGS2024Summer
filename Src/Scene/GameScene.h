@@ -3,6 +3,7 @@
 class Stage;
 class SkyDome;
 class Player;
+class Enemy01;
 
 class GameScene : public SceneBase
 {
@@ -30,4 +31,5 @@ private:
 	//	ƒvƒŒƒCƒ„[
 	std::shared_ptr<Player> player_;
 
+	std::shared_ptr<Enemy01> enemy_;
 };

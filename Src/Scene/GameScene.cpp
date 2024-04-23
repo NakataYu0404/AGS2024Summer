@@ -9,6 +9,8 @@
 #include "../Object/Stage.h"
 #include "../Object/Player.h"
 #include "../Object/Planet.h"
+#include "../Object/Enemy/EnemyBase.h"
+#include "../Object/Enemy/Enemy01.h"
 #include "GameScene.h"
 
 GameScene::GameScene(void)
@@ -39,6 +41,11 @@ void GameScene::Init(void)
 	skyDome_ = std::make_unique<SkyDome>(player_->GetTransform());
 	skyDome_->Init();
 
+	//	スカイドーム
+	enemy_ = std::make_shared<Enemy01>();
+	enemy_->Init();
+
+
 	SceneManager::GetInstance().GetCamera()->SetFollow(&player_->GetTransform());
 	SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::FOLLOW);
 
@@ -59,6 +66,7 @@ void GameScene::Update(void)
 	stage_->Update();
 
 	player_->Update();
+	enemy_->Update();
 
 }
 
@@ -70,6 +78,7 @@ void GameScene::Draw(void)
 	stage_->Draw();
 	
 	player_->Draw();
+	enemy_->Draw();
 
 	//	ヘルプ
 	DrawFormatString(840, 20, 0x000000, "移動　　：WASD");
