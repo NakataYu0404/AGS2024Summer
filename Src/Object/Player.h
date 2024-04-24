@@ -12,14 +12,14 @@ class Player : public ActorBase
 public:
 
 	//	スピード
-	static constexpr float SPEED_RUN = 10.0f;
-	static constexpr float SPEED_FLY = 15.0f;
+	static constexpr float SPEED_RUN = 15.0f;
+	static constexpr float SPEED_FLY = 20.0f;
 
 	//	回転完了までの時間
 	static constexpr float TIME_ROT = 0.3f;
 
 	//	ジャンプ力
-	static constexpr float POW_JUMP = 35.0f;
+	static constexpr float POW_JUMP = 15.0f;
 
 	//	ジャンプ受付時間
 	static constexpr float TIME_JUMP_IN = 0.5f;
@@ -67,6 +67,7 @@ public:
 		WARP_PAUSE,
 		FLY,
 		FALLING,
+		FLOAT,
 		VICTORY,
 	};
 
@@ -120,6 +121,8 @@ private:
 	Quaternion goalQuaRot_;
 	float stepRotTime_;
 
+	float rotRad_;
+
 	//	ジャンプ量
 	VECTOR jumpPow_;
 
@@ -139,6 +142,8 @@ private:
 	//	衝突チェック
 	VECTOR gravHitPosDown_;
 	VECTOR gravHitPosUp_;
+
+	float gravityPow_;
 
 	//	丸影
 	int imgShadow_;
@@ -191,4 +196,5 @@ private:
 	//	着地モーション終了
 	bool IsEndLanding(void);
 
+	Transform followTran_;
 };

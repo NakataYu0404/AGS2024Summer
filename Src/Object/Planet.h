@@ -9,7 +9,7 @@ class Planet : public ActorBase
 public:
 
 	//	d—Í‚Ì‹­‚³
-	static constexpr float DEFAULT_GRAVITY_POW = 15.0f;
+	static constexpr float DEFAULT_GRAVITY_POW = 1.0f;
 
 	//	d—Í‚ª‚©‚©‚é”ÍˆÍ
 	static constexpr float DEFAULT_GRAVITY_RADIUS = 5000.0f;

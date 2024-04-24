@@ -41,6 +41,9 @@ Player::Player(void)
 
 	capsule_ = nullptr;
 
+	gravityPow_ = Planet::DEFAULT_GRAVITY_POW;
+
+	rotRad_ = 0.0f;
 }
 
 Player::~Player(void)
@@ -110,7 +113,7 @@ void Player::Draw(void)
 	//	丸影描画
 	DrawShadow();
 
-	DrawFormatString(0, 0, 0x000000, "jumppow:%fjumppow:%fjumppow:%f", jumpPow_.x, jumpPow_.y, jumpPow_.z);
+	DrawFormatString(0, 0, 0x000000, "jumppowX:%fjumppowY:%fjumppowZ:%f", jumpPow_.x, jumpPow_.y, jumpPow_.z);
 }
 
 void Player::AddCollider(Collider* collider)
@@ -145,6 +148,7 @@ void Player::InitAnimation(void)
 	animationController_->Add((int)ANIM_TYPE::WARP_PAUSE, path + "WarpPose.mv1", 60.0f);
 	animationController_->Add((int)ANIM_TYPE::FLY, path + "Flying.mv1", 60.0f);
 	animationController_->Add((int)ANIM_TYPE::FALLING, path + "FallIdle.mv1", 80.0f);
+	animationController_->Add((int)ANIM_TYPE::FLOAT, path + "FloatIdle.mv1", 80.0f);
 	animationController_->Add((int)ANIM_TYPE::VICTORY, path + "Victory.mv1", 60.0f);
 
 	animationController_->Play((int)ANIM_TYPE::IDLE);
@@ -207,7 +211,7 @@ void Player::ChangeStateAnimation(void)
 			animationController_->Play((int)ANIM_TYPE::FALLING);
 			break;
 		case Player::STATE_INPLAY::FLOAT:
-			animationController_->Play((int)ANIM_TYPE::FALLING);
+			animationController_->Play((int)ANIM_TYPE::FLOAT);
 			break;
 		case Player::STATE_INPLAY::ATTACK:
 			break;
@@ -241,7 +245,7 @@ void Player::ChangeStateAnimation(void)
 			animationController_->Play((int)ANIM_TYPE::FALLING);
 			break;
 		case Player::STATE_INPLAY::FLOAT:
-			animationController_->Play((int)ANIM_TYPE::FALLING);
+			animationController_->Play((int)ANIM_TYPE::FLOAT);
 			break;
 		case Player::STATE_INPLAY::ATTACK:
 			break;
@@ -430,37 +434,37 @@ void Player::ProcessMove(void)
 	//	X軸回転を除いた、重力方向に垂直なカメラ角度(XZ平面)を取得
 	Quaternion cameraRot = SceneManager::GetInstance().GetCamera()->GetQuaRotOutX();
 
-	//	回転したい角度
-	double rotRad = 0;
-
 	VECTOR dir = AsoUtility::VECTOR_ZERO;
 
-	//	カメラ方向に前進したい
-	if (ins.IsNew(KEY_INPUT_W))
+	if (!IsStateInPlay(STATE_INPLAY::FALL))
 	{
-		rotRad = AsoUtility::Deg2RadD(0.0);
-		dir = cameraRot.GetForward();
-	}
+		//	カメラ方向に前進したい
+		if (ins.IsNew(KEY_INPUT_W))
+		{
+			rotRad_ = AsoUtility::Deg2RadD(0.0);
+			dir = cameraRot.GetForward();
+		}
 
-	//	カメラ方向から後退したい
-	if (ins.IsNew(KEY_INPUT_S))
-	{
-		rotRad = AsoUtility::Deg2RadD(180.0);
-		dir = cameraRot.GetBack();
-	}
+		//	カメラ方向から後退したい
+		if (ins.IsNew(KEY_INPUT_S))
+		{
+			rotRad_ = AsoUtility::Deg2RadD(180.0);
+			dir = cameraRot.GetBack();
+		}
 
-	//	カメラ方向から右側へ移動したい
-	if (ins.IsNew(KEY_INPUT_D))
-	{
-		rotRad = AsoUtility::Deg2RadD(90.0);
-		dir = cameraRot.GetRight();
-	}
+		//	カメラ方向から右側へ移動したい
+		if (ins.IsNew(KEY_INPUT_D))
+		{
+			rotRad_ = AsoUtility::Deg2RadD(90.0);
+			dir = cameraRot.GetRight();
+		}
 
-	//	カメラ方向から左側へ移動したい
-	if (ins.IsNew(KEY_INPUT_A))
-	{
-		rotRad = AsoUtility::Deg2RadD(270.0);
-		dir = cameraRot.GetLeft();
+		//	カメラ方向から左側へ移動したい
+		if (ins.IsNew(KEY_INPUT_A))
+		{
+			rotRad_ = AsoUtility::Deg2RadD(270.0);
+			dir = cameraRot.GetLeft();
+		}
 	}
 
 	if (!AsoUtility::EqualsVZero(dir)/* && (isJump_ || IsEndLanding())*/) {
@@ -472,7 +476,7 @@ void Player::ProcessMove(void)
 		movePow_ = VScale(dir, speed_);
 
 		//	回転処理
-		SetGoalRotate(rotRad);
+		SetGoalRotate(rotRad_);
 
 		if (!isJump_ && IsEndLanding())
 		{
@@ -553,9 +557,6 @@ void Player::ProcessMoveFly(void)
 	//	X軸回転を除いた、重力方向に垂直なカメラ角度(XZ平面)を取得
 	Quaternion cameraRot = SceneManager::GetInstance().GetCamera()->GetQuaRot();
 
-	//	回転したい角度
-	double rotRad = 0;
-
 	VECTOR dir = AsoUtility::VECTOR_ZERO;
 
 	if (!IsStateInPlay(STATE_INPLAY::FALL))
@@ -563,28 +564,28 @@ void Player::ProcessMoveFly(void)
 		//	カメラ方向に前進したい
 		if (ins.IsNew(KEY_INPUT_W))
 		{
-			rotRad = AsoUtility::Deg2RadD(0.0);
+			rotRad_ = AsoUtility::Deg2RadD(0.0);
 			dir = cameraRot.GetForward();
 		}
 
 		//	カメラ方向から後退したい
 		if (ins.IsNew(KEY_INPUT_S))
 		{
-			rotRad = AsoUtility::Deg2RadD(180.0);
+			rotRad_ = AsoUtility::Deg2RadD(180.0);
 			dir = cameraRot.GetBack();
 		}
 
 		//	カメラ方向から右側へ移動したい
 		if (ins.IsNew(KEY_INPUT_D))
 		{
-			rotRad = AsoUtility::Deg2RadD(90.0);
+			rotRad_ = AsoUtility::Deg2RadD(90.0);
 			dir = cameraRot.GetRight();
 		}
 
 		//	カメラ方向から左側へ移動したい
 		if (ins.IsNew(KEY_INPUT_A))
 		{
-			rotRad = AsoUtility::Deg2RadD(270.0);
+			rotRad_ = AsoUtility::Deg2RadD(270.0);
 			dir = cameraRot.GetLeft();
 		}
 	}
@@ -594,12 +595,13 @@ void Player::ProcessMoveFly(void)
 	{
 		isFly_ = false;
 		statePlay_ = STATE_INPLAY::FALL;
-		SetGoalRotate(rotRad);
+		SetGoalRotate(rotRad_);
 	}
 	//	絶対的な上方へ移動したい
 	else if (ins.IsNew(KEY_INPUT_SPACE))
 	{
-		dir = AsoUtility::AXIS_Y;
+		dir.y = 0.0f;
+		dir = VAdd(dir,AsoUtility::AXIS_Y);
 	}
 
 	if (!AsoUtility::EqualsVZero(dir) && (isJump_ || IsEndLanding())) {
@@ -611,7 +613,7 @@ void Player::ProcessMoveFly(void)
 		movePow_ = VScale(dir, speed_);
 
 		//	回転処理
-		SetGoalRotate(rotRad);
+		SetGoalRotate(rotRad_);
 
 		if (statePlPos_ == STATE_PLPOS::AIR)
 		{
@@ -624,12 +626,13 @@ void Player::ProcessMoveFly(void)
 		{
 			ChangeStateInPlay(STATE_INPLAY::FLOAT);
 		}
-	}		//移動してなかったら
-		else if (AsoUtility::EqualsVZero(dir))
-		{
-			//	空中Idleに
-			ChangeStateInPlay(STATE_INPLAY::IDLE);
-		}
+	}
+	//移動してなかったら
+	else if (AsoUtility::EqualsVZero(dir) && isFly_)
+	{
+		//	空中Idleに
+		ChangeStateInPlay(STATE_INPLAY::IDLE);
+	}
 
 }
 
@@ -659,9 +662,14 @@ void Player::SetGoalRotate(double rotRad)
 
 		cameraRot = SceneManager::GetInstance().GetCamera()->GetAngles();
 		axis = Quaternion::AngleAxis((double)cameraRot.y + rotRad, AsoUtility::AXIS_Y);
-		if (rotRad <= AsoUtility::Deg2RadD(270.0) && rotRad >= AsoUtility::Deg2RadD(90.0))
+
+		cameraRot.x *= cosf(rotRad);
+
+		//もし空中で上昇しながらもXZ平面に移動してたら
+		if (InputManager::GetInstance().IsNew(KEY_INPUT_SPACE) && IsStateInPlay(STATE_INPLAY::MOVE) && statePlPos_ == STATE_PLPOS::AIR)
 		{
-			cameraRot.x *= -1;
+			//	x軸の角度を45度に
+			cameraRot.x = AsoUtility::Deg2RadF(-45.0f);
 		}
 
 		axis2 = Quaternion::AngleAxis((double)cameraRot.x, AsoUtility::AXIS_X);
@@ -724,7 +732,7 @@ void Player::CollisionGravity(void)
 	VECTOR dirUpGravity = AsoUtility::DIR_U;
 
 	//	重力の強さ
-	float gravityPow = Planet::DEFAULT_GRAVITY_POW;
+	float gravityPow = gravityPow_;
 
 	float checkPow = 10.0f;
 	gravHitPosUp_ = VAdd(movedPos_, VScale(dirUpGravity, gravityPow));
@@ -738,8 +746,7 @@ void Player::CollisionGravity(void)
 		auto hit = MV1CollCheck_Line(
 			c->modelId_, -1, gravHitPosUp_, gravHitPosDown_);
 
-		//	最初は上の行のように実装して、木の上に登ってしまうことを確認する
-		//if (hit.HitFlag > 0)
+		//	当たってるか、重力とジャンプのベクトル方向がほぼ一緒
 		if (hit.HitFlag > 0 && VDot(dirGravity, jumpPow_) > 0.9f)
 		{
 
@@ -757,6 +764,7 @@ void Player::CollisionGravity(void)
 
 			isJump_ = false;
 
+			gravityPow_ = Planet::DEFAULT_GRAVITY_POW;
 		}
 
 	}
@@ -818,7 +826,9 @@ void Player::CalcGravityPow(void)
 {
 	if (statePlPos_ == STATE_PLPOS::AIR)
 	{
+		//	飛んでるなら重力とジャンプ力を無効に
 		jumpPow_ = AsoUtility::VECTOR_ZERO;
+		gravityPow_ = Planet::DEFAULT_GRAVITY_POW;
 		return;
 	}
 
@@ -826,10 +836,10 @@ void Player::CalcGravityPow(void)
 	VECTOR dirGravity = AsoUtility::DIR_D;
 
 	//	重力の強さ
-	float gravityPow = Planet::DEFAULT_GRAVITY_POW;
+	gravityPow_ += 0.2f;
 
 	//	重力
-	VECTOR gravity = VScale(dirGravity, gravityPow);
+	VECTOR gravity = VScale(dirGravity, gravityPow_);
 	jumpPow_ = VAdd(jumpPow_, gravity);
 
 	//	最初は実装しない。地面と突き抜けることを確認する。
