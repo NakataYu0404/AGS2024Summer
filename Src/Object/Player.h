@@ -50,7 +50,8 @@ public:
 		MOVE,
 		JUMP,
 		LAND,	//	’…’n
-		FALL,	//	Ž©•ª‚Å~‰º‚µ‚Ä‚é
+		FALL_MYSELF,	//	Ž©•ª‚Å~‰º‚µ‚Ä‚é
+		FALL_NATURE,	//	ŸŽè‚É—Ž‰º‚µ‚Ä‚é
 		FLOAT,	//	Ž©•ª‚Åã¸‚µ‚Ä‚é
 		ATTACK,
 		SHOT,

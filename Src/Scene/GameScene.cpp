@@ -25,7 +25,6 @@ GameScene::~GameScene(void)
 
 void GameScene::Init(void)
 {
-
 	//	プレイヤー
 	player_ = std::make_shared<Player>();
 	player_->Init();
@@ -45,15 +44,12 @@ void GameScene::Init(void)
 	enemy_ = std::make_shared<Enemy01>();
 	enemy_->Init();
 
-
 	SceneManager::GetInstance().GetCamera()->SetFollow(&player_->GetTransform());
 	SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::FOLLOW);
-
 }
 
 void GameScene::Update(void)
 {
-
 	//	シーン遷移
 	InputManager& ins = InputManager::GetInstance();
 	if (ins.IsTrgDown(KEY_INPUT_NUMPAD0))
@@ -67,7 +63,6 @@ void GameScene::Update(void)
 
 	player_->Update();
 	enemy_->Update();
-
 }
 
 void GameScene::Draw(void)
@@ -85,5 +80,4 @@ void GameScene::Draw(void)
 	DrawFormatString(840, 40, 0x000000, "カメラ　：矢印キー");
 	DrawFormatString(840, 60, 0x000000, "ダッシュ：右Shift");
 	DrawFormatString(840, 80, 0x000000, "ジャンプ：＼(バクスラ)");
-
 }

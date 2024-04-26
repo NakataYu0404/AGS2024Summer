@@ -207,7 +207,10 @@ void Player::ChangeStateAnimation(void)
 			//	着地モーション
 			animationController_->Play((int)ANIM_TYPE::JUMP, false, 29.0f, 45.0f, false, true);
 			break;
-		case Player::STATE_INPLAY::FALL:
+		case Player::STATE_INPLAY::FALL_MYSELF:
+			animationController_->Play((int)ANIM_TYPE::FALLING);
+			break;
+		case Player::STATE_INPLAY::FALL_NATURE:
 			animationController_->Play((int)ANIM_TYPE::FALLING);
 			break;
 		case Player::STATE_INPLAY::FLOAT:
@@ -241,7 +244,10 @@ void Player::ChangeStateAnimation(void)
 		case Player::STATE_INPLAY::LAND:
 			
 			break;
-		case Player::STATE_INPLAY::FALL:
+		case Player::STATE_INPLAY::FALL_MYSELF:
+			animationController_->Play((int)ANIM_TYPE::FALLING);
+			break;
+		case Player::STATE_INPLAY::FALL_NATURE:
 			animationController_->Play((int)ANIM_TYPE::FALLING);
 			break;
 		case Player::STATE_INPLAY::FLOAT:
@@ -436,7 +442,7 @@ void Player::ProcessMove(void)
 
 	VECTOR dir = AsoUtility::VECTOR_ZERO;
 
-	if (!IsStateInPlay(STATE_INPLAY::FALL))
+	if (!IsStateInPlay(STATE_INPLAY::FALL_MYSELF))
 	{
 		//	カメラ方向に前進したい
 		if (ins.IsNew(KEY_INPUT_W))
@@ -502,7 +508,7 @@ void Player::ProcessJump(void)
 	bool isHit = ins.IsTrgDown(KEY_INPUT_BACKSLASH);
 
 	//	ジャンプ操作(ボタンが押されてるけどジャンプ中か着地してるとき、またはジャンプ中で着地してないとき)
- 	if ((isHit && (isJump_ || IsEndLanding())) || (isJump_ && !IsEndLanding() && !IsStateInPlay(STATE_INPLAY::FALL)) )
+ 	if ((isHit && (isJump_ || IsEndLanding())) || (isJump_ && !IsEndLanding() && !IsStateInPlay(STATE_INPLAY::FALL_MYSELF)))
 	{
 
 		if (!isJump_)
@@ -559,7 +565,7 @@ void Player::ProcessMoveFly(void)
 
 	VECTOR dir = AsoUtility::VECTOR_ZERO;
 
-	if (!IsStateInPlay(STATE_INPLAY::FALL))
+	if (!IsStateInPlay(STATE_INPLAY::FALL_MYSELF))
 	{
 		//	カメラ方向に前進したい
 		if (ins.IsNew(KEY_INPUT_W))
@@ -594,7 +600,7 @@ void Player::ProcessMoveFly(void)
 	if (ins.IsDoubleClick(KEY_INPUT_SPACE))
 	{
 		isFly_ = false;
-		statePlay_ = STATE_INPLAY::FALL;
+		statePlay_ = STATE_INPLAY::FALL_MYSELF;
 		SetGoalRotate(rotRad_);
 	}
 	//	絶対的な上方へ移動したい
@@ -653,7 +659,7 @@ void Player::SetGoalRotate(double rotRad)
 
 	case Player::STATE_PLPOS::AIR:
 
-		if (IsStateInPlay(STATE_INPLAY::FLOAT) || IsStateInPlay(STATE_INPLAY::FALL))
+		if (IsStateInPlay(STATE_INPLAY::FLOAT) || IsStateInPlay(STATE_INPLAY::FALL_MYSELF))
 		{
 			cameraRot = SceneManager::GetInstance().GetCamera()->GetAngles();
 			axis = Quaternion::AngleAxis((double)cameraRot.y + rotRad, AsoUtility::AXIS_Y);
@@ -857,7 +863,7 @@ bool Player::IsEndLanding(void)
 	bool ret = true;
 
 	//	アニメーションがジャンプではない
-	if (statePlPos_ == STATE_PLPOS::LAND && (!isJump_ && !IsStateInPlay(STATE_INPLAY::FALL)))
+	if (statePlPos_ == STATE_PLPOS::LAND && (!isJump_ && !IsStateInPlay(STATE_INPLAY::FALL_MYSELF)))
 	{
 		return ret;
 	}
