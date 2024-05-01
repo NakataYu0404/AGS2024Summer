@@ -114,7 +114,7 @@ void Stage::MakeMainStage(void)
 	Transform planetTrans;
 	planetTrans.SetModel(
 		resMng_.LoadModelDuplicate(ResourceManager::SRC::MAIN_PLANET));
-	planetTrans.scl = AsoUtility::VECTOR_ONE;
+	planetTrans.scl = {2.0f,1.0f,2.0f};
 	planetTrans.quaRot = Quaternion();
 	planetTrans.pos = { 0.0f, -100.0f, 0.0f };
 

@@ -58,6 +58,14 @@ public:
 		STUN,
 	};
 
+
+	enum class LEVEL_PL
+	{
+		LV1,
+		LV2,
+		LV3,
+	};
+
 	//	アニメーション種別
 	enum class ANIM_TYPE
 	{
@@ -79,6 +87,7 @@ public:
 	~Player(void);
 
 	void Init(void) override;
+	void SetParam(void) override;
 	void Update(void) override;
 	void Draw(void) override;
 
@@ -88,6 +97,7 @@ public:
 
 	//	衝突用カプセルの取得
 	const Capsule* GetCapsule(void) const;
+	void AddCapsule(Capsule* capsule);
 
 	//	現在のSTATE::PLAY中ステートが入力したステートと同じか調べる
 	bool IsStateInPlay(STATE_INPLAY state);
@@ -104,6 +114,8 @@ private:
 
 	//	STATE::PLAYの中のステート
 	STATE_INPLAY statePlay_;
+
+	LEVEL_PL levelPlayer_;
 
 	//	移動スピード
 	float speed_;
@@ -176,6 +188,9 @@ private:
 	//	地上、空中関係ないSTATE::PLAY中ステートの切り替え
 	void ChangeStateInPlay(STATE_INPLAY state);
 
+	//	飛んでるかフラグをここで設定する(現在レベルによって変えるかどうか決められる)
+	void ChangeIsFly(bool isFly);
+
 	//	操作
 	void ProcessMove(void);
 	void ProcessJump(void);
@@ -198,4 +213,5 @@ private:
 	bool IsEndLanding(void);
 
 	Transform followTran_;
+
 };

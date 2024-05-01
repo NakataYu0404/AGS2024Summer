@@ -16,7 +16,7 @@ public:
 	~EnemyBase(void);
 
 	void Init(void) override;
-	virtual void Update(void) override = 0;
+	virtual void Update(void) override;
 	virtual void Draw(void) override;
 
 	virtual void SetParam(void) override;

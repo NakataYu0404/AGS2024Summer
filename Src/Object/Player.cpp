@@ -13,7 +13,46 @@
 
 Player::Player(void)
 {
+	SetParam();
+}
 
+Player::~Player(void)
+{
+	delete capsule_;
+	delete animationController_;
+}
+
+void Player::Init(void)
+{
+
+	//	モデルの基本設定
+	transform_.SetModel(resMng_.LoadModelDuplicate(
+		ResourceManager::SRC::PLAYER));
+	transform_.scl = AsoUtility::VECTOR_ONE;
+	transform_.pos = { 0.0f, -30.0f, 0.0f };
+	transform_.quaRot = Quaternion();
+	transform_.quaRotLocal =
+		Quaternion::Euler({ 0.0f, AsoUtility::Deg2RadF(180.0f), 0.0f });
+	transform_.Update();
+	//	アニメーションの設定
+	InitAnimation();
+
+	//	カプセルコライダ
+	capsule_ = new Capsule(transform_);
+	capsule_->SetLocalPosTop({ 0.0f, 110.0f, 0.0f });
+	capsule_->SetLocalPosDown({ 0.0f, 30.0f, 0.0f });
+	capsule_->SetRadius(20.0f);
+
+	//	丸影画像
+	imgShadow_ = resMng_.Load(ResourceManager::SRC::PLAYER_SHADOW).handleId_;
+
+	//	初期状態
+	ChangeState(STATE::PLAY);
+
+}
+
+void Player::SetParam(void)
+{
 	animationController_ = nullptr;
 	state_ = STATE::NONE;
 	statePlPos_ = STATE_PLPOS::LAND;
@@ -44,42 +83,7 @@ Player::Player(void)
 	gravityPow_ = Planet::DEFAULT_GRAVITY_POW;
 
 	rotRad_ = 0.0f;
-}
-
-Player::~Player(void)
-{
-	delete capsule_;
-	delete animationController_;
-}
-
-void Player::Init(void)
-{
-
-	//	モデルの基本設定
-	transform_.SetModel(resMng_.LoadModelDuplicate(
-		ResourceManager::SRC::PLAYER));
-	transform_.scl = AsoUtility::VECTOR_ONE;
-	transform_.pos = { 0.0f, -30.0f, 0.0f };
-	transform_.quaRot = Quaternion();
-	transform_.quaRotLocal =
-		Quaternion::Euler({ 0.0f, AsoUtility::Deg2RadF(180.0f), 0.0f });
-	transform_.Update();
-
-	//	アニメーションの設定
-	InitAnimation();
-
-	//	カプセルコライダ
-	capsule_ = new Capsule(transform_);
-	capsule_->SetLocalPosTop({ 0.0f, 110.0f, 0.0f });
-	capsule_->SetLocalPosDown({ 0.0f, 30.0f, 0.0f });
-	capsule_->SetRadius(20.0f);
-
-	//	丸影画像
-	imgShadow_ = resMng_.Load(ResourceManager::SRC::PLAYER_SHADOW).handleId_;
-
-	//	初期状態
-	ChangeState(STATE::PLAY);
-
+	levelPlayer_ = LEVEL_PL::LV1;
 }
 
 void Player::Update(void)
@@ -129,6 +133,10 @@ void Player::ClearCollider(void)
 const Capsule* Player::GetCapsule(void) const
 {
 	return capsule_;
+}
+
+void Player::AddCapsule(Capsule* capsule)
+{
 }
 
 bool Player::IsStateInPlay(STATE_INPLAY state)
@@ -397,12 +405,17 @@ void Player::DrawShadow(void)
 
 }
 
+
 void Player::UpdateLand(void)
 {
 	ProcessMove();
+	if (levelPlayer_ != LEVEL_PL::LV1)
+	{
+		//	飛行処理
+		ProcessFly();
+	}
 	//	ジャンプ処理
 	ProcessJump();
-	ProcessFly();
 
 }
 
@@ -428,6 +441,12 @@ void Player::ChangeStateInPlay(STATE_INPLAY state)
 {
 	statePlay_ = state;
 }
+
+void Player::ChangeIsFly(bool isFly)
+{
+	isFly_ = isFly;
+}
+
 
 void Player::ProcessMove(void)
 {
@@ -505,7 +524,7 @@ void Player::ProcessJump(void)
 {
 
 	auto& ins = InputManager::GetInstance();
-	bool isHit = ins.IsTrgDown(KEY_INPUT_BACKSLASH);
+	bool isHit = ins.IsTrgDown(KEY_INPUT_SPACE);
 
 	//	ジャンプ操作(ボタンが押されてるけどジャンプ中か着地してるとき、またはジャンプ中で着地してないとき)
  	if ((isHit && (isJump_ || IsEndLanding())) || (isJump_ && !IsEndLanding() && !IsStateInPlay(STATE_INPLAY::FALL_MYSELF)))
@@ -547,9 +566,16 @@ void Player::ProcessFly(void)
 
   	if (isHit && (isJump_ && !IsEndLanding()))
 	{
-		isFly_ = true;
+		ChangeIsFly(true);
 		stepJump_ = TIME_JUMP_IN;
 	}
+
+	if (IsStateInPlay(STATE_INPLAY::FALL_MYSELF) && (ins.IsNew(KEY_INPUT_W) || ins.IsNew(KEY_INPUT_S) || ins.IsNew(KEY_INPUT_D) || ins.IsNew(KEY_INPUT_A)))
+	{
+		ChangeIsFly(true);
+		ChangeStateInPlay(STATE_INPLAY::MOVE);
+	}
+
 }
 
 void Player::ProcessMoveFly(void)
@@ -564,6 +590,7 @@ void Player::ProcessMoveFly(void)
 	Quaternion cameraRot = SceneManager::GetInstance().GetCamera()->GetQuaRot();
 
 	VECTOR dir = AsoUtility::VECTOR_ZERO;
+
 
 	if (!IsStateInPlay(STATE_INPLAY::FALL_MYSELF))
 	{
@@ -596,15 +623,8 @@ void Player::ProcessMoveFly(void)
 		}
 	}
 
-	//	下降したい
-	if (ins.IsDoubleClick(KEY_INPUT_SPACE))
-	{
-		isFly_ = false;
-		statePlay_ = STATE_INPLAY::FALL_MYSELF;
-		SetGoalRotate(rotRad_);
-	}
-	//	絶対的な上方へ移動したい
-	else if (ins.IsNew(KEY_INPUT_SPACE))
+	//	上方へ移動したい
+	if (ins.IsNew(KEY_INPUT_SPACE))
 	{
 		dir.y = 0.0f;
 		dir = VAdd(dir,AsoUtility::AXIS_Y);
@@ -623,7 +643,7 @@ void Player::ProcessMoveFly(void)
 
 		if (statePlPos_ == STATE_PLPOS::AIR)
 		{
-			//	アニメーション
+			//	飛んでたらMOVEに
 			ChangeStateInPlay(STATE_INPLAY::MOVE);
 		}
 
@@ -638,6 +658,23 @@ void Player::ProcessMoveFly(void)
 	{
 		//	空中Idleに
 		ChangeStateInPlay(STATE_INPLAY::IDLE);
+	}
+
+	//	下降したい
+	if (ins.IsDoubleClick(KEY_INPUT_SPACE))
+	{
+		//	移動ボタンを押しただけでFLYに戻る降下
+		ChangeIsFly(false);
+		statePlay_ = STATE_INPLAY::FALL_MYSELF;
+		gravityPow_ = 30.0f;
+		SetGoalRotate(rotRad_);
+	}
+	else if (ins.IsTrgDown(KEY_INPUT_LCONTROL))
+	{
+		//	FLYボタンを押さないとFLYに戻らない降下
+		ChangeIsFly(false);
+		statePlay_ = STATE_INPLAY::FALL_NATURE;
+		SetGoalRotate(rotRad_);
 	}
 
 }
@@ -659,7 +696,7 @@ void Player::SetGoalRotate(double rotRad)
 
 	case Player::STATE_PLPOS::AIR:
 
-		if (IsStateInPlay(STATE_INPLAY::FLOAT) || IsStateInPlay(STATE_INPLAY::FALL_MYSELF))
+		if (IsStateInPlay(STATE_INPLAY::FLOAT) || IsStateInPlay(STATE_INPLAY::FALL_MYSELF) || IsStateInPlay(STATE_INPLAY::FALL_NATURE))
 		{
 			cameraRot = SceneManager::GetInstance().GetCamera()->GetAngles();
 			axis = Quaternion::AngleAxis((double)cameraRot.y + rotRad, AsoUtility::AXIS_Y);
@@ -705,7 +742,6 @@ void Player::Rotate(void)
 	//	回転の球面補間
 	playerRotY_ = Quaternion::Slerp(
 		playerRotY_, goalQuaRot_, (TIME_ROT - stepRotTime_) / TIME_ROT);
-
 }
 
 void Player::Collision(void)
@@ -740,7 +776,7 @@ void Player::CollisionGravity(void)
 	//	重力の強さ
 	float gravityPow = gravityPow_;
 
-	float checkPow = 10.0f;
+	float checkPow = 20.0f;
 	gravHitPosUp_ = VAdd(movedPos_, VScale(dirUpGravity, gravityPow));
 	gravHitPosUp_ = VAdd(gravHitPosUp_, VScale(dirUpGravity, checkPow * 2.0f));
 	gravHitPosDown_ = VAdd(movedPos_, VScale(dirGravity, checkPow));
@@ -755,7 +791,6 @@ void Player::CollisionGravity(void)
 		//	当たってるか、重力とジャンプのベクトル方向がほぼ一緒
 		if (hit.HitFlag > 0 && VDot(dirGravity, jumpPow_) > 0.9f)
 		{
-
 			//	衝突地点から、少し上に移動
 			movedPos_ = VAdd(hit.HitPosition, VScale(dirUpGravity, 5.0f));
 
@@ -785,7 +820,6 @@ void Player::CollisionCapsule(void)
 	trans.pos = movedPos_;
 	trans.Update();
 	Capsule cap = Capsule(*capsule_, trans);
-
 	//	カプセルとの衝突判定
 	for (const auto c : colliders_)
 	{
@@ -808,7 +842,7 @@ void Player::CollisionCapsule(void)
 
 				if (pHit)
 				{
-					movedPos_ = VAdd(movedPos_, VScale(hit.Normal, 1.0f));
+					movedPos_ = VAdd(movedPos_, VScale(hit.Normal, 2.0f));
 					//	カプセルを移動させる
 					trans.pos = movedPos_;
 					trans.Update();

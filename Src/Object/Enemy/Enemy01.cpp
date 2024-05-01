@@ -8,6 +8,7 @@
 #include "../Common/Capsule.h"
 #include "../Common/Collider.h"
 #include "../Planet.h"
+#include "../Player.h"
 #include "Enemy01.h"
 
 Enemy01::Enemy01(void)
@@ -24,6 +25,7 @@ Enemy01::~Enemy01(void)
 
 void Enemy01::Init(void)
 {
+
 	//	モデルの基本設定
 	transform_.SetModel(resMng_.LoadModelDuplicate(
 		ResourceManager::SRC::PLAYER));
@@ -40,14 +42,15 @@ void Enemy01::Init(void)
 	capsule_->SetLocalPosDown({ 0.0f, 30.0f, 0.0f });
 	capsule_->SetRadius(20.0f);
 
+	player_.lock()->AddCapsule(capsule_);
+
 
 }
 
-void Enemy01::Update(void)
+void Enemy01::SetParam(void)
 {
-	//	モデル制御更新
-	transform_.Update();
 }
+
 
 void Enemy01::Draw(void)
 {
