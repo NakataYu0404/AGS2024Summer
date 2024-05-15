@@ -2,8 +2,8 @@
 #include "SceneBase.h"
 class Stage;
 class SkyDome;
-class Player;
-class Enemy01;
+class Raider;
+class Survivor;
 
 class GameScene : public SceneBase
 {
@@ -29,7 +29,7 @@ private:
 	std::unique_ptr<SkyDome> skyDome_;
 
 	//	ƒvƒŒƒCƒ„[
-	std::shared_ptr<Player> player_;
+	std::shared_ptr<Raider> raider_;
 
-	std::shared_ptr<Enemy01> enemy_;
+	std::shared_ptr<Survivor> survivor_;
 };

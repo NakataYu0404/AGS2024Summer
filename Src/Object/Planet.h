@@ -28,7 +28,7 @@ public:
 	};
 
 	//	コンストラクタ
-	Planet(const Stage::NAME& name, const TYPE& type, const Transform& transform);
+	Planet(const Stage::NAME& name, const TYPE& type, const std::shared_ptr<Transform> transform);
 
 	//	デストラクタ
 	~Planet(void);

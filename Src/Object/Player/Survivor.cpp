@@ -1,44 +1,45 @@
 #include <string>
-#include "../Application.h"
-#include "../Utility/AsoUtility.h"
-#include "../Manager/InputManager.h"
-#include "../Manager/SceneManager.h"
-#include "../Manager/ResourceManager.h"
-#include "../Manager/Camera.h"
-#include "Common/AnimationController.h"
-#include "Common/Capsule.h"
-#include "Common/Collider.h"
-#include "Planet.h"
-#include "Player.h"
+#include "../../Application.h"
+#include "../../Utility/AsoUtility.h"
+#include "../../Manager/InputManager.h"
+#include "../../Manager/SceneManager.h"
+#include "../../Manager/ResourceManager.h"
+#include "../../Manager/Camera.h"
+#include "../Common/AnimationController.h"
+#include "../Common/Capsule.h"
+#include "../Common/Collider.h"
+#include "../Planet.h"
+#include "Survivor.h"
 
-Player::Player(void)
+Survivor::Survivor(void)
 {
 	SetParam();
 }
 
-Player::~Player(void)
+Survivor::~Survivor(void)
 {
 	delete capsule_;
 	delete animationController_;
 }
 
-void Player::Init(void)
+void Survivor::Init(void)
 {
+	transform_ = std::make_shared<Transform>();
 
 	//	モデルの基本設定
-	transform_.SetModel(resMng_.LoadModelDuplicate(
+	transform_->SetModel(resMng_.LoadModelDuplicate(
 		ResourceManager::SRC::PLAYER));
-	transform_.scl = AsoUtility::VECTOR_ONE;
-	transform_.pos = { 0.0f, -30.0f, 0.0f };
-	transform_.quaRot = Quaternion();
-	transform_.quaRotLocal =
+	transform_->scl = AsoUtility::VECTOR_ONE;
+	transform_->pos = { 0.0f, -30.0f, 0.0f };
+	transform_->quaRot = Quaternion();
+	transform_->quaRotLocal =
 		Quaternion::Euler({ 0.0f, AsoUtility::Deg2RadF(180.0f), 0.0f });
-	transform_.Update();
+	transform_->Update();
 	//	アニメーションの設定
 	InitAnimation();
 
 	//	カプセルコライダ
-	capsule_ = new Capsule(transform_);
+	capsule_ = new Capsule(*transform_);
 	capsule_->SetLocalPosTop({ 0.0f, 110.0f, 0.0f });
 	capsule_->SetLocalPosDown({ 0.0f, 30.0f, 0.0f });
 	capsule_->SetRadius(20.0f);
@@ -51,11 +52,10 @@ void Player::Init(void)
 
 }
 
-void Player::SetParam(void)
+void Survivor::SetParam(void)
 {
 	animationController_ = nullptr;
 	state_ = STATE::NONE;
-	statePlPos_ = STATE_PLPOS::LAND;
 	statePlay_ = STATE_INPLAY::IDLE;
 
 	speed_ = 0.0f;
@@ -83,36 +83,35 @@ void Player::SetParam(void)
 	gravityPow_ = Planet::DEFAULT_GRAVITY_POW;
 
 	rotRad_ = 0.0f;
-	levelPlayer_ = LEVEL_PL::LV1;
 }
 
-void Player::Update(void)
+void Survivor::Update(void)
 {
 
 	//	更新ステップ
 	switch (state_)
 	{
-	case Player::STATE::NONE:
+	case Survivor::STATE::NONE:
 		UpdateNone();
 		break;
-	case Player::STATE::PLAY:
+	case Survivor::STATE::PLAY:
 		UpdatePlay();
 		break;
 	}
 
 	//	モデル制御更新
-	transform_.Update();
+	transform_->Update();
 
 	//	アニメーション再生
 	animationController_->Update();
 
 }
 
-void Player::Draw(void)
+void Survivor::Draw(void)
 {
 
 	//	モデルの描画
-	MV1DrawModel(transform_.modelId);
+	MV1DrawModel(transform_->modelId);
 
 	//	丸影描画
 	DrawShadow();
@@ -120,35 +119,40 @@ void Player::Draw(void)
 	DrawFormatString(0, 0, 0x000000, "jumppowX:%fjumppowY:%fjumppowZ:%f", jumpPow_.x, jumpPow_.y, jumpPow_.z);
 }
 
-void Player::AddCollider(Collider* collider)
+void Survivor::AddCollider(Collider* collider)
 {
 	colliders_.push_back(collider);
 }
 
-void Player::ClearCollider(void)
+void Survivor::ClearCollider(void)
 {
 	colliders_.clear();
 }
 
-const Capsule* Player::GetCapsule(void) const
+const Capsule* Survivor::GetCapsule(void) const
 {
 	return capsule_;
 }
 
-void Player::AddCapsule(Capsule* capsule)
+void Survivor::AddCapsule(Capsule* capsule)
 {
 }
 
-bool Player::IsStateInPlay(STATE_INPLAY state)
+bool Survivor::IsStateInPlay(STATE_INPLAY state)
 {
 	return statePlay_ == state;
 }
 
-void Player::InitAnimation(void)
+void Survivor::SetEnemy(std::weak_ptr<Transform> tran)
+{
+	enemyTran_ = tran;
+}
+
+void Survivor::InitAnimation(void)
 {
 
 	std::string path = Application::PATH_MODEL + "Player/";
-	animationController_ = new AnimationController(transform_.modelId);
+	animationController_ = new AnimationController(transform_->modelId);
 	animationController_->Add((int)ANIM_TYPE::IDLE, path + "Idle.mv1", 20.0f);
 	animationController_->Add((int)ANIM_TYPE::RUN, path + "Run.mv1", 20.0f);
 	animationController_->Add((int)ANIM_TYPE::FAST_RUN, path + "FastRun.mv1", 20.0f);
@@ -163,7 +167,7 @@ void Player::InitAnimation(void)
 
 }
 
-void Player::ChangeState(STATE state)
+void Survivor::ChangeState(STATE state)
 {
 
 	//	状態変更
@@ -172,129 +176,58 @@ void Player::ChangeState(STATE state)
 	//	各状態遷移の初期処理
 	switch (state_)
 	{
-	case Player::STATE::NONE:
+	case Survivor::STATE::NONE:
 		ChangeStateNone();
 		break;
-	case Player::STATE::PLAY:
+	case Survivor::STATE::PLAY:
 		ChangeStatePlay();
 		break;
 	}
 
 }
 
-void Player::ChangeStateNone(void)
+void Survivor::ChangeStateNone(void)
 {
 }
 
-void Player::ChangeStatePlay(void)
+void Survivor::ChangeStatePlay(void)
 {
 }
 
-void Player::ChangeStateAnimation(void)
+void Survivor::ChangeStateAnimation(void)
 {
-
-	switch (statePlPos_)
-	{
-	case Player::STATE_PLPOS::NONE:
-		break;
-	case Player::STATE_PLPOS::LAND:
 
 		switch (statePlay_)
 		{
-		case Player::STATE_INPLAY::NONE:
+		case Survivor::STATE_INPLAY::NONE:
 			break;
-		case Player::STATE_INPLAY::IDLE:
+		case Survivor::STATE_INPLAY::IDLE:
 			animationController_->Play((int)ANIM_TYPE::IDLE);
 			break;
-		case Player::STATE_INPLAY::MOVE:
+		case Survivor::STATE_INPLAY::MOVE:
 			animationController_->Play((int)ANIM_TYPE::RUN);
 			break;
-		case Player::STATE_INPLAY::JUMP:
+		case Survivor::STATE_INPLAY::JUMP:
 			break;
-		case Player::STATE_INPLAY::LAND:
+		case Survivor::STATE_INPLAY::LAND:
 			//	着地モーション
 			animationController_->Play((int)ANIM_TYPE::JUMP, false, 29.0f, 45.0f, false, true);
 			break;
-		case Player::STATE_INPLAY::FALL_MYSELF:
-			animationController_->Play((int)ANIM_TYPE::FALLING);
-			break;
-		case Player::STATE_INPLAY::FALL_NATURE:
-			animationController_->Play((int)ANIM_TYPE::FALLING);
-			break;
-		case Player::STATE_INPLAY::FLOAT:
-			animationController_->Play((int)ANIM_TYPE::FLOAT);
-			break;
-		case Player::STATE_INPLAY::ATTACK:
-			break;
-		case Player::STATE_INPLAY::SHOT:
-			break;
-		case Player::STATE_INPLAY::STUN:
+		case Survivor::STATE_INPLAY::STUN:
 			break;
 		default:
 			break;
 		}
 
-		break;
-	case Player::STATE_PLPOS::AIR:
-
-		switch (statePlay_)
-		{
-		case Player::STATE_INPLAY::NONE:
-			break;
-		case Player::STATE_INPLAY::IDLE:
-			animationController_->Play((int)ANIM_TYPE::IDLE);
-			break;
-		case Player::STATE_INPLAY::MOVE:
-			animationController_->Play((int)ANIM_TYPE::FLY);
-			break;
-		case Player::STATE_INPLAY::JUMP:
-			break;
-		case Player::STATE_INPLAY::LAND:
-			
-			break;
-		case Player::STATE_INPLAY::FALL_MYSELF:
-			animationController_->Play((int)ANIM_TYPE::FALLING);
-			break;
-		case Player::STATE_INPLAY::FALL_NATURE:
-			animationController_->Play((int)ANIM_TYPE::FALLING);
-			break;
-		case Player::STATE_INPLAY::FLOAT:
-			animationController_->Play((int)ANIM_TYPE::FLOAT);
-			break;
-		case Player::STATE_INPLAY::ATTACK:
-			break;
-		case Player::STATE_INPLAY::SHOT:
-			break;
-		case Player::STATE_INPLAY::STUN:
-			break;
-		default:
-			break;
-		}
-
-		break;
-	default:
-		break;
-	}
 }
 
-void Player::UpdateNone(void)
+void Survivor::UpdateNone(void)
 {
 }
 
-void Player::UpdatePlay(void)
+void Survivor::UpdatePlay(void)
 {
-	switch (statePlPos_)
-	{
-	case Player::STATE_PLPOS::LAND:
-		UpdateLand();
-		break;
-	case Player::STATE_PLPOS::AIR:
-		UpdateAir();
-		break;
-	default:
-		break;
-	}
-	ChangeLandAir();
+	UpdateLand();
 	ChangeStateAnimation();
 
 	//	移動方向に応じた回転
@@ -307,11 +240,11 @@ void Player::UpdatePlay(void)
 	Collision();
 
 	//	回転させる
-	transform_.quaRot = playerRotY_;
+	transform_->quaRot = playerRotY_;
 
 }
 
-void Player::DrawShadow(void)
+void Survivor::DrawShadow(void)
 {
 
 	float PLAYER_SHADOW_HEIGHT = 300.0f;
@@ -343,7 +276,7 @@ void Player::DrawShadow(void)
 		//	プレイヤーの直下に存在する地面のポリゴンを取得
 		HitResDim = MV1CollCheck_Capsule(
 			ModelHandle, -1,
-			transform_.pos, VAdd(transform_.pos, { 0.0f, -PLAYER_SHADOW_HEIGHT, 0.0f }), PLAYER_SHADOW_SIZE);
+			transform_->pos, VAdd(transform_->pos, { 0.0f, -PLAYER_SHADOW_HEIGHT, 0.0f }), PLAYER_SHADOW_SIZE);
 
 		//	頂点データで変化が無い部分をセット
 		Vertex[0].dif = GetColorU8(255, 255, 255, 255);
@@ -372,22 +305,22 @@ void Player::DrawShadow(void)
 			Vertex[0].dif.a = 0;
 			Vertex[1].dif.a = 0;
 			Vertex[2].dif.a = 0;
-			if (HitRes->Position[0].y > transform_.pos.y - PLAYER_SHADOW_HEIGHT)
-				Vertex[0].dif.a = static_cast<int>(roundf(128.0f * (1.0f - fabs(HitRes->Position[0].y - transform_.pos.y) / PLAYER_SHADOW_HEIGHT)));
+			if (HitRes->Position[0].y > transform_->pos.y - PLAYER_SHADOW_HEIGHT)
+				Vertex[0].dif.a = static_cast<int>(roundf(128.0f * (1.0f - fabs(HitRes->Position[0].y - transform_->pos.y) / PLAYER_SHADOW_HEIGHT)));
 
-			if (HitRes->Position[1].y > transform_.pos.y - PLAYER_SHADOW_HEIGHT)
-				Vertex[1].dif.a = static_cast<int>(roundf(128.0f * (1.0f - fabs(HitRes->Position[1].y - transform_.pos.y) / PLAYER_SHADOW_HEIGHT)));
+			if (HitRes->Position[1].y > transform_->pos.y - PLAYER_SHADOW_HEIGHT)
+				Vertex[1].dif.a = static_cast<int>(roundf(128.0f * (1.0f - fabs(HitRes->Position[1].y - transform_->pos.y) / PLAYER_SHADOW_HEIGHT)));
 
-			if (HitRes->Position[2].y > transform_.pos.y - PLAYER_SHADOW_HEIGHT)
-				Vertex[2].dif.a = static_cast<int>(roundf(128.0f * (1.0f - fabs(HitRes->Position[2].y - transform_.pos.y) / PLAYER_SHADOW_HEIGHT)));
+			if (HitRes->Position[2].y > transform_->pos.y - PLAYER_SHADOW_HEIGHT)
+				Vertex[2].dif.a = static_cast<int>(roundf(128.0f * (1.0f - fabs(HitRes->Position[2].y - transform_->pos.y) / PLAYER_SHADOW_HEIGHT)));
 
 			//	ＵＶ値は地面ポリゴンとプレイヤーの相対座標から割り出す
-			Vertex[0].u = (HitRes->Position[0].x - transform_.pos.x) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
-			Vertex[0].v = (HitRes->Position[0].z - transform_.pos.z) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
-			Vertex[1].u = (HitRes->Position[1].x - transform_.pos.x) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
-			Vertex[1].v = (HitRes->Position[1].z - transform_.pos.z) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
-			Vertex[2].u = (HitRes->Position[2].x - transform_.pos.x) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
-			Vertex[2].v = (HitRes->Position[2].z - transform_.pos.z) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
+			Vertex[0].u = (HitRes->Position[0].x - transform_->pos.x) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
+			Vertex[0].v = (HitRes->Position[0].z - transform_->pos.z) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
+			Vertex[1].u = (HitRes->Position[1].x - transform_->pos.x) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
+			Vertex[1].v = (HitRes->Position[1].z - transform_->pos.z) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
+			Vertex[2].u = (HitRes->Position[2].x - transform_->pos.x) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
+			Vertex[2].v = (HitRes->Position[2].z - transform_->pos.z) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
 
 			//	影ポリゴンを描画
 			DrawPolygon3D(Vertex, 1, imgShadow_, TRUE);
@@ -406,49 +339,20 @@ void Player::DrawShadow(void)
 }
 
 
-void Player::UpdateLand(void)
+void Survivor::UpdateLand(void)
 {
 	ProcessMove();
-	if (levelPlayer_ != LEVEL_PL::LV1)
-	{
-		//	飛行処理
-		ProcessFly();
-	}
 	//	ジャンプ処理
 	ProcessJump();
 
 }
 
-void Player::UpdateAir(void)
-{
-	ProcessMoveFly();
-
-}
-
-void Player::ChangeLandAir(void)
-{
-	if (isFly_)
-	{
-		statePlPos_ = STATE_PLPOS::AIR;
-	}
-	else
-	{
-		statePlPos_ = STATE_PLPOS::LAND;
-	}
-}
-
-void Player::ChangeStateInPlay(STATE_INPLAY state)
+void Survivor::ChangeStateInPlay(STATE_INPLAY state)
 {
 	statePlay_ = state;
 }
 
-void Player::ChangeIsFly(bool isFly)
-{
-	isFly_ = isFly;
-}
-
-
-void Player::ProcessMove(void)
+void Survivor::ProcessMove(void)
 {
 
 	auto& ins = InputManager::GetInstance();
@@ -461,8 +365,6 @@ void Player::ProcessMove(void)
 
 	VECTOR dir = AsoUtility::VECTOR_ZERO;
 
-	if (!IsStateInPlay(STATE_INPLAY::FALL_MYSELF))
-	{
 		//	カメラ方向に前進したい
 		if (ins.IsNew(KEY_INPUT_W))
 		{
@@ -490,7 +392,6 @@ void Player::ProcessMove(void)
 			rotRad_ = AsoUtility::Deg2RadD(270.0);
 			dir = cameraRot.GetLeft();
 		}
-	}
 
 	if (!AsoUtility::EqualsVZero(dir)/* && (isJump_ || IsEndLanding())*/) {
 
@@ -507,7 +408,7 @@ void Player::ProcessMove(void)
 		{
 			ChangeStateInPlay(STATE_INPLAY::MOVE);
 		}
-		
+
 	}
 	else
 	{
@@ -520,14 +421,14 @@ void Player::ProcessMove(void)
 
 }
 
-void Player::ProcessJump(void)
+void Survivor::ProcessJump(void)
 {
 
 	auto& ins = InputManager::GetInstance();
 	bool isHit = ins.IsTrgDown(KEY_INPUT_SPACE);
 
 	//	ジャンプ操作(ボタンが押されてるけどジャンプ中か着地してるとき、またはジャンプ中で着地してないとき)
- 	if ((isHit && (isJump_ || IsEndLanding())) || (isJump_ && !IsEndLanding() && !IsStateInPlay(STATE_INPLAY::FALL_MYSELF)))
+	if ((isHit && (isJump_ || IsEndLanding())) || (isJump_ && !IsEndLanding()))
 	{
 
 		if (!isJump_)
@@ -539,19 +440,19 @@ void Player::ProcessJump(void)
 			//	切り取りアニメーション
 			//mAnimationController->Play((int)ANIM_TYPE::JUMP, false, 13.0f, 24.0f);
 			//	無理やりアニメーション
-				ChangeStateInPlay(STATE_INPLAY::JUMP);
-				animationController_->Play((int)ANIM_TYPE::JUMP, true, 13.0f, 25.0f);
-				animationController_->SetEndLoop(23.0f, 25.0f, 5.0f);
+			ChangeStateInPlay(STATE_INPLAY::JUMP);
+			animationController_->Play((int)ANIM_TYPE::JUMP, true, 13.0f, 25.0f);
+			animationController_->SetEndLoop(23.0f, 25.0f, 5.0f);
 
 		}
 
 		isJump_ = true;
 
 		//	ジャンプの入力受付時間をヘラス
- 		stepJump_ += scnMng_.GetDeltaTime();
+		stepJump_ += scnMng_.GetDeltaTime();
 		if (stepJump_ < TIME_JUMP_IN)
 		{
- 			jumpPow_ = VScale(AsoUtility::DIR_U, POW_JUMP);
+			jumpPow_ = VScale(AsoUtility::DIR_U, POW_JUMP);
 		}
 
 	}
@@ -559,167 +460,14 @@ void Player::ProcessJump(void)
 
 }
 
-void Player::ProcessFly(void)
-{
-	auto& ins = InputManager::GetInstance();
-	bool isHit = ins.IsTrgDown(KEY_INPUT_SPACE);
-
-  	if (isHit && (isJump_ && !IsEndLanding()))
-	{
-		ChangeIsFly(true);
-		stepJump_ = TIME_JUMP_IN;
-	}
-
-	if (IsStateInPlay(STATE_INPLAY::FALL_MYSELF) && (ins.IsNew(KEY_INPUT_W) || ins.IsNew(KEY_INPUT_S) || ins.IsNew(KEY_INPUT_D) || ins.IsNew(KEY_INPUT_A)))
-	{
-		ChangeIsFly(true);
-		ChangeStateInPlay(STATE_INPLAY::MOVE);
-	}
-
-}
-
-void Player::ProcessMoveFly(void)
-{
-
-	auto& ins = InputManager::GetInstance();
-
-	//	移動量をゼロ
-	movePow_ = AsoUtility::VECTOR_ZERO;
-
-	//	X軸回転を除いた、重力方向に垂直なカメラ角度(XZ平面)を取得
-	Quaternion cameraRot = SceneManager::GetInstance().GetCamera()->GetQuaRot();
-
-	VECTOR dir = AsoUtility::VECTOR_ZERO;
-
-
-	if (!IsStateInPlay(STATE_INPLAY::FALL_MYSELF))
-	{
-		//	カメラ方向に前進したい
-		if (ins.IsNew(KEY_INPUT_W))
-		{
-			rotRad_ = AsoUtility::Deg2RadD(0.0);
-			dir = cameraRot.GetForward();
-		}
-
-		//	カメラ方向から後退したい
-		if (ins.IsNew(KEY_INPUT_S))
-		{
-			rotRad_ = AsoUtility::Deg2RadD(180.0);
-			dir = cameraRot.GetBack();
-		}
-
-		//	カメラ方向から右側へ移動したい
-		if (ins.IsNew(KEY_INPUT_D))
-		{
-			rotRad_ = AsoUtility::Deg2RadD(90.0);
-			dir = cameraRot.GetRight();
-		}
-
-		//	カメラ方向から左側へ移動したい
-		if (ins.IsNew(KEY_INPUT_A))
-		{
-			rotRad_ = AsoUtility::Deg2RadD(270.0);
-			dir = cameraRot.GetLeft();
-		}
-	}
-
-	//	上方へ移動したい
-	if (ins.IsNew(KEY_INPUT_SPACE))
-	{
-		dir.y = 0.0f;
-		dir = VAdd(dir,AsoUtility::AXIS_Y);
-	}
-
-	if (!AsoUtility::EqualsVZero(dir) && (isJump_ || IsEndLanding())) {
-
-		//	移動処理
-		speed_ = SPEED_FLY;
-
-		moveDir_ = dir;
-		movePow_ = VScale(dir, speed_);
-
-		//	回転処理
-		SetGoalRotate(rotRad_);
-
-		if (statePlPos_ == STATE_PLPOS::AIR)
-		{
-			//	飛んでたらMOVEに
-			ChangeStateInPlay(STATE_INPLAY::MOVE);
-		}
-
-		//上方向にのみいどうしてたら（上昇操作）
-		if (dir.y == 1.0f && AsoUtility::EqualsVZero({ dir.x,0.0f,dir.z }))
-		{
-			ChangeStateInPlay(STATE_INPLAY::FLOAT);
-		}
-	}
-	//移動してなかったら
-	else if (AsoUtility::EqualsVZero(dir) && isFly_)
-	{
-		//	空中Idleに
-		ChangeStateInPlay(STATE_INPLAY::IDLE);
-	}
-
-	//	下降したい
-	if (ins.IsDoubleClick(KEY_INPUT_SPACE))
-	{
-		//	移動ボタンを押しただけでFLYに戻る降下
-		ChangeIsFly(false);
-		statePlay_ = STATE_INPLAY::FALL_MYSELF;
-		gravityPow_ = 30.0f;
-		SetGoalRotate(rotRad_);
-	}
-	else if (ins.IsTrgDown(KEY_INPUT_LCONTROL))
-	{
-		//	FLYボタンを押さないとFLYに戻らない降下
-		ChangeIsFly(false);
-		statePlay_ = STATE_INPLAY::FALL_NATURE;
-		SetGoalRotate(rotRad_);
-	}
-
-}
-
-void Player::SetGoalRotate(double rotRad)
+void Survivor::SetGoalRotate(double rotRad)
 {
 	VECTOR cameraRot;
 	Quaternion axis;
 	Quaternion axis2;
 
-	switch (statePlPos_)
-	{
-	case Player::STATE_PLPOS::LAND:
-
 		cameraRot = SceneManager::GetInstance().GetCamera()->GetAngles();
 		axis = Quaternion::AngleAxis((double)cameraRot.y + rotRad, AsoUtility::AXIS_Y);
-
-		break;
-
-	case Player::STATE_PLPOS::AIR:
-
-		if (IsStateInPlay(STATE_INPLAY::FLOAT) || IsStateInPlay(STATE_INPLAY::FALL_MYSELF) || IsStateInPlay(STATE_INPLAY::FALL_NATURE))
-		{
-			cameraRot = SceneManager::GetInstance().GetCamera()->GetAngles();
-			axis = Quaternion::AngleAxis((double)cameraRot.y + rotRad, AsoUtility::AXIS_Y);
-			break;
-		}
-
-		cameraRot = SceneManager::GetInstance().GetCamera()->GetAngles();
-		axis = Quaternion::AngleAxis((double)cameraRot.y + rotRad, AsoUtility::AXIS_Y);
-
-		cameraRot.x *= cosf(rotRad);
-
-		//もし空中で上昇しながらもXZ平面に移動してたら
-		if (InputManager::GetInstance().IsNew(KEY_INPUT_SPACE) && IsStateInPlay(STATE_INPLAY::MOVE) && statePlPos_ == STATE_PLPOS::AIR)
-		{
-			//	x軸の角度を45度に
-			cameraRot.x = AsoUtility::Deg2RadF(-45.0f);
-		}
-
-		axis2 = Quaternion::AngleAxis((double)cameraRot.x, AsoUtility::AXIS_X);
-		axis = Quaternion::Mult(axis, axis2);
-		break;
-
-	}
 
 	//	現在設定されている回転との角度差を取る
 	double angleDiff = Quaternion::Angle(axis, goalQuaRot_);
@@ -734,7 +482,7 @@ void Player::SetGoalRotate(double rotRad)
 
 }
 
-void Player::Rotate(void)
+void Survivor::Rotate(void)
 {
 
 	stepRotTime_ -= scnMng_.GetDeltaTime();
@@ -744,11 +492,11 @@ void Player::Rotate(void)
 		playerRotY_, goalQuaRot_, (TIME_ROT - stepRotTime_) / TIME_ROT);
 }
 
-void Player::Collision(void)
+void Survivor::Collision(void)
 {
 
 	//	現在座標を起点に移動後座標を決める
-	movedPos_ = VAdd(transform_.pos, movePow_);
+	movedPos_ = VAdd(transform_->pos, movePow_);
 
 	//	衝突(カプセル)
 	CollisionCapsule();
@@ -757,11 +505,11 @@ void Player::Collision(void)
 	CollisionGravity();
 
 	//	移動
-	transform_.pos = movedPos_;
+	transform_->pos = movedPos_;
 
 }
 
-void Player::CollisionGravity(void)
+void Survivor::CollisionGravity(void)
 {
 
 	//	ジャンプ量を加算
@@ -783,7 +531,7 @@ void Player::CollisionGravity(void)
 
 	for (const auto c : colliders_)
 	{
-		
+
 		//	地面との衝突
 		auto hit = MV1CollCheck_Line(
 			c->modelId_, -1, gravHitPosUp_, gravHitPosDown_);
@@ -812,11 +560,11 @@ void Player::CollisionGravity(void)
 
 }
 
-void Player::CollisionCapsule(void)
+void Survivor::CollisionCapsule(void)
 {
 
 	//	カプセルを移動させる
-	Transform trans = Transform(transform_);
+	Transform trans = Transform(*transform_);
 	trans.pos = movedPos_;
 	trans.Update();
 	Capsule cap = Capsule(*capsule_, trans);
@@ -862,15 +610,8 @@ void Player::CollisionCapsule(void)
 
 }
 
-void Player::CalcGravityPow(void)
+void Survivor::CalcGravityPow(void)
 {
-	if (statePlPos_ == STATE_PLPOS::AIR)
-	{
-		//	飛んでるなら重力とジャンプ力を無効に
-		jumpPow_ = AsoUtility::VECTOR_ZERO;
-		gravityPow_ = Planet::DEFAULT_GRAVITY_POW;
-		return;
-	}
 
 	//	重力方向
 	VECTOR dirGravity = AsoUtility::DIR_D;
@@ -892,16 +633,15 @@ void Player::CalcGravityPow(void)
 	}
 }
 
-bool Player::IsEndLanding(void)
+bool Survivor::IsEndLanding(void)
 {
 	bool ret = true;
 
-	//	アニメーションがジャンプではない
-	if (statePlPos_ == STATE_PLPOS::LAND && (!isJump_ && !IsStateInPlay(STATE_INPLAY::FALL_MYSELF)))
+	if(!(statePlay_ == STATE_INPLAY::JUMP) && !(statePlay_ == STATE_INPLAY::FALL))
 	{
 		return ret;
 	}
-
+	
 	//	アニメーションが終了しているか
 	if (animationController_->IsEnd())
 	{

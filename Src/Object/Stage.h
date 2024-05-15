@@ -4,7 +4,8 @@
 class ResourceManager;
 class WarpStar;
 class Planet;
-class Player;
+class Raider;
+class Survivor;
 
 class Stage
 {
@@ -24,7 +25,7 @@ public:
 	};
 
 	//	コンストラクタ
-	Stage(std::weak_ptr<Player> player);
+	Stage(std::weak_ptr<Raider> player, std::weak_ptr<Survivor> survivor);
 
 	//	デストラクタ
 	~Stage(void);
@@ -44,7 +45,8 @@ private:
 	//	シングルトン参照
 	ResourceManager& resMng_;
 
-	std::weak_ptr<Player> player_;
+	std::weak_ptr<Raider> raider_;
+	std::weak_ptr<Survivor> survivor_;
 
 	//	ステージアクティブになっている惑星の情報
 	NAME activeName_;
@@ -53,9 +55,6 @@ private:
 	//	惑星
 	std::map<NAME, Planet*> planets_;
 
-	//	ワープスター
-	std::vector<WarpStar*> warpStars_;
-
 	//	空のPlanet
 	Planet* nullPlanet = nullptr;
 
@@ -63,8 +62,5 @@ private:
 
 	//	最初の惑星
 	void MakeMainStage(void);
-
-	//	ワープスター
-	void MakeWarpStar(void);
 
 };

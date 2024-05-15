@@ -32,7 +32,7 @@ void TitleScene::Init(void)
 
 	//	背景
 	spaceDomeTran_.pos = AsoUtility::VECTOR_ZERO;
-	skyDome_ = std::make_unique<SkyDome>(spaceDomeTran_);
+	skyDome_ = std::make_unique<SkyDome>();
 	skyDome_->Init();
 
 	float size;
@@ -62,7 +62,7 @@ void TitleScene::Init(void)
 	charactor_.Update();
 
 	//	アニメーションの設定
-	std::string path = Application::PATH_MODEL + "Player/";
+	std::string path = Application::PATH_MODEL + "Raider/";
 	animationController_ = std::make_unique<AnimationController>(charactor_.modelId);
 	animationController_->Add(0, path + "Run.mv1", 20.0f);
 	animationController_->Play(0);

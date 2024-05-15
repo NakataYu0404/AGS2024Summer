@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include "Common/Transform.h"
 class ResourceManager;
 class SceneManager;
@@ -20,7 +21,7 @@ public:
 
 	virtual void SetParam(void);
 
-	const Transform& GetTransform(void) const;
+	const std::weak_ptr<Transform> GetTransform(void) const;
 
 protected:
 
@@ -29,6 +30,6 @@ protected:
 	SceneManager& scnMng_;
 
 	//	ƒ‚ƒfƒ‹§Œä‚ÌŠî–{î•ñ
-	Transform transform_;
+	std::shared_ptr<Transform> transform_;
 
 };

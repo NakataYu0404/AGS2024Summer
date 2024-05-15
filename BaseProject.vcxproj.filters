@@ -81,16 +81,10 @@
     <ClCompile Include="Src\Object\Planet.cpp">
       <Filter>ソース ファイル\Object</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Object\Player.cpp">
-      <Filter>ソース ファイル\Object</Filter>
-    </ClCompile>
     <ClCompile Include="Src\Object\SkyDome.cpp">
       <Filter>ソース ファイル\Object</Filter>
     </ClCompile>
     <ClCompile Include="Src\Object\Stage.cpp">
-      <Filter>ソース ファイル\Object</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Object\WarpStar.cpp">
       <Filter>ソース ファイル\Object</Filter>
     </ClCompile>
     <ClCompile Include="Src\Scene\GameScene.cpp">
@@ -132,10 +126,10 @@
     <ClCompile Include="Src\Object\Common\AnimationController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Object\Enemy\EnemyBase.cpp">
+    <ClCompile Include="Src\Object\Player\Survivor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Object\Enemy\Enemy01.cpp">
+    <ClCompile Include="Src\Object\Player\Raider.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -165,9 +159,6 @@
       <Filter>ヘッダー ファイル\Object</Filter>
     </ClInclude>
     <ClInclude Include="Src\Object\Stage.h">
-      <Filter>ヘッダー ファイル\Object</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Object\WarpStar.h">
       <Filter>ヘッダー ファイル\Object</Filter>
     </ClInclude>
     <ClInclude Include="Src\Scene\GameScene.h">
@@ -215,10 +206,10 @@
     <ClInclude Include="Src\Object\Common\AnimationController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Object\Enemy\EnemyBase.h">
+    <ClInclude Include="Src\Object\Player\Survivor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Object\Enemy\Enemy01.h">
+    <ClInclude Include="Src\Object\Player\Raider.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

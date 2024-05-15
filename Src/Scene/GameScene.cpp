@@ -7,10 +7,9 @@
 #include "../Object/Common/Collider.h"
 #include "../Object/SkyDome.h"
 #include "../Object/Stage.h"
-#include "../Object/Player.h"
+#include "../Object/Player/Raider.h"
 #include "../Object/Planet.h"
-#include "../Object/Enemy/EnemyBase.h"
-#include "../Object/Enemy/Enemy01.h"
+#include "../Object/Player/Survivor.h"
 #include "GameScene.h"
 
 GameScene::GameScene(void)
@@ -25,26 +24,31 @@ GameScene::~GameScene(void)
 
 void GameScene::Init(void)
 {
-	//	プレイヤー
-	player_ = std::make_shared<Player>();
-	player_->Init();
+	//	レイダー
+	raider_ = std::make_shared<Raider>();
+	raider_->Init();
+	
+	//	サバイバー
+	survivor_ = std::make_shared<Survivor>();
+	survivor_->Init();
+
+	raider_->SetEnemy(survivor_->GetTransform());
+	survivor_->SetEnemy(raider_->GetTransform());
 
 	//	ステージ
-	stage_ = std::make_unique<Stage>(player_);
+	stage_ = std::make_unique<Stage>(raider_, survivor_);
 	stage_->Init();
 
 	//	ステージの初期設定
 	stage_->ChangeStage(Stage::NAME::MAIN_PLANET);
 
 	//	スカイドーム
-	skyDome_ = std::make_unique<SkyDome>(player_->GetTransform());
+	skyDome_ = std::make_unique<SkyDome>();
 	skyDome_->Init();
 
-	//	スカイドーム
-	enemy_ = std::make_shared<Enemy01>();
-	enemy_->Init();
 
-	SceneManager::GetInstance().GetCamera()->SetFollow(&player_->GetTransform());
+
+	SceneManager::GetInstance().GetCamera()->SetFollow(raider_->GetTransform().lock().get());
 	SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::FOLLOW);
 }
 
@@ -61,8 +65,8 @@ void GameScene::Update(void)
 
 	stage_->Update();
 
-	player_->Update();
-	enemy_->Update();
+	raider_->Update();
+	survivor_->Update();
 }
 
 void GameScene::Draw(void)
@@ -72,8 +76,8 @@ void GameScene::Draw(void)
 	skyDome_->Draw();
 	stage_->Draw();
 	
-	player_->Draw();
-	enemy_->Draw();
+	raider_->Draw();
+	survivor_->Draw();
 
 	//	ヘルプ
 	DrawFormatString(840, 20, 0x000000, "移動　　：WASD");

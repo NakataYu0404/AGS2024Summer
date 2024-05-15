@@ -1,12 +1,13 @@
 #pragma once
 #include <map>
+#include <vector>
 #include <DxLib.h>
-#include "ActorBase.h"
+#include "../ActorBase.h"
 class AnimationController;
 class Collider;
 class Capsule;
 
-class Player : public ActorBase
+class Raider : public ActorBase
 {
 
 public:
@@ -53,11 +54,14 @@ public:
 		FALL_MYSELF,	//	自分で降下してる
 		FALL_NATURE,	//	勝手に落下してる
 		FLOAT,	//	自分で上昇してる
-		ATTACK,
-		SHOT,
 		STUN,
 	};
 
+	enum class STATE_ATTACK
+	{
+		ATTACK,
+		SHOT,
+	};
 
 	enum class LEVEL_PL
 	{
@@ -81,10 +85,10 @@ public:
 	};
 
 	//	コンストラクタ
-	Player(void);
+	Raider(void);
 
 	//	デストラクタ
-	~Player(void);
+	~Raider(void);
 
 	void Init(void) override;
 	void SetParam(void) override;
@@ -101,6 +105,8 @@ public:
 
 	//	現在のSTATE::PLAY中ステートが入力したステートと同じか調べる
 	bool IsStateInPlay(STATE_INPLAY state);
+
+	void SetEnemy(std::weak_ptr<Transform> tran);
 private:
 
 	//	アニメーション
@@ -115,7 +121,7 @@ private:
 	//	STATE::PLAYの中のステート
 	STATE_INPLAY statePlay_;
 
-	LEVEL_PL levelPlayer_;
+	LEVEL_PL levelRaider_;
 
 	//	移動スピード
 	float speed_;
@@ -212,6 +218,10 @@ private:
 	//	着地モーション終了
 	bool IsEndLanding(void);
 
-	Transform followTran_;
+	std::weak_ptr<Transform> enemyTran_;
 
+	float CheckDistance(void);
+
+	//	trueでターゲッティング
+	bool IsTarget(void);
 };

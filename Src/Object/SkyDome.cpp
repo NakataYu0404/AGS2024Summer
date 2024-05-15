@@ -4,7 +4,7 @@
 #include "Common/Transform.h"
 #include "SkyDome.h"
 
-SkyDome::SkyDome(const Transform& syncTransform) : syncTransform_(syncTransform)
+SkyDome::SkyDome(void)
 {
 
 	state_ = STATE::NONE;
@@ -17,24 +17,25 @@ SkyDome::~SkyDome(void)
 
 void SkyDome::Init(void)
 {
+	transform_ = std::make_shared<Transform>();
 
 	//	モデル制御の基本情報
-	transform_.SetModel(
+	transform_->SetModel(
 		resMng_.LoadModelDuplicate(
 			ResourceManager::SRC::SKY_DOME));
-	transform_.scl = SCALES;
-	transform_.pos = AsoUtility::VECTOR_ZERO;
-	transform_.quaRot = Quaternion::Euler(
+	transform_->scl = SCALES;
+	transform_->pos = AsoUtility::VECTOR_ZERO;
+	transform_->quaRot = Quaternion::Euler(
 		0.0f, 
 		AsoUtility::Deg2RadF(180.0f),
 		0.0f
 	);
-	transform_.quaRotLocal = Quaternion();
-	transform_.Update();
+	transform_->quaRotLocal = Quaternion();
+	transform_->Update();
 
 	//	Zバッファ無効(突き抜け対策)
-	MV1SetUseZBuffer(transform_.modelId, false);
-	MV1SetWriteZBuffer(transform_.modelId, false);
+	MV1SetUseZBuffer(transform_->modelId, false);
+	MV1SetWriteZBuffer(transform_->modelId, false);
 
 	//	状態遷移
 	auto sceneId = scnMng_.GetSceneID();
@@ -70,7 +71,7 @@ void SkyDome::Update(void)
 
 void SkyDome::Draw(void)
 {
-	MV1DrawModel(transform_.modelId);
+	MV1DrawModel(transform_->modelId);
 }
 
 void SkyDome::ChangeState(STATE state)
@@ -105,8 +106,7 @@ void SkyDome::ChangeStateStay(void)
 
 void SkyDome::ChangeStateFollow(void)
 {
-	transform_.pos = syncTransform_.pos;
-	transform_.Update();
+	transform_->Update();
 }
 
 void SkyDome::UpdateNone(void)
@@ -119,6 +119,5 @@ void SkyDome::UpdateStay(void)
 
 void SkyDome::UpdateFollow(void)
 {
-	transform_.pos = syncTransform_.pos;
-	transform_.Update();
+	transform_->Update();
 }

@@ -10,14 +10,14 @@ ActorBase::ActorBase(void)
 
 ActorBase::~ActorBase(void)
 {
-	transform_.Release();
+	transform_->Release();
 }
 
 void ActorBase::SetParam(void)
 {
 }
 
-const Transform& ActorBase::GetTransform(void) const
+const std::weak_ptr<Transform> ActorBase::GetTransform(void) const
 {
 	return transform_;
 }
