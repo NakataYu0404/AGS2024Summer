@@ -62,7 +62,7 @@ void TitleScene::Init(void)
 	charactor_.Update();
 
 	//	アニメーションの設定
-	std::string path = Application::PATH_MODEL + "Raider/";
+	std::string path = Application::PATH_MODEL + "Player/";
 	animationController_ = std::make_unique<AnimationController>(charactor_.modelId);
 	animationController_->Add(0, path + "Run.mv1", 20.0f);
 	animationController_->Play(0);

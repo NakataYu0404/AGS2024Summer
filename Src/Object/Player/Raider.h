@@ -220,8 +220,14 @@ private:
 
 	std::weak_ptr<Transform> enemyTran_;
 
+	//	ロックオン
+	void LockOn(void);
+
+	//	キャラクターの距離(軸を考えない)
 	float CheckDistance(void);
 
 	//	trueでターゲッティング
 	bool IsTarget(void);
+
+
 };

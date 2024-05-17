@@ -912,6 +912,20 @@ bool Raider::IsEndLanding(void)
 	return false;
 }
 
+void Raider::LockOn(void)
+{
+	if(!IsTarget())
+	{
+		//	ターゲットできんなら帰る
+		return;
+	}
+
+	//	カメラの中心に一番近いやつに攻撃方向を固定
+	
+
+
+}
+
 float Raider::CheckDistance(void)
 {
 	VECTOR Dif = VSub(transform_->pos, enemyTran_.lock()->pos);
@@ -922,9 +936,10 @@ float Raider::CheckDistance(void)
 
 bool Raider::IsTarget(void)
 {
-	if(CheckDistance() < 300.0f)
+	if(CheckDistance() < 1000.0f)
 	{
-		if(CheckCameraViewClip(enemyTran_.lock()->pos) == TRUE)
+		//この関数がFALSEならカメラ内に入っている
+		if(CheckCameraViewClip(enemyTran_.lock()->pos) == FALSE)
 		{
 			return true;
 		}
