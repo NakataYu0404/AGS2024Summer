@@ -25,7 +25,7 @@ public:
 	};
 
 	//	コンストラクタ
-	Stage(std::weak_ptr<Raider> player, std::weak_ptr<Survivor> survivor);
+	Stage(void);
 
 	//	デストラクタ
 	~Stage(void);
@@ -33,6 +33,8 @@ public:
 	void Init(void);
 	void Update(void);
 	void Draw(void);
+
+	void SetObject(std::weak_ptr<Raider> raider, std::weak_ptr<Survivor> survivor1, std::weak_ptr<Survivor> survivor2, std::weak_ptr<Survivor> survivor3);
 
 	//	ステージ変更
 	void ChangeStage(NAME type);
@@ -46,7 +48,7 @@ private:
 	ResourceManager& resMng_;
 
 	std::weak_ptr<Raider> raider_;
-	std::weak_ptr<Survivor> survivor_;
+	std::weak_ptr<Survivor> survivor_[3];
 
 	//	ステージアクティブになっている惑星の情報
 	NAME activeName_;

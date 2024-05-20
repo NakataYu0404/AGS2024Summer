@@ -29,14 +29,24 @@ void GameScene::Init(void)
 	raider_->Init();
 	
 	//	サバイバー
-	survivor_ = std::make_shared<Survivor>();
-	survivor_->Init();
+	std::weak_ptr<Transform> raiderTran = raider_->GetTransform();
+	std::weak_ptr<Transform> surviveTran[3];
 
-	raider_->SetEnemy(survivor_->GetTransform());
-	survivor_->SetEnemy(raider_->GetTransform());
+	int i = 0;
+	for (int i = 0; i < 3; i++)
+	{
+		survivor_[i] = std::make_shared<Survivor>();
+		survivor_[i]->Init();
+		surviveTran[i] = survivor_[i]->GetTransform();
+		survivor_[i]->SetEnemy(raiderTran);
+	}
+
+	raider_->SetEnemy(surviveTran);
 
 	//	ステージ
-	stage_ = std::make_unique<Stage>(raider_, survivor_);
+	//	TODO:uniqueポインタにはシェアードポインタの配列をそのまま渡せないらしい。arrayを使うんだと
+	stage_ = std::make_unique<Stage>();
+	stage_->SetObject(raider_, survivor_[0], survivor_[1], survivor_[2]);
 	stage_->Init();
 
 	//	ステージの初期設定
@@ -45,8 +55,6 @@ void GameScene::Init(void)
 	//	スカイドーム
 	skyDome_ = std::make_unique<SkyDome>();
 	skyDome_->Init();
-
-
 
 	SceneManager::GetInstance().GetCamera()->SetFollow(raider_->GetTransform().lock().get());
 	SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::FOLLOW);
@@ -66,18 +74,23 @@ void GameScene::Update(void)
 	stage_->Update();
 
 	raider_->Update();
-	survivor_->Update();
+	for (int i = 0; i < 3; i++)
+	{
+		survivor_[i]->Update();
+	}
 }
 
 void GameScene::Draw(void)
 {
-
 	//	背景
 	skyDome_->Draw();
 	stage_->Draw();
 	
 	raider_->Draw();
-	survivor_->Draw();
+	for (int i = 0; i < 3; i++)
+	{
+		survivor_[i]->Draw();
+	}
 
 	//	ヘルプ
 	DrawFormatString(840, 20, 0x000000, "移動　　：WASD");

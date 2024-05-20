@@ -31,5 +31,6 @@ private:
 	//	プレイヤー
 	std::shared_ptr<Raider> raider_;
 
-	std::shared_ptr<Survivor> survivor_;
+	//	1~3人と決まっているのでvectorにしない
+	std::shared_ptr<Survivor> survivor_[3];
 };

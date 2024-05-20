@@ -4,18 +4,17 @@
 #include "../Utility/AsoUtility.h"
 #include "../Manager/SceneManager.h"
 #include "../Manager/ResourceManager.h"
-#include "Raider/Raider.h"
-#include "Survivor/Survivor.h"
+#include "Player/Raider.h"
+#include "Player/Survivor.h"
 #include "Planet.h"
 #include "Common/Collider.h"
 #include "Common/Transform.h"
 #include "Stage.h"
 
-Stage::Stage(std::weak_ptr<Raider> raider, std::weak_ptr<Survivor> survivor)
+Stage::Stage(void)
 	: resMng_(ResourceManager::GetInstance())
 {
-	raider_ = raider;
-	survivor_ = survivor;
+
 	activeName_ = NAME::MAIN_PLANET;
 	step_ = 0.0f;
 }
@@ -62,6 +61,16 @@ void Stage::Draw(void)
 
 }
 
+void Stage::SetObject(std::weak_ptr<Raider> raider, std::weak_ptr<Survivor> survivor1, std::weak_ptr<Survivor> survivor2, std::weak_ptr<Survivor> survivor3)
+{
+	raider_ = raider;
+
+	int i = 0;
+	survivor_[i++] = survivor1;
+	survivor_[i++] = survivor2;
+	survivor_[i] = survivor3;
+}
+
 void Stage::ChangeStage(NAME type)
 {
 
@@ -74,8 +83,11 @@ void Stage::ChangeStage(NAME type)
 	raider_.lock()->ClearCollider();
 	raider_.lock()->AddCollider(activePlanet_->GetTransform().lock()->collider);
 
-	survivor_.lock()->ClearCollider();
-	survivor_.lock()->AddCollider(activePlanet_->GetTransform().lock()->collider);
+	for (int i = 0; i < 3; i++)
+	{
+		survivor_[i].lock()->ClearCollider();
+		survivor_[i].lock()->AddCollider(activePlanet_->GetTransform().lock()->collider);
+	}
 
 	step_ = TIME_STAGE_CHANGE;
 

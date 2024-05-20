@@ -86,6 +86,12 @@ void Raider::SetParam(void)
 	rotRad_ = 0.0f;
 
 	levelRaider_ = LEVEL_PL::LV2;
+
+	for (int i = 0; i < 3; i++)
+	{
+		R2SDistance_[i] = 0.0f;
+	}
+	
 }
 
 void Raider::Update(void)
@@ -105,7 +111,7 @@ void Raider::Update(void)
 	//	モデル制御更新
 	transform_->Update();
 
-	IsTarget();
+	LockOn();
 
 	//	アニメーション再生
 	animationController_->Update();
@@ -148,9 +154,13 @@ bool Raider::IsStateInPlay(STATE_INPLAY state)
 	return statePlay_ == state;
 }
 
-void Raider::SetEnemy(std::weak_ptr<Transform> tran)
+void Raider::SetEnemy(std::weak_ptr<Transform> tran[3])
 {
-	enemyTran_ = tran;
+	for (int i = 0; i < 3; i++)
+	{
+		enemyTran_[i] = tran[i];
+	}
+	
 }
 
 void Raider::InitAnimation(void)
@@ -914,32 +924,35 @@ bool Raider::IsEndLanding(void)
 
 void Raider::LockOn(void)
 {
-	if(!IsTarget())
+	for (int i = 0; i < 3; i++)
 	{
-		//	ターゲットできんなら帰る
-		return;
+		if (!IsTarget(i))
+		{
+			//	ターゲットできんなら帰る
+			return;
+		}
+
+		//	カメラの中心に一番近いやつに攻撃方向を固定
+
+
 	}
-
-	//	カメラの中心に一番近いやつに攻撃方向を固定
-	
-
-
 }
 
-float Raider::CheckDistance(void)
-{
-	VECTOR Dif = VSub(transform_->pos, enemyTran_.lock()->pos);
+float Raider::CheckDistance(int num)
+{	
+	VECTOR Dif = VSub(transform_->pos, enemyTran_[num].lock()->pos);
 	float DistanceXZ = sqrtf(powf(fabsf(Dif.x),2) + powf(fabsf(Dif.z),2));
 	float Distance3D = sqrtf(powf(fabsf(DistanceXZ), 2) + powf(fabsf(Dif.y), 2));
 	return Distance3D;
 }
 
-bool Raider::IsTarget(void)
+bool Raider::IsTarget(int num)
 {
-	if(CheckDistance() < 1000.0f)
+	R2SDistance_[num] = CheckDistance(num);
+	if(R2SDistance_[num] < 1000.0f)
 	{
 		//この関数がFALSEならカメラ内に入っている
-		if(CheckCameraViewClip(enemyTran_.lock()->pos) == FALSE)
+		if(CheckCameraViewClip(enemyTran_[num].lock()->pos) == FALSE)
 		{
 			return true;
 		}

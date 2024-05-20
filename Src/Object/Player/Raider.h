@@ -106,7 +106,7 @@ public:
 	//	現在のSTATE::PLAY中ステートが入力したステートと同じか調べる
 	bool IsStateInPlay(STATE_INPLAY state);
 
-	void SetEnemy(std::weak_ptr<Transform> tran);
+	void SetEnemy(std::weak_ptr<Transform> tran[3]);
 private:
 
 	//	アニメーション
@@ -218,16 +218,17 @@ private:
 	//	着地モーション終了
 	bool IsEndLanding(void);
 
-	std::weak_ptr<Transform> enemyTran_;
+	std::weak_ptr<Transform> enemyTran_[3];
 
 	//	ロックオン
 	void LockOn(void);
 
 	//	キャラクターの距離(軸を考えない)
-	float CheckDistance(void);
+	float CheckDistance(int num);
 
 	//	trueでターゲッティング
-	bool IsTarget(void);
+	bool IsTarget(int num);
 
-
+	//	レイダーからサバイバーへの距離
+	float R2SDistance_[3];
 };
