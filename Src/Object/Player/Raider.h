@@ -1,11 +1,11 @@
 #pragma once
 #include <map>
 #include <vector>
-#include <DxLib.h>
 #include "../ActorBase.h"
 class AnimationController;
 class Collider;
 class Capsule;
+class ShotBase;
 
 class Raider : public ActorBase
 {
@@ -24,6 +24,8 @@ public:
 
 	//	ジャンプ受付時間
 	static constexpr float TIME_JUMP_IN = 0.5f;
+
+	static constexpr int SURVIVOR_NUM = 3;
 
 	//	状態
 	enum class STATE
@@ -106,8 +108,11 @@ public:
 	//	現在のSTATE::PLAY中ステートが入力したステートと同じか調べる
 	bool IsStateInPlay(STATE_INPLAY state);
 
-	void SetEnemy(std::weak_ptr<Transform> tran[3]);
+	void SetEnemy(std::weak_ptr<Transform> tran[SURVIVOR_NUM]);
 private:
+
+	//	ターゲット範囲の最大距離
+	static constexpr float MAX_DISTANCE_TARGET = 1000.0f;
 
 	//	アニメーション
 	AnimationController* animationController_;
@@ -203,6 +208,9 @@ private:
 	void ProcessFly(void);
 	void ProcessMoveFly(void);
 
+	void Attack(void);
+	void MakeShot(void);
+
 	//	回転
 	void SetGoalRotate(double rotRad);
 	void Rotate(void);
@@ -218,17 +226,22 @@ private:
 	//	着地モーション終了
 	bool IsEndLanding(void);
 
-	std::weak_ptr<Transform> enemyTran_[3];
+	std::weak_ptr<Transform> enemyTran_[SURVIVOR_NUM];
 
 	//	ロックオン
 	void LockOn(void);
-
 	//	キャラクターの距離(軸を考えない)
 	float CheckDistance(int num);
-
 	//	trueでターゲッティング
-	bool IsTarget(int num);
+	bool CanTarget(int num);
+
 
 	//	レイダーからサバイバーへの距離
-	float R2SDistance_[3];
+	float R2SDistance_[SURVIVOR_NUM];
+	//	誰かをターゲットしてるか
+	bool isTarget_;
+	//	ターゲッティングされるサバイバーのNo
+	int targetSurvivorNo_;
+
+	std::vector<std::shared_ptr<ShotBase>> shot_;
 };

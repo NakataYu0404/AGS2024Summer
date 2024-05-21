@@ -1,7 +1,6 @@
 #pragma once
 #include <map>
 #include <vector>
-#include <DxLib.h>
 #include "../ActorBase.h"
 class AnimationController;
 class Collider;
@@ -61,8 +60,8 @@ public:
 		VICTORY,
 	};
 
-	//	コンストラクタ
-	Survivor(void);
+	//	コンストラクタ(サバイバーのプレイヤー番号)
+	Survivor(int survivorNum);
 
 	//	デストラクタ
 	~Survivor(void);
@@ -185,6 +184,7 @@ private:
 
 	std::weak_ptr<Transform> enemyTran_;
 
-
+	//	自分のプレイヤーNo.サバイバー内のみ
+	int plNum_;
 };
 

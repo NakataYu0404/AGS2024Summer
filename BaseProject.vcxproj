@@ -38,6 +38,7 @@
     <ClCompile Include="Src\Object\Player\Survivor.cpp" />
     <ClCompile Include="Src\Object\Planet.cpp" />
     <ClCompile Include="Src\Object\Player\Raider.cpp" />
+    <ClCompile Include="Src\Object\Shot\ShotBase.cpp" />
     <ClCompile Include="Src\Object\SkyDome.cpp" />
     <ClCompile Include="Src\Object\Stage.cpp" />
     <ClCompile Include="Src\Scene\GameScene.cpp" />
@@ -66,6 +67,7 @@
     <ClInclude Include="Src\Object\Planet.h" />
     <ClInclude Include="Src\Object\Player.h" />
     <ClInclude Include="Src\Object\Player\Raider.h" />
+    <ClInclude Include="Src\Object\Shot\ShotBase.h" />
     <ClInclude Include="Src\Object\SkyDome.h" />
     <ClInclude Include="Src\Object\Stage.h" />
     <ClInclude Include="Src\Scene\GameScene.h" />

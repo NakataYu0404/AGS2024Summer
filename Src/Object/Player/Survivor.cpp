@@ -1,4 +1,5 @@
 #include <string>
+#include <DxLib.h>
 #include "../../Application.h"
 #include "../../Utility/AsoUtility.h"
 #include "../../Manager/InputManager.h"
@@ -11,8 +12,9 @@
 #include "../Planet.h"
 #include "Survivor.h"
 
-Survivor::Survivor(void)
+Survivor::Survivor(int survivorNum)
 {
+	plNum_ = survivorNum;
 	SetParam();
 }
 
@@ -365,33 +367,56 @@ void Survivor::ProcessMove(void)
 
 	VECTOR dir = AsoUtility::VECTOR_ZERO;
 
-		//	カメラ方向に前進したい
-		if (ins.IsNew(KEY_INPUT_W))
-		{
-			rotRad_ = AsoUtility::Deg2RadD(0.0);
-			dir = cameraRot.GetForward();
-		}
-
-		//	カメラ方向から後退したい
-		if (ins.IsNew(KEY_INPUT_S))
-		{
-			rotRad_ = AsoUtility::Deg2RadD(180.0);
-			dir = cameraRot.GetBack();
-		}
-
-		//	カメラ方向から右側へ移動したい
-		if (ins.IsNew(KEY_INPUT_D))
-		{
-			rotRad_ = AsoUtility::Deg2RadD(90.0);
-			dir = cameraRot.GetRight();
-		}
-
-		//	カメラ方向から左側へ移動したい
-		if (ins.IsNew(KEY_INPUT_A))
-		{
-			rotRad_ = AsoUtility::Deg2RadD(270.0);
-			dir = cameraRot.GetLeft();
-		}
+	//	進みたい方向のキーが押されているか
+	bool pushForward = false;
+	bool pushBack = false;
+	bool pushRight = false;
+	bool pushLeft = false;
+	switch (plNum_)
+	{
+	case 0:
+		pushForward = ins.IsNew(KEY_INPUT_T);
+		pushBack = ins.IsNew(KEY_INPUT_G);
+		pushRight = ins.IsNew(KEY_INPUT_H);
+		pushLeft = ins.IsNew(KEY_INPUT_F);
+		break;
+	case 1:
+		pushForward = ins.IsNew(KEY_INPUT_I);
+		pushBack = ins.IsNew(KEY_INPUT_K);
+		pushRight = ins.IsNew(KEY_INPUT_L);
+		pushLeft = ins.IsNew(KEY_INPUT_J);
+		break;
+	case 2:
+		pushForward = ins.IsNew(KEY_INPUT_NUMPAD8);
+		pushBack = ins.IsNew(KEY_INPUT_NUMPAD5);
+		pushRight = ins.IsNew(KEY_INPUT_NUMPAD6);
+		pushLeft = ins.IsNew(KEY_INPUT_NUMPAD4);
+		break;
+	}
+	//	カメラ方向に前進したい
+	if (pushForward)
+	{
+		rotRad_ = AsoUtility::Deg2RadD(0.0);
+		dir = cameraRot.GetForward();
+	}
+	//	カメラ方向から後退したい
+	if (pushBack)
+	{
+		rotRad_ = AsoUtility::Deg2RadD(180.0);
+		dir = cameraRot.GetBack();
+	}
+	//	カメラ方向から右側へ移動したい
+	if (pushRight)
+	{
+		rotRad_ = AsoUtility::Deg2RadD(90.0);
+		dir = cameraRot.GetRight();
+	}
+	//	カメラ方向から左側へ移動したい
+	if (pushLeft)
+	{
+		rotRad_ = AsoUtility::Deg2RadD(270.0);
+		dir = cameraRot.GetLeft();
+	}
 
 	if (!AsoUtility::EqualsVZero(dir)/* && (isJump_ || IsEndLanding())*/) {
 

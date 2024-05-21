@@ -1,4 +1,5 @@
 #include <vector>
+#include <array>
 #include <map>
 #include <DxLib.h>
 #include "../Utility/AsoUtility.h"
@@ -61,14 +62,11 @@ void Stage::Draw(void)
 
 }
 
-void Stage::SetObject(std::weak_ptr<Raider> raider, std::weak_ptr<Survivor> survivor1, std::weak_ptr<Survivor> survivor2, std::weak_ptr<Survivor> survivor3)
+void Stage::SetObject(std::weak_ptr<Raider> raider, std::array<std::weak_ptr<Survivor>,3> survivor)
 {
 	raider_ = raider;
 
-	int i = 0;
-	survivor_[i++] = survivor1;
-	survivor_[i++] = survivor2;
-	survivor_[i] = survivor3;
+	survivor_ = survivor;
 }
 
 void Stage::ChangeStage(NAME type)

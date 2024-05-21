@@ -1,4 +1,5 @@
 #include <string>
+#include <DxLib.h>
 #include "../../Application.h"
 #include "../../Utility/AsoUtility.h"
 #include "../../Manager/InputManager.h"
@@ -9,6 +10,7 @@
 #include "../Common/Capsule.h"
 #include "../Common/Collider.h"
 #include "../Planet.h"
+#include "../Shot/ShotBase.h"
 #include "Raider.h"
 
 Raider::Raider(void)
@@ -87,11 +89,12 @@ void Raider::SetParam(void)
 
 	levelRaider_ = LEVEL_PL::LV2;
 
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < SURVIVOR_NUM; i++)
 	{
 		R2SDistance_[i] = 0.0f;
 	}
-	
+	isTarget_ = false;
+	targetSurvivorNo_ = SURVIVOR_NUM;
 }
 
 void Raider::Update(void)
@@ -154,9 +157,9 @@ bool Raider::IsStateInPlay(STATE_INPLAY state)
 	return statePlay_ == state;
 }
 
-void Raider::SetEnemy(std::weak_ptr<Transform> tran[3])
+void Raider::SetEnemy(std::weak_ptr<Transform> tran[SURVIVOR_NUM])
 {
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < SURVIVOR_NUM; i++)
 	{
 		enemyTran_[i] = tran[i];
 	}
@@ -306,6 +309,12 @@ void Raider::UpdatePlay(void)
 		break;
 	}
 	ChangeLandAir();
+
+	if (isTarget_ && InputManager::GetInstance().IsClickMouseLeft())
+	{
+		Attack();
+	}
+
 	ChangeStateAnimation();
 
 	//	移動方向に応じた回転
@@ -331,7 +340,7 @@ void Raider::DrawShadow(void)
 	int i;
 	MV1_COLL_RESULT_POLY_DIM HitResDim;
 	MV1_COLL_RESULT_POLY* HitRes;
-	VERTEX3D Vertex[3] = { VERTEX3D(), VERTEX3D(), VERTEX3D() };
+	VERTEX3D Vertex[SURVIVOR_NUM] = { VERTEX3D(), VERTEX3D(), VERTEX3D() };
 	VECTOR SlideVec;
 	int ModelHandle;
 
@@ -690,6 +699,42 @@ void Raider::ProcessMoveFly(void)
 
 }
 
+void Raider::Attack(void)
+{
+
+	if (R2SDistance_[targetSurvivorNo_] < 300.0f)
+	{
+		//	近接
+
+	}
+	else
+	{
+		//	TODO:弾
+		MakeShot();
+		for (auto i : shot_)
+		{
+			i->Update();
+		}
+	}
+}
+
+void Raider::MakeShot(void)
+{
+	//	弾
+	for (auto i : shot_)
+	{
+		if (i->GetAlive() == false)
+		{
+			i->SetPos();
+
+		}
+		return;
+	}
+	std::shared_ptr<ShotBase>shot = std::make_shared<ShotBase>();
+	shot_.push_back(shot);
+
+}
+
 void Raider::SetGoalRotate(double rotRad)
 {
 	VECTOR cameraRot;
@@ -924,18 +969,28 @@ bool Raider::IsEndLanding(void)
 
 void Raider::LockOn(void)
 {
-	for (int i = 0; i < 3; i++)
+	//	フラグ管理のために必要な初期化
+	float tmpKingDistance = MAX_DISTANCE_TARGET;	//	とりあえず入れとくレイダー→サバイバーの一番短い距離
+	targetSurvivorNo_ = SURVIVOR_NUM;	//	ターゲッティングする敵の番号 0~2の場合処理に入ります
+	isTarget_ = false;
+
+	for (int i = 0; i < SURVIVOR_NUM; i++)
 	{
-		if (!IsTarget(i))
+		if (!CanTarget(i))
 		{
 			//	ターゲットできんなら帰る
-			return;
+			continue;
 		}
-
-		//	カメラの中心に一番近いやつに攻撃方向を固定
-
-
+		//	現在一番短いやつとの比較
+		//	ここに入るってことは、MAX_DISTANCE_TARGETよりは絶対に距離が短い
+		if (tmpKingDistance > R2SDistance_[i])
+		{
+			tmpKingDistance = R2SDistance_[i];
+			targetSurvivorNo_ = i;
+		}
 	}
+	isTarget_ = true;
+
 }
 
 float Raider::CheckDistance(int num)
@@ -946,10 +1001,10 @@ float Raider::CheckDistance(int num)
 	return Distance3D;
 }
 
-bool Raider::IsTarget(int num)
+bool Raider::CanTarget(int num)
 {
 	R2SDistance_[num] = CheckDistance(num);
-	if(R2SDistance_[num] < 1000.0f)
+	if(R2SDistance_[num] < MAX_DISTANCE_TARGET)
 	{
 		//この関数がFALSEならカメラ内に入っている
 		if(CheckCameraViewClip(enemyTran_[num].lock()->pos) == FALSE)
@@ -959,3 +1014,4 @@ bool Raider::IsTarget(int num)
 	}
 	return false;
 }
+

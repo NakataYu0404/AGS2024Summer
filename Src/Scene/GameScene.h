@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include "SceneBase.h"
 class Stage;
 class SkyDome;
@@ -32,5 +33,5 @@ private:
 	std::shared_ptr<Raider> raider_;
 
 	//	1~3l‚ÆŒˆ‚Ü‚Á‚Ä‚¢‚é‚Ì‚Åvector‚É‚µ‚È‚¢
-	std::shared_ptr<Survivor> survivor_[3];
+	std::array<std::shared_ptr<Survivor>,3> survivor_;
 };

@@ -34,7 +34,7 @@ public:
 	void Update(void);
 	void Draw(void);
 
-	void SetObject(std::weak_ptr<Raider> raider, std::weak_ptr<Survivor> survivor1, std::weak_ptr<Survivor> survivor2, std::weak_ptr<Survivor> survivor3);
+	void SetObject(std::weak_ptr<Raider> raider, std::array<std::weak_ptr<Survivor>,3> survivor);
 
 	//	ステージ変更
 	void ChangeStage(NAME type);
@@ -48,7 +48,7 @@ private:
 	ResourceManager& resMng_;
 
 	std::weak_ptr<Raider> raider_;
-	std::weak_ptr<Survivor> survivor_[3];
+	std::array<std::weak_ptr<Survivor>,3> survivor_;
 
 	//	ステージアクティブになっている惑星の情報
 	NAME activeName_;

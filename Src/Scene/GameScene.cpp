@@ -32,10 +32,9 @@ void GameScene::Init(void)
 	std::weak_ptr<Transform> raiderTran = raider_->GetTransform();
 	std::weak_ptr<Transform> surviveTran[3];
 
-	int i = 0;
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; survivor_.size(); i++)
 	{
-		survivor_[i] = std::make_shared<Survivor>();
+		survivor_[i] = std::make_shared<Survivor>(i);
 		survivor_[i]->Init();
 		surviveTran[i] = survivor_[i]->GetTransform();
 		survivor_[i]->SetEnemy(raiderTran);
@@ -44,9 +43,10 @@ void GameScene::Init(void)
 	raider_->SetEnemy(surviveTran);
 
 	//	ステージ
-	//	TODO:uniqueポインタにはシェアードポインタの配列をそのまま渡せないらしい。arrayを使うんだと
 	stage_ = std::make_unique<Stage>();
-	stage_->SetObject(raider_, survivor_[0], survivor_[1], survivor_[2]);
+	//	TODO:uniqueポインタにはシェアードポインタの配列をそのまま渡せないらしい。そのまま渡したいならarrayかvectorを使うんだと
+	int i = 0;
+	stage_->SetObject(raider_, survivor_);
 	stage_->Init();
 
 	//	ステージの初期設定
@@ -87,6 +87,7 @@ void GameScene::Draw(void)
 	stage_->Draw();
 	
 	raider_->Draw();
+
 	for (int i = 0; i < 3; i++)
 	{
 		survivor_[i]->Draw();
