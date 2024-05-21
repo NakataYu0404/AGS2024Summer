@@ -157,7 +157,7 @@ bool Raider::IsStateInPlay(STATE_INPLAY state)
 	return statePlay_ == state;
 }
 
-void Raider::SetEnemy(std::weak_ptr<Transform> tran[SURVIVOR_NUM])
+void Raider::SetEnemy(std::array<std::weak_ptr<Transform>, SURVIVOR_NUM> tran)
 {
 	for (int i = 0; i < SURVIVOR_NUM; i++)
 	{
@@ -711,27 +711,27 @@ void Raider::Attack(void)
 	{
 		//	TODO:’e
 		MakeShot();
-		for (auto i : shot_)
-		{
-			i->Update();
-		}
+		//for (auto i : shot_)
+		//{
+		//	i->Update();
+		//}
 	}
 }
 
 void Raider::MakeShot(void)
 {
-	//	’e
-	for (auto i : shot_)
-	{
-		if (i->GetAlive() == false)
-		{
-			i->SetPos();
+	////	’e
+	//for (auto i : shot_)
+	//{
+	//	if (i->GetAlive() == false)
+	//	{
+	//		i->SetPos();
 
-		}
-		return;
-	}
-	std::shared_ptr<ShotBase>shot = std::make_shared<ShotBase>();
-	shot_.push_back(shot);
+	//	}
+	//	return;
+	//}
+	//std::shared_ptr<ShotBase>shot = std::make_shared<ShotBase>();
+	//shot_.push_back(shot);
 
 }
 

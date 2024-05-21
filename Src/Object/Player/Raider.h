@@ -1,11 +1,12 @@
 #pragma once
 #include <map>
 #include <vector>
+#include <array>
 #include "../ActorBase.h"
 class AnimationController;
 class Collider;
 class Capsule;
-class ShotBase;
+//class ShotBase;
 
 class Raider : public ActorBase
 {
@@ -108,7 +109,7 @@ public:
 	//	現在のSTATE::PLAY中ステートが入力したステートと同じか調べる
 	bool IsStateInPlay(STATE_INPLAY state);
 
-	void SetEnemy(std::weak_ptr<Transform> tran[SURVIVOR_NUM]);
+	void SetEnemy(std::array<std::weak_ptr<Transform>, SURVIVOR_NUM> tran);
 private:
 
 	//	ターゲット範囲の最大距離
@@ -226,7 +227,7 @@ private:
 	//	着地モーション終了
 	bool IsEndLanding(void);
 
-	std::weak_ptr<Transform> enemyTran_[SURVIVOR_NUM];
+	std::array<std::weak_ptr<Transform>, SURVIVOR_NUM> enemyTran_;
 
 	//	ロックオン
 	void LockOn(void);
@@ -237,11 +238,11 @@ private:
 
 
 	//	レイダーからサバイバーへの距離
-	float R2SDistance_[SURVIVOR_NUM];
+	 std::array<float, SURVIVOR_NUM> R2SDistance_;
 	//	誰かをターゲットしてるか
 	bool isTarget_;
 	//	ターゲッティングされるサバイバーのNo
 	int targetSurvivorNo_;
 
-	std::vector<std::shared_ptr<ShotBase>> shot_;
+	//std::vector<std::shared_ptr<ShotBase>> shot_;
 };

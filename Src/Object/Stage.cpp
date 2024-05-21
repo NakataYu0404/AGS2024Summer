@@ -1,6 +1,4 @@
 #include <vector>
-#include <array>
-#include <map>
 #include <DxLib.h>
 #include "../Utility/AsoUtility.h"
 #include "../Manager/SceneManager.h"
@@ -62,11 +60,13 @@ void Stage::Draw(void)
 
 }
 
-void Stage::SetObject(std::weak_ptr<Raider> raider, std::array<std::weak_ptr<Survivor>,3> survivor)
+void Stage::SetObject(std::weak_ptr<Raider> raider, std::weak_ptr<Survivor> survivor1, std::weak_ptr<Survivor> survivor2, std::weak_ptr<Survivor> survivor3 )
 {
 	raider_ = raider;
 
-	survivor_ = survivor;
+	survivor_[0] = survivor1;
+	survivor_[1] = survivor2;
+	survivor_[2] = survivor3;
 }
 
 void Stage::ChangeStage(NAME type)

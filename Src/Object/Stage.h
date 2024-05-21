@@ -1,5 +1,6 @@
 #pragma once
 #include <map>
+#include <array>
 #include "Common/Transform.h"
 class ResourceManager;
 class WarpStar;
@@ -34,7 +35,7 @@ public:
 	void Update(void);
 	void Draw(void);
 
-	void SetObject(std::weak_ptr<Raider> raider, std::array<std::weak_ptr<Survivor>,3> survivor);
+	void SetObject(std::weak_ptr<Raider> raider, std::weak_ptr<Survivor> survivor1, std::weak_ptr<Survivor> survivor2, std::weak_ptr<Survivor> survivor3);
 
 	//	ステージ変更
 	void ChangeStage(NAME type);
