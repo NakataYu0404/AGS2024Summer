@@ -23,16 +23,20 @@ void ShotBase::Init(void)
 		Quaternion::Euler({ 0.0f, 0.0f, 0.0f });
 
 	transform_->Update();
-
-	isAlive_ = false;
+	SetParam();
 }
 
 void ShotBase::SetParam(void)
 {
+	isAlive_ = false;
+	moveDir_ = { 0.0f,0.0f,0.0f };
+	speed_ = 30.0f;
 }
 
 void ShotBase::Update(void)
 {
+	transform_->pos = VAdd(transform_->pos, VScale(moveDir_, speed_));
+	transform_->Update();
 }
 
 void ShotBase::Draw(void)

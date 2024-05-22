@@ -1,6 +1,7 @@
 #include <math.h>
 #include <DxLib.h>
 #include <EffekseerForDXLib.h>
+#include "../Application.h"
 #include "../Utility/AsoUtility.h"
 #include "../Manager/InputManager.h"
 #include "../Object/Common/Transform.h"
@@ -22,9 +23,8 @@ Camera::~Camera(void)
 
 void Camera::Init(void)
 {
-
 	ChangeMode(MODE::FIXED_POINT);
-
+	defaultMousePos_ = { Application::SCREEN_SIZE_X/2, Application::SCREEN_SIZE_Y/2 };
 }
 
 void Camera::Update(void)
@@ -173,22 +173,25 @@ void Camera::ProcessRot(void)
 
 	float movePow = 5.0f;
 
+	Vector2 mousePos = { defaultMousePos_.x - ins.GetMousePos().x, defaultMousePos_.y - ins.GetMousePos().y };
+	SetMousePoint(defaultMousePos_.x, defaultMousePos_.y);
+	
 	//	ÉJÉÅÉââÒì]
-	if (ins.IsNew(KEY_INPUT_RIGHT))
+	if (mousePos.x < 0)
 	{
 		//	âEâÒì]
-		angles_.y += AsoUtility::Deg2RadF(1.0f);
+		angles_.y += AsoUtility::Deg2RadF((float)-mousePos.x / 10.0f);
 	}
-	if (ins.IsNew(KEY_INPUT_LEFT))
+	if (mousePos.x > 0)
 	{
 		//	ç∂âÒì]
-		angles_.y += AsoUtility::Deg2RadF(-1.0f);
+		angles_.y += AsoUtility::Deg2RadF((float)-mousePos.x/10.0f);
 	}
 
 	//	è„âÒì]
-	if (ins.IsNew(KEY_INPUT_UP))
+	if (mousePos.y < 0)
 	{
-		angles_.x += AsoUtility::Deg2RadF(1.0f);
+		angles_.x += AsoUtility::Deg2RadF((float)-mousePos.y/10.0f);
 		if (angles_.x > LIMIT_X_UP_RAD)
 		{
 			angles_.x = LIMIT_X_UP_RAD;
@@ -196,15 +199,14 @@ void Camera::ProcessRot(void)
 	}
 
 	//	â∫âÒì]
-	if (ins.IsNew(KEY_INPUT_DOWN))
+	if (mousePos.y > 0)
 	{
-		angles_.x += AsoUtility::Deg2RadF(-1.0f);
+		angles_.x += AsoUtility::Deg2RadF((float)-mousePos.y/10.0f);
 		if (angles_.x < -LIMIT_X_DW_RAD)
 		{
 			angles_.x = -LIMIT_X_DW_RAD;
 		}
 	}
-
 }
 
 void Camera::SetBeforeDrawFixedPoint(void)
@@ -214,13 +216,11 @@ void Camera::SetBeforeDrawFixedPoint(void)
 
 void Camera::SetBeforeDrawFollow(void)
 {
-
 	//	ÉJÉÅÉâëÄçÏ
 	ProcessRot();
 
 	//	í«è]ëŒè€Ç∆ÇÃëäëŒà íuÇìØä˙
 	SyncFollow();
-
 }
 
 void Camera::SetBeforeDrawSelfShot(void)

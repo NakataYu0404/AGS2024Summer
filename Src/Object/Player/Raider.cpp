@@ -311,12 +311,9 @@ void Raider::UpdatePlay(void)
 	default:
 		break;
 	}
+	Attack();
 	ChangeLandAir();
 
-	if (InputManager::GetInstance().IsClickMouseLeft())
-	{
-		Attack();
-	}
 
 	ChangeStateAnimation();
 
@@ -731,21 +728,31 @@ void Raider::ProcessMoveFly(void)
 
 void Raider::Attack(void)
 {
+	if (!InputManager::GetInstance().IsTrgMouseLeft() && statePlay_ != STATE_INPLAY::ATTACK)
+	{
+		return;
+	}
+
 	if (isTarget_)
 	{
-		if (R2SDistance_[targetSurvivorNo_] < MAX_DISTANCE_TARGET/3.0f)
+		if (R2SDistance_[targetSurvivorNo_] < MAX_DISTANCE_TARGET / 3.0f)
 		{
 			//	近接
-
+			goalQuaRot_ = transform_->quaRot.LookRotation(R2SDir(targetSurvivorNo_));
+			statePlay_ = STATE_INPLAY::ATTACK;
+			ChangeIsFly(true);
+			isJump_ = true;
 		}
 		else
 		{
 			MakeShot();
+			statePlay_ = STATE_INPLAY::SHOT;
 		}
 	}
 	else
 	{
 		MakeShot();
+		statePlay_ = STATE_INPLAY::SHOT;
 	}
 
 }
@@ -778,7 +785,7 @@ void Raider::MakeShot(void)
 void Raider::ShotInit(std::shared_ptr<ShotBase> shot)
 {
 	shot->SetPos(transform_->pos);
-	shot->SetDir({ 0.0f, 0.0f, 0.0f });
+	shot->SetDir(ShotDir());
 	shot->SetAlive(true);
 }
 
@@ -1061,5 +1068,36 @@ bool Raider::CanTarget(int num)
 		}
 	}
 	return false;
+}
+
+VECTOR Raider::ShotDir(void)
+{
+	//	自分から相手に向かうベクトルだから、カメラ回転とかは関係ない
+	VECTOR ret;
+
+	if (isTarget_)
+	{
+		VECTOR raiPos = transform_->pos;
+		VECTOR suvPos = enemyTran_[targetSurvivorNo_].lock()->pos;
+
+		ret = AsoUtility::VNormalize(VSub(suvPos, raiPos));
+	}
+	else
+	{
+		ret = SceneManager::GetInstance().GetCamera()->GetForward();
+	}
+
+	return ret;
+}
+
+VECTOR Raider::R2SDir(int num)
+{
+	VECTOR ret;
+
+	VECTOR raiPos = transform_->pos;
+	VECTOR suvPos = enemyTran_[num].lock()->pos;
+
+	ret = AsoUtility::VNormalize(VSub(suvPos, raiPos));
+	return ret;
 }
 

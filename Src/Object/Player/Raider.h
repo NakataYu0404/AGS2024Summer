@@ -60,10 +60,6 @@ public:
 		FALL_NATURE,	//	勝手に落下してる
 		FLOAT,	//	自分で上昇してる
 		STUN,
-	};
-
-	enum class STATE_ATTACK
-	{
 		ATTACK,
 		SHOT,
 	};
@@ -240,10 +236,14 @@ private:
 	float CheckDistance(int num);
 	//	trueでターゲッティング
 	bool CanTarget(int num);
+	VECTOR ShotDir(void);
 
+	VECTOR R2SDir(int num);
 
 	//	レイダーからサバイバーへの距離
-	 std::array<float, SURVIVOR_NUM> R2SDistance_;
+	std::array<float, SURVIVOR_NUM> R2SDistance_;
+	//	レイダーからターゲットしたサバイバーへの向き
+	VECTOR R2TDir_;
 	//	誰かをターゲットしてるか
 	bool isTarget_;
 	//	ターゲッティングされるサバイバーのNo
