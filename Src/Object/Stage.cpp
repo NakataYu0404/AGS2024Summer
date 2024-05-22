@@ -60,13 +60,11 @@ void Stage::Draw(void)
 
 }
 
-void Stage::SetObject(std::weak_ptr<Raider> raider, std::weak_ptr<Survivor> survivor1, std::weak_ptr<Survivor> survivor2, std::weak_ptr<Survivor> survivor3 )
+void Stage::SetObject(std::weak_ptr<Raider> raider, std::array<std::weak_ptr<Survivor>, Raider::SURVIVOR_NUM> survivor)
 {
 	raider_ = raider;
 
-	survivor_[0] = survivor1;
-	survivor_[1] = survivor2;
-	survivor_[2] = survivor3;
+	survivor_ = survivor;
 }
 
 void Stage::ChangeStage(NAME type)

@@ -110,11 +110,12 @@ void Raider::Update(void)
 		UpdatePlay();
 		break;
 	}
-
 	//	モデル制御更新
 	transform_->Update();
+	UpdateShot();
 
 	LockOn();
+
 
 	//	アニメーション再生
 	animationController_->Update();
@@ -126,6 +127,8 @@ void Raider::Draw(void)
 
 	//	モデルの描画
 	MV1DrawModel(transform_->modelId);
+
+	DrawShot();
 
 	//	丸影描画
 	DrawShadow();
@@ -310,7 +313,7 @@ void Raider::UpdatePlay(void)
 	}
 	ChangeLandAir();
 
-	if (isTarget_ && InputManager::GetInstance().IsClickMouseLeft())
+	if (InputManager::GetInstance().IsClickMouseLeft())
 	{
 		Attack();
 	}
@@ -329,6 +332,19 @@ void Raider::UpdatePlay(void)
 	//	回転させる
 	transform_->quaRot = playerRotY_;
 
+}
+
+void Raider::UpdateShot(void)
+{
+	for (auto i : shot_)
+	{
+		if (i == nullptr)
+		{
+			return;
+		}
+
+		i->Update();
+	}
 }
 
 void Raider::DrawShadow(void)
@@ -423,6 +439,20 @@ void Raider::DrawShadow(void)
 	//	Ｚバッファを無効にする
 	SetUseZBuffer3D(FALSE);
 
+}
+
+void Raider::DrawShot(void)
+{
+	for(auto i:shot_)
+	{
+		if (i == nullptr)
+		{
+			//	shot_配列の中身がnullの可能性があるのは1番目だけなので、nullを発見したらもうforまわさない
+			return;
+		}
+
+		i->Draw();
+	}
 }
 
 
@@ -701,38 +731,55 @@ void Raider::ProcessMoveFly(void)
 
 void Raider::Attack(void)
 {
-
-	if (R2SDistance_[targetSurvivorNo_] < 300.0f)
+	if (isTarget_)
 	{
-		//	近接
+		if (R2SDistance_[targetSurvivorNo_] < MAX_DISTANCE_TARGET/3.0f)
+		{
+			//	近接
 
+		}
+		else
+		{
+			MakeShot();
+		}
 	}
 	else
 	{
-		//	TODO:弾
 		MakeShot();
-		//for (auto i : shot_)
-		//{
-		//	i->Update();
-		//}
 	}
+
 }
 
 void Raider::MakeShot(void)
 {
-	////	弾
-	//for (auto i : shot_)
-	//{
-	//	if (i->GetAlive() == false)
-	//	{
-	//		i->SetPos();
+	//	弾
+	for (auto i : shot_)
+	{
+		//	iがnullなら抜ける iがnullなのは最初だけ
+		if (i == nullptr)
+		{
+			break;
+		}
+		//	死んだ弾に第二の人生歩ませる
+		if (i->IsAlive() == false)
+		{
+			i->Init();
+			ShotInit(i);	
+			return;
+		}
+	}
+	std::shared_ptr<ShotBase>shot = std::make_shared<ShotBase>();
+	shot->Init();
+	ShotInit(shot);
+	shot_.push_back(shot);
 
-	//	}
-	//	return;
-	//}
-	//std::shared_ptr<ShotBase>shot = std::make_shared<ShotBase>();
-	//shot_.push_back(shot);
+}
 
+void Raider::ShotInit(std::shared_ptr<ShotBase> shot)
+{
+	shot->SetPos(transform_->pos);
+	shot->SetDir({ 0.0f, 0.0f, 0.0f });
+	shot->SetAlive(true);
 }
 
 void Raider::SetGoalRotate(double rotRad)
@@ -969,6 +1016,7 @@ bool Raider::IsEndLanding(void)
 
 void Raider::LockOn(void)
 {
+
 	//	フラグ管理のために必要な初期化
 	float tmpKingDistance = MAX_DISTANCE_TARGET;	//	とりあえず入れとくレイダー→サバイバーの一番短い距離
 	targetSurvivorNo_ = SURVIVOR_NUM;	//	ターゲッティングする敵の番号 0~2の場合処理に入ります
@@ -987,10 +1035,9 @@ void Raider::LockOn(void)
 		{
 			tmpKingDistance = R2SDistance_[i];
 			targetSurvivorNo_ = i;
+			isTarget_ = true;
 		}
 	}
-	isTarget_ = true;
-
 }
 
 float Raider::CheckDistance(int num)
@@ -1007,7 +1054,8 @@ bool Raider::CanTarget(int num)
 	if(R2SDistance_[num] < MAX_DISTANCE_TARGET)
 	{
 		//この関数がFALSEならカメラ内に入っている
-		if(CheckCameraViewClip(enemyTran_[num].lock()->pos) == FALSE)
+		if(CheckCameraViewClip(enemyTran_[num].lock()->pos) == FALSE)	//	TODO:足元座標だけでやってるから、足元が入ってないと画面にキャラがはいってない判定される。頭Posも使うこと
+
 		{
 			return true;
 		}

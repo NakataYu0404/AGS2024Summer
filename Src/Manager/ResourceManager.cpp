@@ -115,6 +115,9 @@ void ResourceManager::Init(void)
 	res = new RES(RES_T::MODEL, PATH_MDL + "Tank/Barrel.mv1");
 	resourcesMap_.emplace(SRC::TANK_BARREL, res);
 
+	res = new RES(RES_T::MODEL, PATH_MDL + "Shot/Shot.mv1");
+	resourcesMap_.emplace(SRC::SHOT, res);
+
 }
 
 void ResourceManager::Release(void)

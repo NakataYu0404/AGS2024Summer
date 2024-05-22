@@ -6,7 +6,7 @@
 class AnimationController;
 class Collider;
 class Capsule;
-//class ShotBase;
+class ShotBase;
 
 class Raider : public ActorBase
 {
@@ -26,6 +26,8 @@ public:
 	//	ジャンプ受付時間
 	static constexpr float TIME_JUMP_IN = 0.5f;
 
+	//	サバイバーの数
+	//	GameSceneのやつを使えた方がいいけど、ヘッダーでインクルードすることになって良くない
 	static constexpr int SURVIVOR_NUM = 3;
 
 	//	状態
@@ -113,7 +115,7 @@ public:
 private:
 
 	//	ターゲット範囲の最大距離
-	static constexpr float MAX_DISTANCE_TARGET = 1000.0f;
+	static constexpr float MAX_DISTANCE_TARGET = 3000.0f;
 
 	//	アニメーション
 	AnimationController* animationController_;
@@ -186,9 +188,11 @@ private:
 	//	更新ステップ
 	void UpdateNone(void);
 	void UpdatePlay(void);
-	
+	void UpdateShot(void);
+
 	//	描画系
 	void DrawShadow(void);
+	void DrawShot(void);
 
 	//	地上、空中別の処理
 	void UpdateLand(void);
@@ -211,6 +215,7 @@ private:
 
 	void Attack(void);
 	void MakeShot(void);
+	void ShotInit(std::shared_ptr<ShotBase> shot);
 
 	//	回転
 	void SetGoalRotate(double rotRad);
@@ -244,5 +249,5 @@ private:
 	//	ターゲッティングされるサバイバーのNo
 	int targetSurvivorNo_;
 
-	//std::vector<std::shared_ptr<ShotBase>> shot_;
+	std::vector<std::shared_ptr<ShotBase>> shot_;
 };

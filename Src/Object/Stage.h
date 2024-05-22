@@ -35,7 +35,7 @@ public:
 	void Update(void);
 	void Draw(void);
 
-	void SetObject(std::weak_ptr<Raider> raider, std::weak_ptr<Survivor> survivor1, std::weak_ptr<Survivor> survivor2, std::weak_ptr<Survivor> survivor3);
+	void SetObject(std::weak_ptr<Raider> raider, std::array<std::weak_ptr<Survivor>, 3> survivor);
 
 	//	ステージ変更
 	void ChangeStage(NAME type);

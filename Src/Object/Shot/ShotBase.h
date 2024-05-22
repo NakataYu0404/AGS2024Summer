@@ -13,12 +13,16 @@ public:
 	virtual void Draw(void) override;
 
 	VECTOR GetPos(void);
-	bool GetAlive(void);
+	bool IsAlive(void);
 	
 	void SetPos(VECTOR pos);
-
+	void SetDir(VECTOR dir);
+	void SetAlive(bool isAlive);
 protected:
 
+	bool isAlive_;
+	float speed_;
+	VECTOR moveDir_;
 
 private:
 

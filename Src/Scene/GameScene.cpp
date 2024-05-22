@@ -31,7 +31,7 @@ void GameScene::Init(void)
 	//	サバイバー
 	std::weak_ptr<Transform> raiderTran = raider_->GetTransform();
 
-	std::array<std::weak_ptr<Transform>, 3> surviveTran;
+	std::array<std::weak_ptr<Transform>, SURVIVOR_NUM> surviveTran;
 
 	for (int i = 0; i < survivor_.size(); i++)
 	{
@@ -45,8 +45,15 @@ void GameScene::Init(void)
 
 	//	ステージ
 	stage_ = std::make_unique<Stage>();
-	//	TODO:uniqueポインタにはシェアードポインタの配列をそのまま渡せないらしい。そのまま渡したいならarrayかvectorを使うんだと
-	stage_->SetObject(raider_, survivor_[0], survivor_[1], survivor_[2]);
+	
+	//	ステージに対して当たり判定付けるオブジェクトを渡すんだけど、sharedptrを配列にしちゃうと、渡すとき勝手にweakptrに変換してくれなくなっちゃうみたい。
+	//	なので、こっちでweak型の配列に移し替えて、それを渡すことにする
+	std::array<std::weak_ptr<Survivor>, SURVIVOR_NUM>tmpSurvivor;
+	for (int i = 0; i < survivor_.size(); i++)
+	{
+		tmpSurvivor[i] = survivor_[i];
+	}
+	stage_->SetObject(raider_, tmpSurvivor);
 	stage_->Init();
 
 	//	ステージの初期設定
@@ -74,7 +81,7 @@ void GameScene::Update(void)
 	stage_->Update();
 
 	raider_->Update();
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < survivor_.size(); i++)
 	{
 		survivor_[i]->Update();
 	}
@@ -88,7 +95,7 @@ void GameScene::Draw(void)
 	
 	raider_->Draw();
 
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < survivor_.size(); i++)
 	{
 		survivor_[i]->Draw();
 	}

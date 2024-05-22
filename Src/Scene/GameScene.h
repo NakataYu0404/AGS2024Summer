@@ -8,7 +8,6 @@ class Survivor;
 
 class GameScene : public SceneBase
 {
-
 public:
 	
 	//	コンストラクタ
@@ -20,6 +19,8 @@ public:
 	void Init(void) override;
 	void Update(void) override;
 	void Draw(void) override;
+
+	static constexpr int SURVIVOR_NUM = 3;
 
 private:
 
@@ -33,5 +34,5 @@ private:
 	std::shared_ptr<Raider> raider_;
 
 	//	1~3人と決まっているのでvectorにしない
-	std::array<std::shared_ptr<Survivor>,3> survivor_;
+	std::array<std::shared_ptr<Survivor>, SURVIVOR_NUM> survivor_;
 };
