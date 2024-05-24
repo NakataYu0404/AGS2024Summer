@@ -108,10 +108,14 @@ public:
 	bool IsStateInPlay(STATE_INPLAY state);
 
 	void SetEnemy(std::array<std::weak_ptr<Transform>, SURVIVOR_NUM> tran);
+
+	bool IsWaitNow(void);
+		
 private:
 
 	//	ターゲット範囲の最大距離
 	static constexpr float MAX_DISTANCE_TARGET = 3000.0f;
+	static constexpr float MAX_DISTANCE_ATTACKTARGET = MAX_DISTANCE_TARGET / 3.0f;
 
 	//	アニメーション
 	AnimationController* animationController_;
@@ -233,7 +237,7 @@ private:
 	//	ロックオン
 	void LockOn(void);
 	//	キャラクターの距離(軸を考えない)
-	float CheckDistance(int num);
+	float R2SDistance(int num);
 	//	trueでターゲッティング
 	bool CanTarget(int num);
 	VECTOR ShotDir(void);
@@ -250,4 +254,9 @@ private:
 	int targetSurvivorNo_;
 
 	std::vector<std::shared_ptr<ShotBase>> shot_;
+
+	//	待機フレーム(隙)
+	float waitFlame_;
+	void SetWaitFlame(float flame = -1);
+	void WaitFlame(void);
 };

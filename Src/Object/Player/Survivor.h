@@ -24,6 +24,8 @@ public:
 	//	ƒWƒƒƒ“ƒvó•tŠÔ
 	static constexpr float TIME_JUMP_IN = 0.5f;
 
+	static constexpr int FRAME_HEAD = 6;
+
 	//	ó‘Ô
 	enum class STATE
 	{

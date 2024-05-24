@@ -29,6 +29,7 @@ void Camera::Init(void)
 
 void Camera::Update(void)
 {
+	SetMousePoint(defaultMousePos_.x, defaultMousePos_.y);
 }
 
 void Camera::SetBeforeDraw(void)
@@ -170,11 +171,9 @@ void Camera::ProcessRot(void)
 {
 
 	auto& ins = InputManager::GetInstance();
-
 	float movePow = 5.0f;
 
 	Vector2 mousePos = { defaultMousePos_.x - ins.GetMousePos().x, defaultMousePos_.y - ins.GetMousePos().y };
-	SetMousePoint(defaultMousePos_.x, defaultMousePos_.y);
 	
 	//	ƒJƒƒ‰‰ñ“]
 	if (mousePos.x < 0)

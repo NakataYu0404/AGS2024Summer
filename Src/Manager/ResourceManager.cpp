@@ -30,11 +30,11 @@ void ResourceManager::Init(void)
 	static std::string PATH_EFF = Application::PATH_EFFECT;
 
 	Resource* res;
-
+	
 	//	ƒ^ƒCƒgƒ‹‰æ‘œ
 	res = new RES(RES_T::IMG, PATH_IMG + "Title.png");
 	resourcesMap_.emplace(SRC::TITLE, res);
-
+	
 	//	PushSpace
 	res = new RES(RES_T::IMG, PATH_IMG + "PushSpace.png");
 	resourcesMap_.emplace(SRC::PUSH_SPACE, res);
@@ -117,7 +117,6 @@ void ResourceManager::Init(void)
 
 	res = new RES(RES_T::MODEL, PATH_MDL + "Shot/Shot.mv1");
 	resourcesMap_.emplace(SRC::SHOT, res);
-
 }
 
 void ResourceManager::Release(void)

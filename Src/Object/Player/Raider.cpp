@@ -169,6 +169,16 @@ void Raider::SetEnemy(std::array<std::weak_ptr<Transform>, SURVIVOR_NUM> tran)
 	
 }
 
+bool Raider::IsWaitNow(void)
+{
+	if (waitFlame_ <= 0.0f)
+	{
+		return true;
+	}
+
+	return false;
+}
+
 void Raider::InitAnimation(void)
 {
 
@@ -333,7 +343,7 @@ void Raider::UpdatePlay(void)
 
 void Raider::UpdateShot(void)
 {
-	for (auto i : shot_)
+	for (auto& i : shot_)
 	{
 		if (i == nullptr)
 		{
@@ -440,7 +450,7 @@ void Raider::DrawShadow(void)
 
 void Raider::DrawShot(void)
 {
-	for(auto i:shot_)
+	for(auto& i:shot_)
 	{
 		if (i == nullptr)
 		{
@@ -468,8 +478,10 @@ void Raider::UpdateLand(void)
 
 void Raider::UpdateAir(void)
 {
-	ProcessMoveFly();
-
+	if (statePlay_ != STATE_INPLAY::ATTACK)
+	{
+		ProcessMoveFly();
+	}
 }
 
 void Raider::ChangeLandAir(void)
@@ -576,7 +588,6 @@ void Raider::ProcessJump(void)
 	//	ジャンプ操作(ボタンが押されてるけどジャンプ中か着地してるとき、またはジャンプ中で着地してないとき)
  	if ((isHit && (isJump_ || IsEndLanding())) || (isJump_ && !IsEndLanding() && !IsStateInPlay(STATE_INPLAY::FALL_MYSELF)))
 	{
-
 		if (!isJump_)
 		{
 			//	制御無しジャンプ
@@ -585,11 +596,11 @@ void Raider::ProcessJump(void)
 			//mAnimationController->Play((int)ANIM_TYPE::JUMP, false);
 			//	切り取りアニメーション
 			//mAnimationController->Play((int)ANIM_TYPE::JUMP, false, 13.0f, 24.0f);
+			
 			//	無理やりアニメーション
-				ChangeStateInPlay(STATE_INPLAY::JUMP);
-				animationController_->Play((int)ANIM_TYPE::JUMP, true, 13.0f, 25.0f);
-				animationController_->SetEndLoop(23.0f, 25.0f, 5.0f);
-
+			ChangeStateInPlay(STATE_INPLAY::JUMP);
+			animationController_->Play((int)ANIM_TYPE::JUMP, true, 13.0f, 25.0f);
+			animationController_->SetEndLoop(23.0f, 25.0f, 5.0f);
 		}
 
 		isJump_ = true;
@@ -600,10 +611,7 @@ void Raider::ProcessJump(void)
 		{
  			jumpPow_ = VScale(AsoUtility::DIR_U, POW_JUMP);
 		}
-
 	}
-
-
 }
 
 void Raider::ProcessFly(void)
@@ -733,9 +741,17 @@ void Raider::Attack(void)
 		return;
 	}
 
-	if (isTarget_)
+	if (!isTarget_)
 	{
-		if (R2SDistance_[targetSurvivorNo_] < MAX_DISTANCE_TARGET / 3.0f)
+		MakeShot();
+		statePlay_ = STATE_INPLAY::SHOT;
+		return;
+	}
+
+
+	if (R2SDistance_[targetSurvivorNo_] < MAX_DISTANCE_ATTACKTARGET)
+	{
+		if (statePlay_ != STATE_INPLAY::ATTACK)
 		{
 			//	近接
 			goalQuaRot_ = transform_->quaRot.LookRotation(R2SDir(targetSurvivorNo_));
@@ -745,8 +761,9 @@ void Raider::Attack(void)
 		}
 		else
 		{
-			MakeShot();
-			statePlay_ = STATE_INPLAY::SHOT;
+			//	既にアタック状態に入ってる
+			transform_->pos = VAdd(transform_->pos, VScale(transform_->GetForward(), speed_ * 1.5f));
+			goalQuaRot_ = transform_->quaRot.Slerp(transform_->quaRot, transform_->quaRot.LookRotation(R2SDir(targetSurvivorNo_)), (TIME_ROT - stepRotTime_) / TIME_ROT);
 		}
 	}
 	else
@@ -754,13 +771,12 @@ void Raider::Attack(void)
 		MakeShot();
 		statePlay_ = STATE_INPLAY::SHOT;
 	}
-
 }
 
 void Raider::MakeShot(void)
 {
 	//	弾
-	for (auto i : shot_)
+	for (auto& i : shot_)
 	{
 		//	iがnullなら抜ける iがnullなのは最初だけ
 		if (i == nullptr)
@@ -1047,7 +1063,7 @@ void Raider::LockOn(void)
 	}
 }
 
-float Raider::CheckDistance(int num)
+float Raider::R2SDistance(int num)
 {	
 	VECTOR Dif = VSub(transform_->pos, enemyTran_[num].lock()->pos);
 	float DistanceXZ = sqrtf(powf(fabsf(Dif.x),2) + powf(fabsf(Dif.z),2));
@@ -1057,12 +1073,12 @@ float Raider::CheckDistance(int num)
 
 bool Raider::CanTarget(int num)
 {
-	R2SDistance_[num] = CheckDistance(num);
+	R2SDistance_[num] = R2SDistance(num);
 	if(R2SDistance_[num] < MAX_DISTANCE_TARGET)
 	{
 		//この関数がFALSEならカメラ内に入っている
-		if(CheckCameraViewClip(enemyTran_[num].lock()->pos) == FALSE)	//	TODO:足元座標だけでやってるから、足元が入ってないと画面にキャラがはいってない判定される。頭Posも使うこと
-
+		if(CheckCameraViewClip(enemyTran_[num].lock()->pos) == FALSE || 
+			CheckCameraViewClip(enemyTran_[num].lock()->headPos) == FALSE)
 		{
 			return true;
 		}
@@ -1099,5 +1115,23 @@ VECTOR Raider::R2SDir(int num)
 
 	ret = AsoUtility::VNormalize(VSub(suvPos, raiPos));
 	return ret;
+}
+
+//	TODO:待ち状態かどうかをチェックするための関数になってるけど、移動とか、攻撃とかいろんなのに使いたいから、汎用性を増させる
+//			時間が切れるまでこの処理しかしないのはあんまり
+void Raider::SetWaitFlame(float flame)
+{
+	if (flame < 0.0f)
+	{
+		return;
+	}
+
+	waitFlame_ = flame;
+}
+
+void Raider::WaitFlame(void)
+{
+	float delta = SceneManager::GetInstance().GetDeltaTime();
+	waitFlame_ -= delta;
 }
 
