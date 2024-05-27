@@ -64,7 +64,7 @@ void Stage::SetObject(std::weak_ptr<Raider> raider, std::array<std::weak_ptr<Sur
 {
 	raider_ = raider;
 
-	survivor_ = survivor;
+	survivors_ = survivor;
 }
 
 void Stage::ChangeStage(NAME type)
@@ -81,8 +81,8 @@ void Stage::ChangeStage(NAME type)
 
 	for (int i = 0; i < 3; i++)
 	{
-		survivor_[i].lock()->ClearCollider();
-		survivor_[i].lock()->AddCollider(activePlanet_->GetTransform().lock()->collider);
+		survivors_[i].lock()->ClearCollider();
+		survivors_[i].lock()->AddCollider(activePlanet_->GetTransform().lock()->collider);
 	}
 
 	step_ = TIME_STAGE_CHANGE;

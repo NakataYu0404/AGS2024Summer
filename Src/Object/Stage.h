@@ -45,25 +45,25 @@ public:
 
 private:
 
+	//	最初の惑星
+	void MakeMainStage(void);
+
 	//	シングルトン参照
 	ResourceManager& resMng_;
 
 	std::weak_ptr<Raider> raider_;
-	std::array<std::weak_ptr<Survivor>,3> survivor_;
+	std::array<std::weak_ptr<Survivor>,3> survivors_;
+
+	//	空のPlanet
+	Planet* nullPlanet = nullptr;
+
+	//	惑星
+	std::map<NAME, Planet*> planets_;
 
 	//	ステージアクティブになっている惑星の情報
 	NAME activeName_;
 	Planet* activePlanet_;
 
-	//	惑星
-	std::map<NAME, Planet*> planets_;
-
-	//	空のPlanet
-	Planet* nullPlanet = nullptr;
-
 	float step_;
-
-	//	最初の惑星
-	void MakeMainStage(void);
 
 };

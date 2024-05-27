@@ -20,8 +20,6 @@ Raider::Raider(void)
 
 Raider::~Raider(void)
 {
-	delete capsule_;
-	delete animationController_;
 }
 
 void Raider::Init(void)
@@ -30,7 +28,7 @@ void Raider::Init(void)
 
 	//	モデルの基本設定
 	transform_->SetModel(resMng_.LoadModelDuplicate(
-		ResourceManager::SRC::PLAYER));
+		ResourceManager::SRC::RAIDER));
 	transform_->scl = AsoUtility::VECTOR_ONE;
 	transform_->pos = { 0.0f, -30.0f, 0.0f };
 	transform_->quaRot = Quaternion();
@@ -41,7 +39,7 @@ void Raider::Init(void)
 	InitAnimation();
 
 	//	カプセルコライダ
-	capsule_ = new Capsule(*transform_);
+	capsule_ = std::make_shared<Capsule>(*transform_);
 	capsule_->SetLocalPosTop({ 0.0f, 110.0f, 0.0f });
 	capsule_->SetLocalPosDown({ 0.0f, 30.0f, 0.0f });
 	capsule_->SetRadius(20.0f);
@@ -95,6 +93,8 @@ void Raider::SetParam(void)
 	}
 	isTarget_ = false;
 	targetSurvivorNo_ = SURVIVOR_NUM;
+
+	exeTarget_ = TARGET::NONE;
 }
 
 void Raider::Update(void)
@@ -136,35 +136,16 @@ void Raider::Draw(void)
 	DrawFormatString(0, 0, 0x000000, "jumppowX:%fjumppowY:%fjumppowZ:%f", jumpPow_.x, jumpPow_.y, jumpPow_.z);
 }
 
-void Raider::AddCollider(Collider* collider)
-{
-	colliders_.push_back(collider);
-}
-
-void Raider::ClearCollider(void)
-{
-	colliders_.clear();
-}
-
-const Capsule* Raider::GetCapsule(void) const
-{
-	return capsule_;
-}
-
-void Raider::AddCapsule(Capsule* capsule)
-{
-}
-
 bool Raider::IsStateInPlay(STATE_INPLAY state)
 {
 	return statePlay_ == state;
 }
 
-void Raider::SetEnemy(std::array<std::weak_ptr<Transform>, SURVIVOR_NUM> tran)
+void Raider::SetSurvivor(std::array<std::weak_ptr<Transform>, SURVIVOR_NUM> tran)
 {
 	for (int i = 0; i < SURVIVOR_NUM; i++)
 	{
-		enemyTran_[i] = tran[i];
+		survivorTran_[i] = tran[i];
 	}
 	
 }
@@ -183,7 +164,7 @@ void Raider::InitAnimation(void)
 {
 
 	std::string path = Application::PATH_MODEL + "Player/";
-	animationController_ = new AnimationController(transform_->modelId);
+	animationController_ = std::make_shared<AnimationController>(transform_->modelId);
 	animationController_->Add((int)ANIM_TYPE::IDLE, path + "Idle.mv1", 20.0f);
 	animationController_->Add((int)ANIM_TYPE::RUN, path + "Run.mv1", 20.0f);
 	animationController_->Add((int)ANIM_TYPE::FAST_RUN, path + "FastRun.mv1", 20.0f);
@@ -196,33 +177,6 @@ void Raider::InitAnimation(void)
 
 	animationController_->Play((int)ANIM_TYPE::IDLE);
 
-}
-
-void Raider::ChangeState(STATE state)
-{
-
-	//	状態変更
-	state_ = state;
-
-	//	各状態遷移の初期処理
-	switch (state_)
-	{
-	case Raider::STATE::NONE:
-		ChangeStateNone();
-		break;
-	case Raider::STATE::PLAY:
-		ChangeStatePlay();
-		break;
-	}
-
-}
-
-void Raider::ChangeStateNone(void)
-{
-}
-
-void Raider::ChangeStatePlay(void)
-{
 }
 
 void Raider::ChangeStateAnimation(void)
@@ -304,10 +258,6 @@ void Raider::ChangeStateAnimation(void)
 	}
 }
 
-void Raider::UpdateNone(void)
-{
-}
-
 void Raider::UpdatePlay(void)
 {
 	switch (statePlPos_)
@@ -352,100 +302,6 @@ void Raider::UpdateShot(void)
 
 		i->Update();
 	}
-}
-
-void Raider::DrawShadow(void)
-{
-
-	float PLAYER_SHADOW_HEIGHT = 300.0f;
-	float PLAYER_SHADOW_SIZE = 30.0f;
-
-	int i;
-	MV1_COLL_RESULT_POLY_DIM HitResDim;
-	MV1_COLL_RESULT_POLY* HitRes;
-	VERTEX3D Vertex[SURVIVOR_NUM] = { VERTEX3D(), VERTEX3D(), VERTEX3D() };
-	VECTOR SlideVec;
-	int ModelHandle;
-
-	//	ライティングを無効にする
-	SetUseLighting(FALSE);
-
-	//	Ｚバッファを有効にする
-	SetUseZBuffer3D(TRUE);
-
-	//	テクスチャアドレスモードを CLAMP にする( テクスチャの端より先は端のドットが延々続く )
-	SetTextureAddressMode(DX_TEXADDRESS_CLAMP);
-
-	//	影を落とすモデルの数だけ繰り返し
-	for (const auto c : colliders_)
-	{
-
-		//	チェックするモデルは、jが0の時はステージモデル、1以上の場合はコリジョンモデル
-		ModelHandle = c->modelId_;
-
-		//	プレイヤーの直下に存在する地面のポリゴンを取得
-		HitResDim = MV1CollCheck_Capsule(
-			ModelHandle, -1,
-			transform_->pos, VAdd(transform_->pos, { 0.0f, -PLAYER_SHADOW_HEIGHT, 0.0f }), PLAYER_SHADOW_SIZE);
-
-		//	頂点データで変化が無い部分をセット
-		Vertex[0].dif = GetColorU8(255, 255, 255, 255);
-		Vertex[0].spc = GetColorU8(0, 0, 0, 0);
-		Vertex[0].su = 0.0f;
-		Vertex[0].sv = 0.0f;
-		Vertex[1] = Vertex[0];
-		Vertex[2] = Vertex[0];
-
-		//	球の直下に存在するポリゴンの数だけ繰り返し
-		HitRes = HitResDim.Dim;
-		for (i = 0; i < HitResDim.HitNum; i++, HitRes++)
-		{
-			//	ポリゴンの座標は地面ポリゴンの座標
-			Vertex[0].pos = HitRes->Position[0];
-			Vertex[1].pos = HitRes->Position[1];
-			Vertex[2].pos = HitRes->Position[2];
-
-			//	ちょっと持ち上げて重ならないようにする
-			SlideVec = VScale(HitRes->Normal, 0.5f);
-			Vertex[0].pos = VAdd(Vertex[0].pos, SlideVec);
-			Vertex[1].pos = VAdd(Vertex[1].pos, SlideVec);
-			Vertex[2].pos = VAdd(Vertex[2].pos, SlideVec);
-
-			//	ポリゴンの不透明度を設定する
-			Vertex[0].dif.a = 0;
-			Vertex[1].dif.a = 0;
-			Vertex[2].dif.a = 0;
-			if (HitRes->Position[0].y > transform_->pos.y - PLAYER_SHADOW_HEIGHT)
-				Vertex[0].dif.a = static_cast<int>(roundf(128.0f * (1.0f - fabs(HitRes->Position[0].y - transform_->pos.y) / PLAYER_SHADOW_HEIGHT)));
-
-			if (HitRes->Position[1].y > transform_->pos.y - PLAYER_SHADOW_HEIGHT)
-				Vertex[1].dif.a = static_cast<int>(roundf(128.0f * (1.0f - fabs(HitRes->Position[1].y - transform_->pos.y) / PLAYER_SHADOW_HEIGHT)));
-
-			if (HitRes->Position[2].y > transform_->pos.y - PLAYER_SHADOW_HEIGHT)
-				Vertex[2].dif.a = static_cast<int>(roundf(128.0f * (1.0f - fabs(HitRes->Position[2].y - transform_->pos.y) / PLAYER_SHADOW_HEIGHT)));
-
-			//	ＵＶ値は地面ポリゴンとプレイヤーの相対座標から割り出す
-			Vertex[0].u = (HitRes->Position[0].x - transform_->pos.x) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
-			Vertex[0].v = (HitRes->Position[0].z - transform_->pos.z) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
-			Vertex[1].u = (HitRes->Position[1].x - transform_->pos.x) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
-			Vertex[1].v = (HitRes->Position[1].z - transform_->pos.z) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
-			Vertex[2].u = (HitRes->Position[2].x - transform_->pos.x) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
-			Vertex[2].v = (HitRes->Position[2].z - transform_->pos.z) / (PLAYER_SHADOW_SIZE * 2.0f) + 0.5f;
-
-			//	影ポリゴンを描画
-			DrawPolygon3D(Vertex, 1, imgShadow_, TRUE);
-		}
-
-		//	検出した地面ポリゴン情報の後始末
-		MV1CollResultPolyDimTerminate(HitResDim);
-	}
-
-	//	ライティングを有効にする
-	SetUseLighting(TRUE);
-
-	//	Ｚバッファを無効にする
-	SetUseZBuffer3D(FALSE);
-
 }
 
 void Raider::DrawShot(void)
@@ -860,33 +716,6 @@ void Raider::SetGoalRotate(double rotRad)
 
 }
 
-void Raider::Rotate(void)
-{
-
-	stepRotTime_ -= scnMng_.GetDeltaTime();
-
-	//	回転の球面補間
-	playerRotY_ = Quaternion::Slerp(
-		playerRotY_, goalQuaRot_, (TIME_ROT - stepRotTime_) / TIME_ROT);
-}
-
-void Raider::Collision(void)
-{
-
-	//	現在座標を起点に移動後座標を決める
-	movedPos_ = VAdd(transform_->pos, movePow_);
-
-	//	衝突(カプセル)
-	CollisionCapsule();
-
-	//	衝突(重力)
-	CollisionGravity();
-
-	//	移動
-	transform_->pos = movedPos_;
-
-}
-
 void Raider::CollisionGravity(void)
 {
 
@@ -938,55 +767,6 @@ void Raider::CollisionGravity(void)
 
 }
 
-void Raider::CollisionCapsule(void)
-{
-
-	//	カプセルを移動させる
-	Transform trans = Transform(*transform_);
-	trans.pos = movedPos_;
-	trans.Update();
-	Capsule cap = Capsule(*capsule_, trans);
-	//	カプセルとの衝突判定
-	for (const auto c : colliders_)
-	{
-
-		auto hits = MV1CollCheck_Capsule(
-			c->modelId_, -1,
-			cap.GetPosTop(), cap.GetPosDown(), cap.GetRadius());
-
-		for (int i = 0; i < hits.HitNum; i++)
-		{
-
-			auto hit = hits.Dim[i];
-
-			for (int tryCnt = 0; tryCnt < 10; tryCnt++)
-			{
-
-				int pHit = HitCheck_Capsule_Triangle(
-					cap.GetPosTop(), cap.GetPosDown(), cap.GetRadius(),
-					hit.Position[0], hit.Position[1], hit.Position[2]);
-
-				if (pHit)
-				{
-					movedPos_ = VAdd(movedPos_, VScale(hit.Normal, 2.0f));
-					//	カプセルを移動させる
-					trans.pos = movedPos_;
-					trans.Update();
-					continue;
-				}
-
-				break;
-
-			}
-
-		}
-
-		//	検出した地面ポリゴン情報の後始末
-		MV1CollResultPolyDimTerminate(hits);
-
-	}
-
-}
 
 void Raider::CalcGravityPow(void)
 {
@@ -1063,22 +843,14 @@ void Raider::LockOn(void)
 	}
 }
 
-float Raider::R2SDistance(int num)
-{	
-	VECTOR Dif = VSub(transform_->pos, enemyTran_[num].lock()->pos);
-	float DistanceXZ = sqrtf(powf(fabsf(Dif.x),2) + powf(fabsf(Dif.z),2));
-	float Distance3D = sqrtf(powf(fabsf(DistanceXZ), 2) + powf(fabsf(Dif.y), 2));
-	return Distance3D;
-}
-
 bool Raider::CanTarget(int num)
 {
-	R2SDistance_[num] = R2SDistance(num);
+	R2SDistance_[num] = Myself2OtherDistance(survivorTran_[num]);
 	if(R2SDistance_[num] < MAX_DISTANCE_TARGET)
 	{
 		//この関数がFALSEならカメラ内に入っている
-		if(CheckCameraViewClip(enemyTran_[num].lock()->pos) == FALSE || 
-			CheckCameraViewClip(enemyTran_[num].lock()->headPos) == FALSE)
+		if(CheckCameraViewClip(survivorTran_[num].lock()->pos) == FALSE || 
+			CheckCameraViewClip(survivorTran_[num].lock()->headPos) == FALSE)
 		{
 			return true;
 		}
@@ -1094,7 +866,7 @@ VECTOR Raider::ShotDir(void)
 	if (isTarget_)
 	{
 		VECTOR raiPos = transform_->pos;
-		VECTOR suvPos = enemyTran_[targetSurvivorNo_].lock()->pos;
+		VECTOR suvPos = survivorTran_[targetSurvivorNo_].lock()->pos;
 
 		ret = AsoUtility::VNormalize(VSub(suvPos, raiPos));
 	}
@@ -1111,7 +883,7 @@ VECTOR Raider::R2SDir(int num)
 	VECTOR ret;
 
 	VECTOR raiPos = transform_->pos;
-	VECTOR suvPos = enemyTran_[num].lock()->pos;
+	VECTOR suvPos = survivorTran_[num].lock()->pos;
 
 	ret = AsoUtility::VNormalize(VSub(suvPos, raiPos));
 	return ret;

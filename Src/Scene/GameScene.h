@@ -5,6 +5,7 @@ class Stage;
 class SkyDome;
 class Raider;
 class Survivor;
+class Victim;
 
 class GameScene : public SceneBase
 {
@@ -30,9 +31,12 @@ private:
 	//	スカイドーム
 	std::unique_ptr<SkyDome> skyDome_;
 
-	//	プレイヤー
+	//	レイダー
 	std::shared_ptr<Raider> raider_;
 
-	//	1~3人と決まっているのでvectorにしない
-	std::array<std::shared_ptr<Survivor>, SURVIVOR_NUM> survivor_;
+	//	サバイバー	1~3人と決まっているのでvectorにしない
+	std::array<std::shared_ptr<Survivor>, SURVIVOR_NUM> survivors_;
+
+	//	生贄モブ
+	std::vector<std::shared_ptr<Victim>> victims_;
 };

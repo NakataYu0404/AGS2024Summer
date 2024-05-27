@@ -36,6 +36,7 @@
     <ClCompile Include="Src\Object\Common\SpeechBalloon.cpp" />
     <ClCompile Include="Src\Object\Common\Transform.cpp" />
     <ClCompile Include="Src\Object\Mob\Victim.cpp" />
+    <ClCompile Include="Src\Object\Player\PlayerBase.cpp" />
     <ClCompile Include="Src\Object\Player\Survivor.cpp" />
     <ClCompile Include="Src\Object\Planet.cpp" />
     <ClCompile Include="Src\Object\Player\Raider.cpp" />
@@ -65,6 +66,7 @@
     <ClInclude Include="Src\Object\Common\SpeechBalloon.h" />
     <ClInclude Include="Src\Object\Common\Transform.h" />
     <ClInclude Include="Src\Object\Mob\Victim.h" />
+    <ClInclude Include="Src\Object\Player\PlayerBase.h" />
     <ClInclude Include="Src\Object\Player\Survivor.h" />
     <ClInclude Include="Src\Object\Planet.h" />
     <ClInclude Include="Src\Object\Player.h" />

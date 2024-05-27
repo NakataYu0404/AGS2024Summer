@@ -31,9 +31,6 @@ public:
 
 private:
 
-	//	ó‘Ô
-	STATE state_;
-
 	//	ó‘Ô‘JˆÚ
 	void ChangeState(STATE state);
 	void ChangeStateNone(void);
@@ -44,5 +41,8 @@ private:
 	void UpdateNone(void);
 	void UpdateStay(void);
 	void UpdateFollow(void);
+
+	//	ó‘Ô
+	STATE state_;
 
 };

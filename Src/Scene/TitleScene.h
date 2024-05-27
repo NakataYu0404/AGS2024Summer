@@ -22,15 +22,9 @@ public:
 
 private:
 
-	//	画像
-	int imgTitle_;
-	int imgPush_;
 
 	//	スカイドーム用
 	Transform spaceDomeTran_;
-
-	//	スカイドーム(背景)
-	std::unique_ptr<SkyDome> skyDome_;
 
 	//	惑星
 	Transform planet_;
@@ -38,6 +32,13 @@ private:
 
 	//	キャラクター
 	Transform charactor_;
+
+	//	画像
+	int imgTitle_;
+	int imgPush_;
+
+	//	スカイドーム(背景)
+	std::unique_ptr<SkyDome> skyDome_;
 
 	//	アニメーション
 	std::unique_ptr<AnimationController> animationController_;

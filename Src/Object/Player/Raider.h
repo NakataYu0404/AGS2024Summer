@@ -1,14 +1,8 @@
 #pragma once
-#include <map>
-#include <vector>
-#include <array>
-#include "../ActorBase.h"
-class AnimationController;
-class Collider;
-class Capsule;
+#include "PlayerBase.h"
 class ShotBase;
 
-class Raider : public ActorBase
+class Raider : public PlayerBase
 {
 
 public:
@@ -30,15 +24,6 @@ public:
 	//	GameSceneのやつを使えた方がいいけど、ヘッダーでインクルードすることになって良くない
 	static constexpr int SURVIVOR_NUM = 3;
 
-	//	状態
-	enum class STATE
-	{
-		NONE,
-		PLAY,
-		DEAD,
-		VICTORY,
-		END
-	};
 	
 	//	空中にいたいか地上にいたいかで処理を変えたい(不可抗力で空中にいてしまってる場合は(落下とか)LANDで、自分から浮いてるときはAIR)
 	enum class STATE_PLPOS
@@ -85,6 +70,13 @@ public:
 		VICTORY,
 	};
 
+	enum class TARGET
+	{
+		NONE,
+		SURVIVOR,
+		VICTIM,
+	};
+
 	//	コンストラクタ
 	Raider(void);
 
@@ -96,18 +88,10 @@ public:
 	void Update(void) override;
 	void Draw(void) override;
 
-	//	衝突判定に用いられるコライダ制御
-	void AddCollider(Collider* collider);
-	void ClearCollider(void);
-
-	//	衝突用カプセルの取得
-	const Capsule* GetCapsule(void) const;
-	void AddCapsule(Capsule* capsule);
-
 	//	現在のSTATE::PLAY中ステートが入力したステートと同じか調べる
 	bool IsStateInPlay(STATE_INPLAY state);
 
-	void SetEnemy(std::array<std::weak_ptr<Transform>, SURVIVOR_NUM> tran);
+	void SetSurvivor(std::array<std::weak_ptr<Transform>, SURVIVOR_NUM> tran);
 
 	bool IsWaitNow(void);
 		
@@ -117,81 +101,21 @@ private:
 	static constexpr float MAX_DISTANCE_TARGET = 3000.0f;
 	static constexpr float MAX_DISTANCE_ATTACKTARGET = MAX_DISTANCE_TARGET / 3.0f;
 
-	//	アニメーション
-	AnimationController* animationController_;
+	static constexpr float MAX_DISTANCE_EXECUTION = 300;
 
-	//	状態管理
-	STATE state_;
-
-	//	プレイヤーがいるのが地上か空中かを可視化
-	STATE_PLPOS statePlPos_;
-
-	//	STATE::PLAYの中のステート
-	STATE_INPLAY statePlay_;
-
-	LEVEL_PL levelRaider_;
-
-	//	移動スピード
-	float speed_;
-
-	//	移動方向
-	VECTOR moveDir_;
-
-	//	移動量
-	VECTOR movePow_;
-
-	//	移動後の座標
-	VECTOR movedPos_;
-
-	//	回転
-	Quaternion playerRotY_;
-	Quaternion goalQuaRot_;
-	float stepRotTime_;
-
-	float rotRad_;
-
-	//	ジャンプ量
-	VECTOR jumpPow_;
-
-	//	ジャンプ判定
-	bool isJump_;
-
-	//	飛翔判定
-	bool isFly_;
-
-	//	ジャンプの入力受付時間
-	float stepJump_;
-
-	//	衝突判定に用いられるコライダ
-	std::vector<Collider*> colliders_;
-	Capsule* capsule_;
-
-	//	衝突チェック
-	VECTOR gravHitPosDown_;
-	VECTOR gravHitPosUp_;
-
-	float gravityPow_;
-
-	//	丸影
-	int imgShadow_;
-
-	void InitAnimation(void);
-
-	//	状態遷移
-	void ChangeState(STATE state);
-	void ChangeStateNone(void);
-	void ChangeStatePlay(void);
+	//	Anim初期化
+	void InitAnimation(void) override;
 
 	//	現在のSTATEに合わせて変わるアニメーション
-	void ChangeStateAnimation(void);
+	void ChangeStateAnimation(void) override;
 
 	//	更新ステップ
-	void UpdateNone(void);
-	void UpdatePlay(void);
+	void UpdatePlay(void) override;
+
+	//	弾の更新
 	void UpdateShot(void);
 
 	//	描画系
-	void DrawShadow(void);
 	void DrawShot(void);
 
 	//	地上、空中別の処理
@@ -207,49 +131,81 @@ private:
 	//	飛んでるかフラグをここで設定する(現在レベルによって変えるかどうか決められる)
 	void ChangeIsFly(bool isFly);
 
-	//	操作
-	void ProcessMove(void);
-	void ProcessJump(void);
+	//	移動
+	void ProcessMove(void) override;
+	void ProcessJump(void) override;
 	void ProcessFly(void);
 	void ProcessMoveFly(void);
 
+	//	攻撃
 	void Attack(void);
 	void MakeShot(void);
+
+	//	弾初期化
 	void ShotInit(std::shared_ptr<ShotBase> shot);
 
+	//	処刑準備(ボタン長押し)
+	void PrepareExecution(Transform target);
+
+	//	処刑
+	void Execution(Transform target);
+
 	//	回転
-	void SetGoalRotate(double rotRad);
-	void Rotate(void);
+	void SetGoalRotate(double rotRad) override;
 
 	//	衝突判定
-	void Collision(void);
-	void CollisionGravity(void);
-	void CollisionCapsule(void);
+	void CollisionGravity(void) override;
 
 	//	移動量の計算
-	void CalcGravityPow(void);
+	void CalcGravityPow(void) override;
 
 	//	着地モーション終了
-	bool IsEndLanding(void);
-
-	std::array<std::weak_ptr<Transform>, SURVIVOR_NUM> enemyTran_;
+	bool IsEndLanding(void) override;
 
 	//	ロックオン
 	void LockOn(void);
-	//	キャラクターの距離(軸を考えない)
-	float R2SDistance(int num);
+
 	//	trueでターゲッティング
 	bool CanTarget(int num);
 	VECTOR ShotDir(void);
 
+	//	レイダー→サバイバーの向き(正規化済み)
 	VECTOR R2SDir(int num);
+
+	void SetWaitFlame(float flame = -1);
+	void WaitFlame(void);
+
+	//	現在の処刑可能対象(範囲内でサバイバー優先)
+	TARGET exeTarget_;
+
+	//	プレイヤーがいるのが地上か空中かを可視化
+	STATE_PLPOS statePlPos_;
+
+	//	STATE::PLAYの中のステート
+	STATE_INPLAY statePlay_;
+
+	//	レイダーのレベル
+	LEVEL_PL levelRaider_;
+
+	//	移動スピード
+	float speed_;
+
+	//	飛翔判定
+	bool isFly_;
+
+	//	サバイバー、生贄のTransform
+	std::array<std::weak_ptr<Transform>, SURVIVOR_NUM> survivorTran_;
+	std::vector<std::weak_ptr<Transform>> victimTran_;
 
 	//	レイダーからサバイバーへの距離
 	std::array<float, SURVIVOR_NUM> R2SDistance_;
+
 	//	レイダーからターゲットしたサバイバーへの向き
 	VECTOR R2TDir_;
+
 	//	誰かをターゲットしてるか
 	bool isTarget_;
+
 	//	ターゲッティングされるサバイバーのNo
 	int targetSurvivorNo_;
 
@@ -257,6 +213,5 @@ private:
 
 	//	待機フレーム(隙)
 	float waitFlame_;
-	void SetWaitFlame(float flame = -1);
-	void WaitFlame(void);
+
 };

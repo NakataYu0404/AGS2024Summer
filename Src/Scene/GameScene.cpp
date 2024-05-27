@@ -8,8 +8,9 @@
 #include "../Object/SkyDome.h"
 #include "../Object/Stage.h"
 #include "../Object/Player/Raider.h"
-#include "../Object/Planet.h"
 #include "../Object/Player/Survivor.h"
+#include "../Object/Mob/Victim.h"
+#include "../Object/Planet.h"
 #include "GameScene.h"
 
 GameScene::GameScene(void)
@@ -28,20 +29,32 @@ void GameScene::Init(void)
 	raider_ = std::make_shared<Raider>();
 	raider_->Init();
 	
-	//	サバイバー
+	//	サバイバー作成
 	std::weak_ptr<Transform> raiderTran = raider_->GetTransform();
-
 	std::array<std::weak_ptr<Transform>, SURVIVOR_NUM> surviveTran;
 
-	for (int i = 0; i < survivor_.size(); i++)
+	for (int i = 0; i < survivors_.size(); i++)
 	{
-		survivor_[i] = std::make_shared<Survivor>(i);
-		survivor_[i]->Init();
-		surviveTran[i] = survivor_[i]->GetTransform();
-		survivor_[i]->SetEnemy(raiderTran);
+		survivors_[i] = std::make_shared<Survivor>(i);
+		survivors_[i]->Init();
+		surviveTran[i] = survivors_[i]->GetTransform();
+		survivors_[i]->SetRaider(raiderTran);
 	}
 
-	raider_->SetEnemy(surviveTran);
+	//	生贄作成(TODO:とりあえず一人だけ作るけど、あとでＪＳＯＮ使っていっぱい用意する)	
+	std::shared_ptr<Victim> tmp = std::make_shared<Victim>();
+	victims_.push_back(tmp);
+	for (auto& v : victims_)
+	{
+		if (v == nullptr)
+		{
+			break;
+		}
+		v->Init();
+	}
+
+	//	レイダーにサバイバー、生贄情報を渡す
+	raider_->SetSurvivor(surviveTran);
 
 	//	ステージ
 	stage_ = std::make_unique<Stage>();
@@ -49,9 +62,9 @@ void GameScene::Init(void)
 	//	ステージに対して当たり判定付けるオブジェクトを渡すんだけど、sharedptrを配列にしちゃうと、渡すとき勝手にweakptrに変換してくれなくなっちゃうみたい。
 	//	なので、こっちでweak型の配列に移し替えて、それを渡すことにする
 	std::array<std::weak_ptr<Survivor>, SURVIVOR_NUM>tmpSurvivor;
-	for (int i = 0; i < survivor_.size(); i++)
+	for (int i = 0; i < survivors_.size(); i++)
 	{
-		tmpSurvivor[i] = survivor_[i];
+		tmpSurvivor[i] = survivors_[i];
 	}
 	stage_->SetObject(raider_, tmpSurvivor);
 	stage_->Init();
@@ -71,6 +84,7 @@ void GameScene::Update(void)
 {
 	//	シーン遷移
 	InputManager& ins = InputManager::GetInstance();
+
 	if (ins.IsTrgDown(KEY_INPUT_NUMPAD0))
 	{
 		SceneManager::GetInstance().ChangeScene(SceneManager::SCENE_ID::TITLE);
@@ -81,9 +95,23 @@ void GameScene::Update(void)
 	stage_->Update();
 
 	raider_->Update();
-	for (int i = 0; i < survivor_.size(); i++)
+
+	for (auto& s : survivors_)
 	{
-		survivor_[i]->Update();
+		if (s == nullptr)
+		{
+			break;
+		}
+		s->Update();
+	}
+
+	for (auto& v : victims_)
+	{
+		if (v == nullptr)
+		{
+			break;
+		}
+		v->Update();
 	}
 }
 
@@ -95,9 +123,22 @@ void GameScene::Draw(void)
 	
 	raider_->Draw();
 
-	for (int i = 0; i < survivor_.size(); i++)
+	for (auto& s : survivors_)
 	{
-		survivor_[i]->Draw();
+		if (s == nullptr)
+		{
+			break;
+		}
+		s->Draw();
+	}
+
+	for (auto& v : victims_)
+	{
+		if (v == nullptr)
+		{
+			break;
+		}
+		v->Draw();
 	}
 
 	//	ヘルプ

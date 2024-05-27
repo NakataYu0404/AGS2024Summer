@@ -40,6 +40,15 @@ public:
 
 private:
 
+	//	デフォルトコンストラクタをprivateにして、
+	//	外部から生成できない様にする
+	Application(void);
+	Application(const Application& manager) = default;
+	~Application(void) = default;
+
+	//	Effekseerの初期化
+	void InitEffekseer(void);
+
 	//	静的インスタンス
 	static Application* instance_;
 
@@ -49,13 +58,5 @@ private:
 	//	解放失敗
 	bool isReleaseFail_;
 
-	//	デフォルトコンストラクタをprivateにして、
-	//	外部から生成できない様にする
-	Application(void);
-	Application(const Application& manager) = default;
-	~Application(void) = default;
-
-	//	Effekseerの初期化
-	void InitEffekseer(void);
 
 };
