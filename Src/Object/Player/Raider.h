@@ -1,6 +1,8 @@
 #pragma once
 #include "PlayerBase.h"
 class ShotBase;
+class Survivor;
+class Victim;
 
 class Raider : public PlayerBase
 {
@@ -24,7 +26,9 @@ public:
 	//	GameSceneのやつを使えた方がいいけど、ヘッダーでインクルードすることになって良くない
 	static constexpr int SURVIVOR_NUM = 3;
 
-	
+	//	処刑に必要なボタン長押しフレーム量
+	static constexpr float EXECUTION_FLAME = 300;
+
 	//	空中にいたいか地上にいたいかで処理を変えたい(不可抗力で空中にいてしまってる場合は(落下とか)LANDで、自分から浮いてるときはAIR)
 	enum class STATE_PLPOS
 	{
@@ -91,7 +95,8 @@ public:
 	//	現在のSTATE::PLAY中ステートが入力したステートと同じか調べる
 	bool IsStateInPlay(STATE_INPLAY state);
 
-	void SetSurvivor(std::array<std::weak_ptr<Transform>, SURVIVOR_NUM> tran);
+	void SetSurvivor(std::array<std::weak_ptr<Survivor>, SURVIVOR_NUM> surv);
+	void SetVictim(std::vector<std::weak_ptr<Victim>> tran);
 
 	bool IsWaitNow(void);
 		
@@ -139,16 +144,19 @@ private:
 
 	//	攻撃
 	void Attack(void);
+
+	//	処刑準備(ボタン長押し)
+	void PrepareExecution(void);
+
+	//	処刑
+	void Execution(std::shared_ptr<Survivor> target);
+	void Execution(std::shared_ptr<Victim> target);
+
+
 	void MakeShot(void);
 
 	//	弾初期化
 	void ShotInit(std::shared_ptr<ShotBase> shot);
-
-	//	処刑準備(ボタン長押し)
-	void PrepareExecution(Transform target);
-
-	//	処刑
-	void Execution(Transform target);
 
 	//	回転
 	void SetGoalRotate(double rotRad) override;
@@ -178,6 +186,11 @@ private:
 	//	現在の処刑可能対象(範囲内でサバイバー優先)
 	TARGET exeTarget_;
 
+	std::shared_ptr<Survivor> ExecuteSur_;
+	std::shared_ptr<Victim> ExecuteVic_;
+
+	float exeCnt_;
+
 	//	プレイヤーがいるのが地上か空中かを可視化
 	STATE_PLPOS statePlPos_;
 
@@ -187,6 +200,9 @@ private:
 	//	レイダーのレベル
 	LEVEL_PL levelRaider_;
 
+	//	けいけんち
+	int exp_;
+
 	//	移動スピード
 	float speed_;
 
@@ -194,8 +210,8 @@ private:
 	bool isFly_;
 
 	//	サバイバー、生贄のTransform
-	std::array<std::weak_ptr<Transform>, SURVIVOR_NUM> survivorTran_;
-	std::vector<std::weak_ptr<Transform>> victimTran_;
+	std::array<std::weak_ptr<Survivor>, SURVIVOR_NUM> survivor_;
+	std::vector<std::weak_ptr<Victim>> victim_;
 
 	//	レイダーからサバイバーへの距離
 	std::array<float, SURVIVOR_NUM> R2SDistance_;

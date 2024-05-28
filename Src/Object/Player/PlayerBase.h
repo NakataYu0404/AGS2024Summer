@@ -75,7 +75,7 @@ protected:
 	//	着地モーション終了
 	virtual bool IsEndLanding(void) = 0;
 
-	//	自分→何かTransform直線距離
+	//	自分→何かTransform直線距離(内部で正規化、値を正の数にします)
 	float Myself2OtherDistance(std::weak_ptr<Transform> toTran);
 
 	//	回転完了までの時間

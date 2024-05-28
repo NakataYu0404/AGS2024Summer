@@ -52,7 +52,7 @@ private:
 	//	描画系
 	void DrawShadow(void);
 
-	//	生きてっか
+	//	生きてるか
 	bool isAlive_;
 
 	//	アニメーション

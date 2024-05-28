@@ -11,6 +11,8 @@
 #include "../Common/Collider.h"
 #include "../Planet.h"
 #include "../Shot/ShotBase.h"
+#include "../Mob/Victim.h"
+#include "Survivor.h"
 #include "Raider.h"
 
 Raider::Raider(void)
@@ -85,7 +87,8 @@ void Raider::SetParam(void)
 
 	rotRad_ = 0.0f;
 
-	levelRaider_ = LEVEL_PL::LV2;
+	levelRaider_ = LEVEL_PL::LV1;
+	exp_ = 0;
 
 	for (int i = 0; i < SURVIVOR_NUM; i++)
 	{
@@ -95,6 +98,12 @@ void Raider::SetParam(void)
 	targetSurvivorNo_ = SURVIVOR_NUM;
 
 	exeTarget_ = TARGET::NONE;
+
+	ExecuteSur_ = nullptr;
+	ExecuteVic_ = nullptr;
+
+	exeCnt_ = EXECUTION_FLAME;
+
 }
 
 void Raider::Update(void)
@@ -141,13 +150,18 @@ bool Raider::IsStateInPlay(STATE_INPLAY state)
 	return statePlay_ == state;
 }
 
-void Raider::SetSurvivor(std::array<std::weak_ptr<Transform>, SURVIVOR_NUM> tran)
+void Raider::SetSurvivor(std::array<std::weak_ptr<Survivor>, SURVIVOR_NUM> surv)
 {
 	for (int i = 0; i < SURVIVOR_NUM; i++)
 	{
-		survivorTran_[i] = tran[i];
+		survivor_[i] = surv[i];
 	}
 	
+}
+
+void Raider::SetVictim(std::vector<std::weak_ptr<Victim>> tran)
+{
+	victim_ = tran;
 }
 
 bool Raider::IsWaitNow(void)
@@ -271,9 +285,10 @@ void Raider::UpdatePlay(void)
 	default:
 		break;
 	}
-	Attack();
-	ChangeLandAir();
 
+	Attack();
+	PrepareExecution();
+	ChangeLandAir();
 
 	ChangeStateAnimation();
 
@@ -629,6 +644,99 @@ void Raider::Attack(void)
 	}
 }
 
+void Raider::PrepareExecution(void)
+{
+	auto& ins = InputManager::GetInstance();
+
+
+	if (ins.IsTrgDown(KEY_INPUT_E))
+	{
+		//	処刑対象を決めるための処理
+		float exeDistance = MAX_DISTANCE_EXECUTION;
+
+		for (auto& s : survivor_)
+		{
+			if (s.lock() == nullptr)
+			{
+				continue;
+			}
+
+			float distance = Myself2OtherDistance(s.lock()->GetTransform());
+			if (s.lock()->GetStatePlay() == Survivor::STATE_INPLAY::CRAWL && distance <= exeDistance)
+			{
+				exeTarget_ = TARGET::SURVIVOR;
+				ExecuteSur_ = s.lock();
+				exeDistance = distance;
+			}
+		}
+
+		if (exeTarget_ != TARGET::SURVIVOR)
+		{
+			for (auto& v : victim_)
+			{
+				if (v.lock() == nullptr)
+				{
+					continue;
+				}
+
+				float distance = Myself2OtherDistance(v.lock()->GetTransform());
+				if (distance <= exeDistance)
+				{
+					exeTarget_ = TARGET::VICTIM;
+					ExecuteVic_ = v.lock();
+					exeDistance = distance;
+				}
+
+			}
+		}
+	}
+
+	//	処刑ボタン長押しで、処刑
+	if (!ins.IsNew(KEY_INPUT_E))
+	{
+		return;
+	}
+
+	switch (exeTarget_)
+	{
+	case Raider::TARGET::SURVIVOR:
+		if (ExecuteSur_ != nullptr)
+		{
+			//カウントダウン
+			exeCnt_ -= 1.0f;
+			if (exeCnt_ <= 0.0f)
+			{
+				exeCnt_ = EXECUTION_FLAME;
+				Execution(ExecuteSur_);
+			}
+		}
+		break;
+	case Raider::TARGET::VICTIM:
+		if (ExecuteVic_ != nullptr)
+		{
+			//カウントダウン
+			exeCnt_ -= 1.0f;
+			if (exeCnt_ <= 0.0f)
+			{
+				exeCnt_ = EXECUTION_FLAME;
+				Execution(ExecuteVic_);
+			}
+		}
+		break;
+	}
+}
+
+void Raider::Execution(std::shared_ptr<Survivor> target)
+{
+	target->SetState(PlayerBase::STATE::DEAD);
+	exp_ += Survivor::POINT_EVOLUTION;
+}
+
+void Raider::Execution(std::shared_ptr<Victim> target)
+{
+	exp_ += Victim::POINT_EVOLUTION;
+}
+
 void Raider::MakeShot(void)
 {
 	//	弾
@@ -845,12 +953,12 @@ void Raider::LockOn(void)
 
 bool Raider::CanTarget(int num)
 {
-	R2SDistance_[num] = Myself2OtherDistance(survivorTran_[num]);
+	R2SDistance_[num] = Myself2OtherDistance(survivor_[num].lock()->GetTransform().lock());
 	if(R2SDistance_[num] < MAX_DISTANCE_TARGET)
 	{
 		//この関数がFALSEならカメラ内に入っている
-		if(CheckCameraViewClip(survivorTran_[num].lock()->pos) == FALSE || 
-			CheckCameraViewClip(survivorTran_[num].lock()->headPos) == FALSE)
+		if(CheckCameraViewClip(survivor_[num].lock()->GetTransform().lock()->pos) == FALSE ||
+			CheckCameraViewClip(survivor_[num].lock()->GetTransform().lock()->headPos) == FALSE)
 		{
 			return true;
 		}
@@ -866,7 +974,7 @@ VECTOR Raider::ShotDir(void)
 	if (isTarget_)
 	{
 		VECTOR raiPos = transform_->pos;
-		VECTOR suvPos = survivorTran_[targetSurvivorNo_].lock()->pos;
+		VECTOR suvPos = survivor_[targetSurvivorNo_].lock()->GetTransform().lock()->pos;
 
 		ret = AsoUtility::VNormalize(VSub(suvPos, raiPos));
 	}
@@ -883,7 +991,7 @@ VECTOR Raider::R2SDir(int num)
 	VECTOR ret;
 
 	VECTOR raiPos = transform_->pos;
-	VECTOR suvPos = survivorTran_[num].lock()->pos;
+	VECTOR suvPos = survivor_[num].lock()->GetTransform().lock()->pos;
 
 	ret = AsoUtility::VNormalize(VSub(suvPos, raiPos));
 	return ret;

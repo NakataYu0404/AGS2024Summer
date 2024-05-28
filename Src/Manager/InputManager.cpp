@@ -53,6 +53,8 @@ void InputManager::Init(void)
 	InputManager::GetInstance().Add(KEY_INPUT_NUMPAD6);
 	InputManager::GetInstance().Add(KEY_INPUT_NUMPAD4);
 
+	InputManager::GetInstance().Add(KEY_INPUT_E);
+
 	InputManager::GetInstance().Add(KEY_INPUT_RSHIFT);
 
 	InputManager::GetInstance().Add(KEY_INPUT_BACKSLASH);

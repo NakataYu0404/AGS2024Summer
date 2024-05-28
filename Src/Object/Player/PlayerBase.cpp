@@ -242,6 +242,7 @@ void PlayerBase::CollisionCapsule(void)
 	}
 
 }
+
 float PlayerBase::Myself2OtherDistance(std::weak_ptr<Transform> toTran)
 {
 	VECTOR Dif = VSub(transform_->pos, toTran.lock()->pos);

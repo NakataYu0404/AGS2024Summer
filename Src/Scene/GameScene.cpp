@@ -31,30 +31,34 @@ void GameScene::Init(void)
 	
 	//	サバイバー作成
 	std::weak_ptr<Transform> raiderTran = raider_->GetTransform();
-	std::array<std::weak_ptr<Transform>, SURVIVOR_NUM> surviveTran;
+	std::array<std::weak_ptr<Survivor>, SURVIVOR_NUM> surviveWeakArray;
 
 	for (int i = 0; i < survivors_.size(); i++)
 	{
 		survivors_[i] = std::make_shared<Survivor>(i);
 		survivors_[i]->Init();
-		surviveTran[i] = survivors_[i]->GetTransform();
+		surviveWeakArray[i] = survivors_[i];
 		survivors_[i]->SetRaider(raiderTran);
 	}
 
 	//	生贄作成(TODO:とりあえず一人だけ作るけど、あとでＪＳＯＮ使っていっぱい用意する)	
+	std::vector<std::weak_ptr<Victim>> VictimWeak;
+
 	std::shared_ptr<Victim> tmp = std::make_shared<Victim>();
 	victims_.push_back(tmp);
-	for (auto& v : victims_)
+	for (int i = 0; i < victims_.size(); i++)
 	{
-		if (v == nullptr)
+		if (victims_[i] == nullptr)
 		{
 			break;
 		}
-		v->Init();
+		victims_[i]->Init();
+		VictimWeak.push_back(victims_[i]);
 	}
-
+	
 	//	レイダーにサバイバー、生贄情報を渡す
-	raider_->SetSurvivor(surviveTran);
+	raider_->SetSurvivor(surviveWeakArray);
+	raider_->SetVictim(VictimWeak);
 
 	//	ステージ
 	stage_ = std::make_unique<Stage>();

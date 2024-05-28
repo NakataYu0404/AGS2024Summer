@@ -21,6 +21,9 @@ public:
 
 	static constexpr int FRAME_HEAD = 6;
 
+	//	レイダーが殺した時に得るポイント 100で進化
+	static constexpr int POINT_EVOLUTION = 50;
+
 	//	STATE::PLAY中のSTATE
 	enum class STATE_INPLAY
 	{
@@ -31,6 +34,7 @@ public:
 		LAND,	//	着地
 		FALL,	//	勝手に落下してる
 		STUN,
+		CRAWL,	//	死にかけで這っている
 	};
 
 	//	アニメーション種別
@@ -64,6 +68,13 @@ public:
 
 	void SetRaider(std::weak_ptr<Transform> tran);
 
+	Survivor::STATE_INPLAY GetStatePlay(void);
+
+	void SetState(PlayerBase::STATE state);
+
+	//	地上、空中関係ないSTATE::PLAY中ステートの切り替え
+	void ChangeStateInPlay(STATE_INPLAY state);
+
 private:
 
 
@@ -78,8 +89,6 @@ private:
 	//	地上、空中別の処理
 	void UpdateLand(void);
 
-	//	地上、空中関係ないSTATE::PLAY中ステートの切り替え
-	void ChangeStateInPlay(STATE_INPLAY state);
 
 	//	操作
 	void ProcessMove(void) override;

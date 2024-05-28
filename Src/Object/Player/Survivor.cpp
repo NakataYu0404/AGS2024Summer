@@ -130,6 +130,16 @@ void Survivor::SetRaider(std::weak_ptr<Transform> tran)
 	raiderTran_ = tran;
 }
 
+Survivor::STATE_INPLAY Survivor::GetStatePlay(void)
+{
+	return statePlay_;
+}
+
+void Survivor::SetState(PlayerBase::STATE state)
+{
+	state_ = state;
+}
+
 void Survivor::InitAnimation(void)
 {
 
