@@ -3,6 +3,7 @@
 #include "Common/Transform.h"
 class ResourceManager;
 class SceneManager;
+class Capsule;
 
 class ActorBase
 {
@@ -21,7 +22,14 @@ public:
 
 	virtual void SetParam(void);
 
+	//オブジェクトが衝突時に返す
+	virtual void OnCollision(std::weak_ptr<Collider> collider) = 0;
+
 	const std::weak_ptr<Transform> GetTransform(void) const;
+
+	// 衝突用カプセルの取得
+	const std::weak_ptr<Capsule> GetCapsule(void) const;
+
 
 protected:
 
@@ -32,4 +40,6 @@ protected:
 	//	モデル制御の基本情報
 	std::shared_ptr<Transform> transform_;
 
+	//衝突判定用のカプセル
+	std::shared_ptr<Capsule> capsule_;
 };

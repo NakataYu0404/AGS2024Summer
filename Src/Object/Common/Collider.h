@@ -1,25 +1,54 @@
 #pragma once
+#include <DxLib.h>
+#include <vector>
+
 class Collider
 {
 
-public :
+public:
 
-	//	衝突種別
-	enum class TYPE
+	//対象種別
+	enum class Category
 	{
 		STAGE,
+		RAIDER,
+		SURVIVOR,
+		SHOT,
 	};
 
-	//	コンストラクタ
-	Collider(TYPE type, int modelId);
+	// 衝突種別
+	enum class TYPE
+	{
+		MODEL,
+		CAPSULE,
+	};
 
-	//	デストラクタ
+	//衝突情報
+	struct Collision_Date
+	{
+		bool isHit;
+		Category tag;
+		TYPE type;
+		int modelId;
+		VECTOR movedPos;
+		DxLib::VECTOR Normal;
+	};
+
+	// コンストラクタ
+	Collider(Category tag, TYPE type, int modelId);
+
+	// デストラクタ
 	~Collider(void);
 
-	//	衝突種別
+	// 対象種別
+	Category category_;
+
+	// 衝突種別
 	TYPE type_;
 
-	//	モデルのハンドルID
+	// モデルのハンドルID
 	int modelId_;
+
+	Collision_Date hitInfo_;
 
 };

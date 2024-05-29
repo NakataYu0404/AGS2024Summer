@@ -11,7 +11,7 @@ SpeechBalloon::SpeechBalloon(TYPE type, const Transform& parent) : transformPare
 
 	type_ = type;
 
-	Resource res = ResourceManager::GetInstance().Load(ResourceManager::SRC::SPEECH_BALLOON);
+	Resource res = ResourceManager::GetInstance().Load(ResourceManager::SRC::IMG_SPEECHBALLOON);
 	image_ = res.handleId_;
 
 	isVisiblePermanent_ = true;

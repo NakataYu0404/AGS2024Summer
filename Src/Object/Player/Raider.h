@@ -28,6 +28,7 @@ public:
 
 	//	処刑に必要なボタン長押しフレーム量
 	static constexpr float EXECUTION_FLAME = 300;
+	static constexpr float ATTACK_FLAME = 90;
 
 	//	空中にいたいか地上にいたいかで処理を変えたい(不可抗力で空中にいてしまってる場合は(落下とか)LANDで、自分から浮いてるときはAIR)
 	enum class STATE_PLPOS
@@ -92,6 +93,10 @@ public:
 	void Update(void) override;
 	void Draw(void) override;
 
+	void OnCollision(std::weak_ptr<Collider> collider) override;
+
+	void DebugDraw(void);
+
 	//	現在のSTATE::PLAY中ステートが入力したステートと同じか調べる
 	bool IsStateInPlay(STATE_INPLAY state);
 
@@ -107,6 +112,8 @@ private:
 	static constexpr float MAX_DISTANCE_ATTACKTARGET = MAX_DISTANCE_TARGET / 3.0f;
 
 	static constexpr float MAX_DISTANCE_EXECUTION = 300;
+
+	static constexpr int MAX_EVOLUTION_POINT = 100;
 
 	//	Anim初期化
 	void InitAnimation(void) override;
@@ -152,6 +159,8 @@ private:
 	void Execution(std::shared_ptr<Survivor> target);
 	void Execution(std::shared_ptr<Victim> target);
 
+	//	進化
+	void Evolution(void);
 
 	void MakeShot(void);
 
@@ -190,6 +199,8 @@ private:
 	std::shared_ptr<Victim> ExecuteVic_;
 
 	float exeCnt_;
+
+	float attackCnt_;
 
 	//	プレイヤーがいるのが地上か空中かを可視化
 	STATE_PLPOS statePlPos_;
@@ -230,4 +241,5 @@ private:
 	//	待機フレーム(隙)
 	float waitFlame_;
 
+	std::shared_ptr<Transform> exeQube_;
 };

@@ -108,7 +108,7 @@ void Stage::MakeMainStage(void)
 	planetTrans = std::make_shared<Transform>();
 
 	planetTrans->SetModel(
-		resMng_.LoadModelDuplicate(ResourceManager::SRC::MAIN_PLANET));
+		resMng_.LoadModelDuplicate(ResourceManager::SRC::MDL_MAINPLANET));
 	planetTrans->scl = {2.0f,1.0f,2.0f};
 	planetTrans->quaRot = Quaternion();
 	planetTrans->pos = { 0.0f, -100.0f, 0.0f };

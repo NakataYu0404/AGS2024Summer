@@ -30,7 +30,7 @@ void Raider::Init(void)
 
 	//	モデルの基本設定
 	transform_->SetModel(resMng_.LoadModelDuplicate(
-		ResourceManager::SRC::RAIDER));
+		ResourceManager::SRC::MDL_RAIDER));
 	transform_->scl = AsoUtility::VECTOR_ONE;
 	transform_->pos = { 0.0f, -30.0f, 0.0f };
 	transform_->quaRot = Quaternion();
@@ -40,6 +40,17 @@ void Raider::Init(void)
 	//	アニメーションの設定
 	InitAnimation();
 
+	//exeQube_ = std::make_shared<Transform>();
+	//exeQube_->SetModel(resMng_.LoadModelDuplicate(
+	//	ResourceManager::SRC::EXEQUBE));
+	//exeQube_->scl = {2.0f,2.0f,2.0f};
+	//exeQube_->pos = transform_->pos;
+	//exeQube_->localPos = {0.0f,40.0f,0.0f};
+	//exeQube_->quaRot = transform_->quaRot;
+	//exeQube_->quaRotLocal = transform_->quaRotLocal;
+	//exeQube_->Update();
+
+
 	//	カプセルコライダ
 	capsule_ = std::make_shared<Capsule>(*transform_);
 	capsule_->SetLocalPosTop({ 0.0f, 110.0f, 0.0f });
@@ -47,7 +58,7 @@ void Raider::Init(void)
 	capsule_->SetRadius(20.0f);
 
 	//	丸影画像
-	imgShadow_ = resMng_.Load(ResourceManager::SRC::PLAYER_SHADOW).handleId_;
+	imgShadow_ = resMng_.Load(ResourceManager::SRC::IMG_PLAYERSHADOW).handleId_;
 
 	//	初期状態
 	ChangeState(STATE::PLAY);
@@ -103,7 +114,7 @@ void Raider::SetParam(void)
 	ExecuteVic_ = nullptr;
 
 	exeCnt_ = EXECUTION_FLAME;
-
+	attackCnt_ = ATTACK_FLAME;
 }
 
 void Raider::Update(void)
@@ -125,7 +136,6 @@ void Raider::Update(void)
 
 	LockOn();
 
-
 	//	アニメーション再生
 	animationController_->Update();
 
@@ -136,13 +146,42 @@ void Raider::Draw(void)
 
 	//	モデルの描画
 	MV1DrawModel(transform_->modelId);
+	//MV1DrawModel(exeQube_->modelId);
 
 	DrawShot();
 
 	//	丸影描画
 	DrawShadow();
 
+	DebugDraw();
+}
+
+void Raider::OnCollision(std::weak_ptr<Collider> collider)
+{
+	switch (collider.lock()->category_)
+	{
+	case Collider::Category::SURVIVOR:
+
+		break;
+	case Collider::Category::RAIDER:
+
+		break;
+	case Collider::Category::SHOT:
+
+		break;
+	case Collider::Category::STAGE:
+
+		break;
+	default:
+		break;
+	}
+}
+
+void Raider::DebugDraw(void)
+{
 	DrawFormatString(0, 0, 0x000000, "jumppowX:%fjumppowY:%fjumppowZ:%f", jumpPow_.x, jumpPow_.y, jumpPow_.z);
+	DrawFormatString(0, 30, 0x000000, "exp:%d", exp_);
+
 }
 
 bool Raider::IsStateInPlay(STATE_INPLAY state)
@@ -288,6 +327,8 @@ void Raider::UpdatePlay(void)
 
 	Attack();
 	PrepareExecution();
+	Evolution();
+
 	ChangeLandAir();
 
 	ChangeStateAnimation();
@@ -349,7 +390,7 @@ void Raider::UpdateLand(void)
 
 void Raider::UpdateAir(void)
 {
-	if (statePlay_ != STATE_INPLAY::ATTACK)
+	if (!IsStateInPlay(STATE_INPLAY::ATTACK))
 	{
 		ProcessMoveFly();
 	}
@@ -591,7 +632,7 @@ void Raider::ProcessMoveFly(void)
 	{
 		//	移動ボタンを押しただけでFLYに戻る降下
 		ChangeIsFly(false);
-		statePlay_ = STATE_INPLAY::FALL_MYSELF;
+		ChangeStateInPlay(STATE_INPLAY::FALL_MYSELF);
 		gravityPow_ = 30.0f;
 		SetGoalRotate(rotRad_);
 	}
@@ -599,7 +640,7 @@ void Raider::ProcessMoveFly(void)
 	{
 		//	FLYボタンを押さないとFLYに戻らない降下
 		ChangeIsFly(false);
-		statePlay_ = STATE_INPLAY::FALL_NATURE;
+		ChangeStateInPlay(STATE_INPLAY::FALL_NATURE);
 		SetGoalRotate(rotRad_);
 	}
 
@@ -607,40 +648,46 @@ void Raider::ProcessMoveFly(void)
 
 void Raider::Attack(void)
 {
-	if (!InputManager::GetInstance().IsTrgMouseLeft() && statePlay_ != STATE_INPLAY::ATTACK)
+	if (!InputManager::GetInstance().IsTrgMouseLeft() && !IsStateInPlay(STATE_INPLAY::ATTACK))
 	{
 		return;
 	}
-
 	if (!isTarget_)
 	{
 		MakeShot();
-		statePlay_ = STATE_INPLAY::SHOT;
+		ChangeStateInPlay(STATE_INPLAY::SHOT);
 		return;
 	}
 
 
 	if (R2SDistance_[targetSurvivorNo_] < MAX_DISTANCE_ATTACKTARGET)
 	{
-		if (statePlay_ != STATE_INPLAY::ATTACK)
+		if (!IsStateInPlay(STATE_INPLAY::ATTACK))
 		{
 			//	近接
 			goalQuaRot_ = transform_->quaRot.LookRotation(R2SDir(targetSurvivorNo_));
-			statePlay_ = STATE_INPLAY::ATTACK;
+			ChangeStateInPlay(STATE_INPLAY::ATTACK);
 			ChangeIsFly(true);
 			isJump_ = true;
+			attackCnt_ = ATTACK_FLAME;
 		}
 		else
 		{
 			//	既にアタック状態に入ってる
 			transform_->pos = VAdd(transform_->pos, VScale(transform_->GetForward(), speed_ * 1.5f));
 			goalQuaRot_ = transform_->quaRot.Slerp(transform_->quaRot, transform_->quaRot.LookRotation(R2SDir(targetSurvivorNo_)), (TIME_ROT - stepRotTime_) / TIME_ROT);
+			attackCnt_--;
+			if (attackCnt_ <= 0)
+			{
+				attackCnt_ = ATTACK_FLAME;
+				ChangeStateInPlay(STATE_INPLAY::IDLE);
+			}
 		}
 	}
 	else
 	{
 		MakeShot();
-		statePlay_ = STATE_INPLAY::SHOT;
+		ChangeStateInPlay(STATE_INPLAY::SHOT);
 	}
 }
 
@@ -694,6 +741,7 @@ void Raider::PrepareExecution(void)
 	//	処刑ボタン長押しで、処刑
 	if (!ins.IsNew(KEY_INPUT_E))
 	{
+		exeCnt_ = EXECUTION_FLAME;
 		return;
 	}
 
@@ -724,6 +772,11 @@ void Raider::PrepareExecution(void)
 		}
 		break;
 	}
+	//exeQube_->pos = transform_->pos;
+	//exeQube_->quaRot = transform_->quaRot;
+	//exeQube_->quaRotLocal = transform_->quaRotLocal;
+	//exeQube_->Update();
+
 }
 
 void Raider::Execution(std::shared_ptr<Survivor> target)
@@ -735,6 +788,31 @@ void Raider::Execution(std::shared_ptr<Survivor> target)
 void Raider::Execution(std::shared_ptr<Victim> target)
 {
 	exp_ += Victim::POINT_EVOLUTION;
+}
+
+void Raider::Evolution(void)
+{
+	if (exp_ < MAX_EVOLUTION_POINT)
+	{
+		return;
+	}
+
+	switch (levelRaider_)
+	{
+	case Raider::LEVEL_PL::LV1:
+		exp_ = 0;
+		levelRaider_ = Raider::LEVEL_PL::LV2;
+		break;
+	case Raider::LEVEL_PL::LV2:
+		exp_ = 0;
+		levelRaider_ = Raider::LEVEL_PL::LV3;
+		break;
+	case Raider::LEVEL_PL::LV3:
+		exp_ = MAX_EVOLUTION_POINT;
+		break;
+	default:
+		break;
+	}
 }
 
 void Raider::MakeShot(void)
@@ -863,7 +941,7 @@ void Raider::CollisionGravity(void)
 
 			if (isJump_)
 			{
-				statePlay_ = STATE_INPLAY::LAND;
+				ChangeStateInPlay(STATE_INPLAY::LAND);
 			}
 
 			isJump_ = false;
@@ -927,6 +1005,10 @@ bool Raider::IsEndLanding(void)
 
 void Raider::LockOn(void)
 {
+	if (IsStateInPlay(STATE_INPLAY::ATTACK))
+	{
+		return;
+	}
 
 	//	フラグ管理のために必要な初期化
 	float tmpKingDistance = MAX_DISTANCE_TARGET;	//	とりあえず入れとくレイダー→サバイバーの一番短い距離

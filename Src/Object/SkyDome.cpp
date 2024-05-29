@@ -22,7 +22,7 @@ void SkyDome::Init(void)
 	//	ƒ‚ƒfƒ‹§Œä‚ÌŠî–{î•ñ
 	transform_->SetModel(
 		resMng_.LoadModelDuplicate(
-			ResourceManager::SRC::SKY_DOME));
+			ResourceManager::SRC::MDL_SKYDOME));
 	transform_->scl = SCALES;
 	transform_->pos = AsoUtility::VECTOR_ZERO;
 	transform_->quaRot = Quaternion::Euler(

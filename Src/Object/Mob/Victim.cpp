@@ -18,7 +18,7 @@ void Victim::Init()
 
 	//	ƒ‚ƒfƒ‹‚ÌŠî–{İ’è
 	transform_->SetModel(resMng_.LoadModelDuplicate(
-		ResourceManager::SRC::PLAYER));
+		ResourceManager::SRC::MDL_PLAYER));
 	transform_->scl = AsoUtility::VECTOR_ONE;
 	transform_->pos = { 0.0f, -30.0f, 0.0f };
 	transform_->quaRot = Quaternion();
@@ -27,7 +27,7 @@ void Victim::Init()
 	transform_->Update();
 
 	//	ŠÛ‰e‰æ‘œ
-	imgShadow_ = resMng_.Load(ResourceManager::SRC::PLAYER_SHADOW).handleId_;
+	imgShadow_ = resMng_.Load(ResourceManager::SRC::IMG_PLAYERSHADOW).handleId_;
 
 	//	‰Šúó‘Ô
 	ChangeState(STATE::PLAY);
@@ -74,6 +74,7 @@ void Victim::InitAnimation(void)
 
 void Victim::ChangeState(STATE state)
 {
+	state_ = state;
 }
 
 void Victim::ChangeStateNone(void)

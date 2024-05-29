@@ -28,7 +28,7 @@ void Survivor::Init(void)
 
 	//	ƒ‚ƒfƒ‹‚ÌŠî–{İ’è
 	transform_->SetModel(resMng_.LoadModelDuplicate(
-		ResourceManager::SRC::SURVIVOR));
+		ResourceManager::SRC::MDL_SURVIVOR));
 	transform_->scl = AsoUtility::VECTOR_ONE;
 	transform_->pos = { 0.0f, -30.0f, 0.0f };
 	transform_->headPos = MV1GetFramePosition(transform_->modelId, FRAME_HEAD);
@@ -46,7 +46,7 @@ void Survivor::Init(void)
 	capsule_->SetRadius(20.0f);
 
 	//	ŠÛ‰e‰æ‘œ
-	imgShadow_ = resMng_.Load(ResourceManager::SRC::PLAYER_SHADOW).handleId_;
+	imgShadow_ = resMng_.Load(ResourceManager::SRC::IMG_PLAYERSHADOW).handleId_;
 
 	//	‰Šúó‘Ô
 	ChangeState(STATE::PLAY);

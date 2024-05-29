@@ -44,7 +44,7 @@ public:
 	Quaternion quaRotLocal;
 
 	//	コライダ
-	Collider* collider;
+	std::shared_ptr<Collider> collider;
 
 	///	<summary>
 	///	モデル制御の基本情報更新

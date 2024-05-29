@@ -78,10 +78,6 @@ void Transform::Update(void)
 
 void Transform::Release(void)
 {
-	if (collider != nullptr)
-	{
-		delete collider;
-	}
 }
 
 void Transform::SetModel(int model)
@@ -97,7 +93,7 @@ void Transform::MakeCollider(Collider::TYPE type)
 		return;
 	}
 
-	collider = new Collider(type, modelId);
+	collider = std::make_shared<Collider>(type, modelId);
 	int ret = MV1SetupCollInfo(modelId, -1, 1, 1, 1);
 
 }
