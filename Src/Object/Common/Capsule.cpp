@@ -2,18 +2,20 @@
 #include "Transform.h"
 #include "Capsule.h"
 
-Capsule::Capsule(const Transform& parent) : transformParent_(parent)
+Capsule::Capsule(const std::weak_ptr<Transform> parent)
 {
+	transformParent_ = parent;
 	radius_ = 0.0f;
 	localPosTop_ = { 0.0f, 0.0f, 0.0f };
 	localPosDown_ = { 0.0f, 0.0f, 0.0f };
 }
 
-Capsule::Capsule(const Capsule& base, const Transform& parent) : transformParent_(parent)
+Capsule::Capsule(const std::weak_ptr<Capsule> base, const std::weak_ptr<Transform> parent)
 {
-	radius_ = base.GetRadius();
-	localPosTop_ = base.GetLocalPosTop();
-	localPosDown_ = base.GetLocalPosDown();
+	transformParent_ = parent;
+	radius_ = base.lock()->GetRadius();
+	localPosTop_ = base.lock()->GetLocalPosTop();
+	localPosDown_ = base.lock()->GetLocalPosDown();
 }
 
 Capsule::~Capsule(void)
@@ -36,25 +38,25 @@ void Capsule::Draw(void)
 	VECTOR e;
 
 	//	‹…‘Ì‚ðŒq‚®ü(X+)
-	dir = transformParent_.GetRight();
+	dir = transformParent_.lock()->GetRight();
 	s = VAdd(pos1, VScale(dir, radius_));
 	e = VAdd(pos2, VScale(dir, radius_));
 	DrawLine3D(s, e, COLOR);
 
 	//	‹…‘Ì‚ðŒq‚®ü(X-)
-	dir = transformParent_.GetLeft();
+	dir = transformParent_.lock()->GetLeft();
 	s = VAdd(pos1, VScale(dir, radius_));
 	e = VAdd(pos2, VScale(dir, radius_));
 	DrawLine3D(s, e, COLOR);
 
 	//	‹…‘Ì‚ðŒq‚®ü(Z+)
-	dir = transformParent_.GetForward();
+	dir = transformParent_.lock()->GetForward();
 	s = VAdd(pos1, VScale(dir, radius_));
 	e = VAdd(pos2, VScale(dir, radius_));
 	DrawLine3D(s, e, COLOR);
 
 	//	‹…‘Ì‚ðŒq‚®ü(Z-)
-	dir = transformParent_.GetBack();
+	dir = transformParent_.lock()->GetBack();
 	s = VAdd(pos1, VScale(dir, radius_));
 	e = VAdd(pos2, VScale(dir, radius_));
 	DrawLine3D(s, e, COLOR);
@@ -96,8 +98,8 @@ VECTOR Capsule::GetPosDown(void) const
 
 VECTOR Capsule::GetRotPos(const VECTOR& localPos) const
 {
-	VECTOR localRotPos = transformParent_.quaRot.PosAxis(localPos);
-	return VAdd(transformParent_.pos, localRotPos);
+	VECTOR localRotPos = transformParent_.lock()->quaRot.PosAxis(localPos);
+	return VAdd(transformParent_.lock()->pos, localRotPos);
 }
 
 float Capsule::GetRadius(void) const

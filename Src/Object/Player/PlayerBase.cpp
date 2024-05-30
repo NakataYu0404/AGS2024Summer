@@ -23,7 +23,7 @@ PlayerBase::~PlayerBase(void)
 {
 }
 
-void PlayerBase::AddCollider(Collider* collider)
+void PlayerBase::AddCollider(std::shared_ptr<Collider> collider)
 {
 	colliders_.push_back(collider);
 }
@@ -199,7 +199,7 @@ void PlayerBase::CollisionCapsule(void)
 	Transform trans = Transform(*transform_);
 	trans.pos = movedPos_;
 	trans.Update();
-	Capsule cap = Capsule(*capsule_, trans);
+	Capsule cap = Capsule(capsule_, trans);
 
 	//	ƒRƒ‰ƒCƒ_
 	for (const auto c : colliders_)

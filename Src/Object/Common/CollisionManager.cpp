@@ -74,19 +74,19 @@ void CollisionManager::Update(void)
 				case Collider::TYPE::MODEL:		//カプセル対モデル
 				{
 
-					//auto info = Capsule2Model_Collider_PushBack(actor.lock()->GetCapsule(), target.lock()->GetTransform());
+					auto info = Capsule2Model_Collider_PushBack(actor.lock()->GetCapsule(), target.lock()->GetTransform());
 
-					//if (info.isHit)
-					//{
-					//	targetCollider->hitInfo_.isHit = true;
-					//	targetCollider->hitInfo_.Normal = info.Normal;
-					//	actor.lock()->OnCollision(targetCollider);
-					//}
-					//else
-					//{
-					//	targetCollider->hitInfo_.isHit = false;
-					//	targetCollider->hitInfo_.Normal = { 0.0f, 0.0f, 0.0f };
-					//}
+					if (info.isHit)
+					{
+						targetCollider->hitInfo_.isHit = true;
+						targetCollider->hitInfo_.Normal = info.Normal;
+						actor.lock()->OnCollision(targetCollider);
+					}
+					else
+					{
+						targetCollider->hitInfo_.isHit = false;
+						targetCollider->hitInfo_.Normal = { 0.0f, 0.0f, 0.0f };
+					}
 
 				}
 				break;
@@ -147,18 +147,18 @@ Collider::Collision_Date CollisionManager::Capsule2Model_Collider_PushBack(const
 
 
 	// カプセルを移動させる	//TODO:Transform(transform)って何か理解する(Springのやつを見よう！)
-	Transform trans = Transform(transform);
-	trans.pos = answer.movedPos;
-	trans.Update();
-	Capsule cap = Capsule(capsule, trans);
+	std::shared_ptr<Transform> trans = transform.lock();
+	trans->pos = answer.movedPos;
+	trans->Update();
+	std::shared_ptr<Capsule> cap = std::make_shared<Capsule>(capsule, trans);
 
 	//// カプセルとの衝突判定
 	//for (const auto c : colliders_)
 	//{
 
 	auto hits = MV1CollCheck_Capsule(
-		transform.modelId, -1,
-		cap.GetPosTop(), cap.GetPosDown(), cap.GetRadius());
+		transform.lock()->modelId, -1,
+		cap->GetPosTop(), cap->GetPosDown(), cap->GetRadius());
 
 	//DxLib::MV1_COLL_RESULT_POLY_DIM
 
@@ -180,7 +180,7 @@ Collider::Collision_Date CollisionManager::Capsule2Model_Collider_PushBack(const
 			// 再度、モデル全体と衝突検出するには、効率が悪過ぎるので、
 			// 最初の衝突判定で検出した衝突ポリゴン1枚と衝突判定を取る
 			int pHit = HitCheck_Capsule_Triangle(
-				cap.GetPosTop(), cap.GetPosDown(), cap.GetRadius(),
+				cap->GetPosTop(), cap->GetPosDown(), cap->GetRadius(),
 				hit.Position[0], hit.Position[1], hit.Position[2]);
 			if (pHit)
 			{

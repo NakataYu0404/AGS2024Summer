@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <map>
+#include <memory>
 //#include <iostream>
 #include <functional>
 #include "Transform.h"
