@@ -10,7 +10,6 @@
 #include "../Common/AnimationController.h"
 #include "../Common/Capsule.h"
 #include "../Common/Collider.h"
-#include "../Planet.h"
 #include "../Shot/ShotBase.h"
 #include "PlayerBase.h"
 
@@ -33,12 +32,8 @@ void PlayerBase::ClearCollider(void)
 	colliders_.clear();
 }
 
-const std::weak_ptr<Capsule> PlayerBase::GetCapsule(void) const
-{
-	return capsule_;
-}
 
-void PlayerBase::AddCapsule(Capsule* capsule)
+void PlayerBase::AddCapsule(std::shared_ptr<Capsule> capsule)
 {
 }
 
@@ -181,9 +176,6 @@ void PlayerBase::Collision(void)
 	//	現在座標を起点に移動後座標を決める
 	movedPos_ = VAdd(transform_->pos, movePow_);
 
-	//	衝突(カプセル)
-	CollisionCapsule();
-
 	//	衝突(重力)
 	CollisionGravity();
 
@@ -192,56 +184,6 @@ void PlayerBase::Collision(void)
 
 }
 
-void PlayerBase::CollisionCapsule(void)
-{
-
-	//	トランスフォーム
-	Transform trans = Transform(*transform_);
-	trans.pos = movedPos_;
-	trans.Update();
-	Capsule cap = Capsule(capsule_, trans);
-
-	//	コライダ
-	for (const auto c : colliders_)
-	{
-
-		auto hits = MV1CollCheck_Capsule(
-			c->modelId_, -1,
-			cap.GetPosTop(), cap.GetPosDown(), cap.GetRadius());
-
-		for (int i = 0; i < hits.HitNum; i++)
-		{
-
-			auto hit = hits.Dim[i];
-
-			for (int tryCnt = 0; tryCnt < 10; tryCnt++)
-			{
-
-				int pHit = HitCheck_Capsule_Triangle(
-					cap.GetPosTop(), cap.GetPosDown(), cap.GetRadius(),
-					hit.Position[0], hit.Position[1], hit.Position[2]);
-
-				if (pHit)
-				{
-					movedPos_ = VAdd(movedPos_, VScale(hit.Normal, 2.0f));
-					//	移動
-					trans.pos = movedPos_;
-					trans.Update();
-					continue;
-				}
-
-				break;
-
-			}
-
-		}
-
-		//	あとしまつ
-		MV1CollResultPolyDimTerminate(hits);
-
-	}
-
-}
 
 float PlayerBase::Myself2OtherDistance(std::weak_ptr<Transform> toTran)
 {

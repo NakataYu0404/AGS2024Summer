@@ -23,7 +23,7 @@ public:
 	virtual void SetParam(void);
 
 	//オブジェクトが衝突時に返す
-	virtual void OnCollision(std::weak_ptr<Collider> collider) = 0;
+	virtual void OnCollision(std::weak_ptr<Collider> collider);
 
 	const std::weak_ptr<Transform> GetTransform(void) const;
 

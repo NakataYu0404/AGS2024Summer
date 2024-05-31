@@ -18,6 +18,9 @@ public:
 	void SetPos(VECTOR pos);
 	void SetDir(VECTOR dir);
 	void SetAlive(bool isAlive);
+
+	void OnCollision(std::weak_ptr<Collider> collider) override;
+
 protected:
 
 	bool isAlive_;

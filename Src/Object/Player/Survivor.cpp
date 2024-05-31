@@ -9,7 +9,6 @@
 #include "../Common/AnimationController.h"
 #include "../Common/Capsule.h"
 #include "../Common/Collider.h"
-#include "../Planet.h"
 #include "Survivor.h"
 
 Survivor::Survivor(int survivorNum)
@@ -39,11 +38,13 @@ void Survivor::Init(void)
 	//	アニメーションの設定
 	InitAnimation();
 
+	transform_->MakeCollider(Collider::Category::SURVIVOR, Collider::TYPE::CAPSULE);
 	//	カプセルコライダ
-	capsule_ = std::make_shared<Capsule>(*transform_);
+	capsule_ = std::make_shared<Capsule>(transform_);
 	capsule_->SetLocalPosTop({ 0.0f, 110.0f, 0.0f });
 	capsule_->SetLocalPosDown({ 0.0f, 30.0f, 0.0f });
 	capsule_->SetRadius(20.0f);
+
 
 	//	丸影画像
 	imgShadow_ = resMng_.Load(ResourceManager::SRC::IMG_PLAYERSHADOW).handleId_;
@@ -55,6 +56,7 @@ void Survivor::Init(void)
 
 void Survivor::SetParam(void)
 {
+
 	animationController_ = nullptr;
 	state_ = STATE::NONE;
 	statePlay_ = STATE_INPLAY::IDLE;
@@ -79,9 +81,8 @@ void Survivor::SetParam(void)
 
 	imgShadow_ = -1;
 
-	capsule_ = nullptr;
 
-	gravityPow_ = Planet::DEFAULT_GRAVITY_POW;
+	gravityPow_ = 10.0f;
 
 	rotRad_ = 0.0f;
 }
@@ -216,6 +217,28 @@ void Survivor::UpdateLand(void)
 void Survivor::ChangeStateInPlay(STATE_INPLAY state)
 {
 	statePlay_ = state;
+}
+
+void Survivor::OnCollision(std::weak_ptr<Collider> collider)
+{
+	switch (collider.lock()->category_)
+	{
+	case Collider::Category::SURVIVOR:
+
+		break;
+	case Collider::Category::RAIDER:
+
+		break;
+	case Collider::Category::SHOT:
+
+		break;
+	case Collider::Category::STAGE:
+		transform_->pos = collider.lock()->hitInfo_.movedPos;
+		break;
+	default:
+		break;
+	}
+
 }
 
 void Survivor::ProcessMove(void)
@@ -415,7 +438,7 @@ void Survivor::CollisionGravity(void)
 
 			isJump_ = false;
 
-			gravityPow_ = Planet::DEFAULT_GRAVITY_POW;
+			gravityPow_ = 10.0f;
 		}
 
 	}

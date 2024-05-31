@@ -6,6 +6,7 @@ class SkyDome;
 class Raider;
 class Survivor;
 class Victim;
+class CollisionManager;
 
 class GameScene : public SceneBase
 {
@@ -26,7 +27,7 @@ public:
 private:
 
 	//	ステージ
-	std::unique_ptr<Stage> stage_;
+	std::shared_ptr<Stage> stage_;
 
 	//	スカイドーム
 	std::unique_ptr<SkyDome> skyDome_;
@@ -39,4 +40,7 @@ private:
 
 	//	生贄モブ
 	std::vector<std::shared_ptr<Victim>> victims_;
+
+	//	シングルトン参照
+	CollisionManager& colMng_;
 };

@@ -70,3 +70,7 @@ void ShotBase::SetAlive(bool isAlive)
 {
 	isAlive_ = isAlive;
 }
+
+void ShotBase::OnCollision(std::weak_ptr<Collider> collider)
+{
+}

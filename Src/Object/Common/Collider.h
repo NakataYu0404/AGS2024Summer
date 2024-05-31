@@ -10,9 +10,9 @@ public:
 	//СќПџОнХ 
 	enum class Category
 	{
-		STAGE,
 		RAIDER,
 		SURVIVOR,
+		STAGE,
 		SHOT,
 	};
 

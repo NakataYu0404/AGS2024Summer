@@ -5,15 +5,15 @@
 #include "../Manager/InputManager.h"
 #include "../Object/Common/Capsule.h"
 #include "../Object/Common/Collider.h"
+#include "../Object/Common/CollisionManager.h"
 #include "../Object/SkyDome.h"
 #include "../Object/Stage.h"
 #include "../Object/Player/Raider.h"
 #include "../Object/Player/Survivor.h"
 #include "../Object/Mob/Victim.h"
-#include "../Object/Planet.h"
 #include "GameScene.h"
 
-GameScene::GameScene(void)
+GameScene::GameScene(void) : colMng_(CollisionManager::GetInstance())
 {
 	skyDome_ = nullptr;
 	stage_ = nullptr;
@@ -25,6 +25,7 @@ GameScene::~GameScene(void)
 
 void GameScene::Init(void)
 {
+
 	//	レイダー
 	raider_ = std::make_shared<Raider>();
 	raider_->Init();
@@ -61,7 +62,7 @@ void GameScene::Init(void)
 	raider_->SetVictim(VictimWeak);
 
 	//	ステージ
-	stage_ = std::make_unique<Stage>();
+	stage_ = std::make_shared<Stage>();
 	
 	//	ステージに対して当たり判定付けるオブジェクトを渡すんだけど、sharedptrを配列にしちゃうと、渡すとき勝手にweakptrに変換してくれなくなっちゃうみたい。
 	//	なので、こっちでweak型の配列に移し替えて、それを渡すことにする
@@ -73,12 +74,17 @@ void GameScene::Init(void)
 	stage_->SetObject(raider_, tmpSurvivor);
 	stage_->Init();
 
-	//	ステージの初期設定
-	stage_->ChangeStage(Stage::NAME::MAIN_PLANET);
-
 	//	スカイドーム
 	skyDome_ = std::make_unique<SkyDome>();
 	skyDome_->Init();
+
+	colMng_.Init();
+	
+	colMng_.Add(raider_);
+	colMng_.Add(survivors_[0]);
+	colMng_.Add(survivors_[1]);
+	colMng_.Add(survivors_[2]);
+	colMng_.Add(stage_);
 
 	SceneManager::GetInstance().GetCamera()->SetFollow(raider_->GetTransform().lock().get());
 	SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::FOLLOW);
@@ -117,6 +123,8 @@ void GameScene::Update(void)
 		}
 		v->Update();
 	}
+
+	colMng_.Update();
 }
 
 void GameScene::Draw(void)

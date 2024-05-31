@@ -2,7 +2,7 @@
 #include "Transform.h"
 #include "Capsule.h"
 
-Capsule::Capsule(const std::weak_ptr<Transform> parent)
+Capsule::Capsule(std::weak_ptr<Transform> parent)
 {
 	transformParent_ = parent;
 	radius_ = 0.0f;

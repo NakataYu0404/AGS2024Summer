@@ -44,7 +44,7 @@ public:
 	Quaternion quaRotLocal;
 
 	//	コライダ
-	std::shared_ptr<Collider> collider;
+	std::shared_ptr<Collider> collider_;
 
 	///	<summary>
 	///	モデル制御の基本情報更新
@@ -55,7 +55,7 @@ public:
 	void Release(void);
 
 	void SetModel(int modelHId);
-	void MakeCollider(Collider::TYPE type);
+	void MakeCollider(Collider::Category category, Collider::TYPE type);
 
 	//	前方方向を取得
 	VECTOR GetForward(void) const;

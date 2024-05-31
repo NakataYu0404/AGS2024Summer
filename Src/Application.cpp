@@ -3,6 +3,7 @@
 #include "Manager/InputManager.h"
 #include "Manager/ResourceManager.h"
 #include "Manager/SceneManager.h"
+#include "Object/Common/CollisionManager.h"
 #include "Application.h"
 
 Application* Application::instance_ = nullptr;
@@ -56,6 +57,8 @@ void Application::Init(void)
 
 	//	ƒV[ƒ“ŠÇ—‰Šú‰»
 	SceneManager::CreateInstance();
+
+	CollisionManager::CreateInstance();
 
 }
 

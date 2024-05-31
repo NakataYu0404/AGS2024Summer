@@ -25,11 +25,13 @@ class CollisionManager
 {
 public:
 
-	// コンストラクタ
-	CollisionManager(void);
+	static constexpr int MAX_COLLISION_TRY = 100;
 
-	// デストラクタ
-	virtual ~CollisionManager(void);
+	//	インスタンスの生成
+	static void CreateInstance(void);
+
+	//	インスタンスの取得
+	static CollisionManager& GetInstance(void);
 
 	void Init(void);
 	void Update(void);
@@ -40,15 +42,18 @@ public:
 	void AddCollider(std::weak_ptr<Collider> collider);
 	void ClearCollider(void);
 
-	void Add(std::weak_ptr<ActorBase> collider);
+	void Add(std::shared_ptr<ActorBase> collider);
 
 	//カプセルとモデルの衝突判定
-	Collider::Collision_Date Capsule2Model_Collider_PushBack(const std::weak_ptr<Capsule> capsule, const std::weak_ptr<Transform> transform);
+	Collider::Collision_Date Capsule2Model_Collider_PushBack(const std::weak_ptr<ActorBase> actor, const std::weak_ptr<Transform> transform);
 
 	//カプセルとカプセルの衝突判定
 	bool Capsule2_Collider(const std::weak_ptr<Capsule> a, const std::weak_ptr<Capsule> b);
 
 private:
+
+	//	静的インスタンス
+	static CollisionManager* instance_;
 
 	//当たったかの判定
 	bool isAttack = false;

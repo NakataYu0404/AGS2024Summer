@@ -13,7 +13,7 @@ public :
 
 	//	コンストラクタ
 	//	カプセルをつけるオブジェクトを指定する
-	Capsule(const std::weak_ptr<Transform> parent);
+	Capsule(std::weak_ptr<Transform> parent);
 	Capsule(const std::weak_ptr<Capsule> base, const std::weak_ptr<Transform> parent);
 
 	//	デストラクタ

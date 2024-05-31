@@ -6,10 +6,10 @@
 #include "../../Manager/SceneManager.h"
 #include "../../Manager/ResourceManager.h"
 #include "../../Manager/Camera.h"
+#include "../Common/CollisionManager.h"
 #include "../Common/AnimationController.h"
 #include "../Common/Capsule.h"
 #include "../Common/Collider.h"
-#include "../Planet.h"
 #include "../Shot/ShotBase.h"
 #include "../Mob/Victim.h"
 #include "Survivor.h"
@@ -50,13 +50,14 @@ void Raider::Init(void)
 	//exeQube_->quaRotLocal = transform_->quaRotLocal;
 	//exeQube_->Update();
 
+	transform_->MakeCollider(Collider::Category::RAIDER, Collider::TYPE::CAPSULE);
 
 	//	カプセルコライダ
-	capsule_ = std::make_shared<Capsule>(*transform_);
+	capsule_ = std::make_shared<Capsule>(transform_);
 	capsule_->SetLocalPosTop({ 0.0f, 110.0f, 0.0f });
 	capsule_->SetLocalPosDown({ 0.0f, 30.0f, 0.0f });
 	capsule_->SetRadius(20.0f);
-
+	
 	//	丸影画像
 	imgShadow_ = resMng_.Load(ResourceManager::SRC::IMG_PLAYERSHADOW).handleId_;
 
@@ -67,6 +68,7 @@ void Raider::Init(void)
 
 void Raider::SetParam(void)
 {
+
 	animationController_ = nullptr;
 	state_ = STATE::NONE;
 	statePlPos_ = STATE_PLPOS::LAND;
@@ -92,13 +94,12 @@ void Raider::SetParam(void)
 
 	imgShadow_ = -1;
 
-	capsule_ = nullptr;
 
-	gravityPow_ = Planet::DEFAULT_GRAVITY_POW;
+	gravityPow_ = 10.0f;
 
 	rotRad_ = 0.0f;
 
-	levelRaider_ = LEVEL_PL::LV1;
+	levelRaider_ = LEVEL_PL::LV2;
 	exp_ = 0;
 
 	for (int i = 0; i < SURVIVOR_NUM; i++)
@@ -170,7 +171,7 @@ void Raider::OnCollision(std::weak_ptr<Collider> collider)
 
 		break;
 	case Collider::Category::STAGE:
-
+		transform_->pos = collider.lock()->hitInfo_.movedPos;
 		break;
 	default:
 		break;
@@ -946,7 +947,7 @@ void Raider::CollisionGravity(void)
 
 			isJump_ = false;
 
-			gravityPow_ = Planet::DEFAULT_GRAVITY_POW;
+			gravityPow_ = 10.0f;
 		}
 
 	}
@@ -960,7 +961,7 @@ void Raider::CalcGravityPow(void)
 	{
 		//	飛んでるなら重力とジャンプ力を無効に
 		jumpPow_ = AsoUtility::VECTOR_ZERO;
-		gravityPow_ = Planet::DEFAULT_GRAVITY_POW;
+		gravityPow_ = 10.0f;
 		return;
 	}
 

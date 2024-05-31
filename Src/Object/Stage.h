@@ -3,12 +3,12 @@
 #include <array>
 #include "Common/Transform.h"
 class ResourceManager;
+class CollisionManager;
 class WarpStar;
-class Planet;
 class Raider;
 class Survivor;
 
-class Stage
+class Stage : public ActorBase
 {
 
 public:
@@ -31,39 +31,16 @@ public:
 	//	デストラクタ
 	~Stage(void);
 
-	void Init(void);
-	void Update(void);
-	void Draw(void);
+	void Init(void) override;
+	void Update(void) override;
+	void Draw(void) override;
 
 	void SetObject(std::weak_ptr<Raider> raider, std::array<std::weak_ptr<Survivor>, 3> survivor);
 
-	//	ステージ変更
-	void ChangeStage(NAME type);
-
-	//	対象ステージを取得
-	Planet* GetPlanet(NAME type);
 
 private:
 
-	//	最初の惑星
-	void MakeMainStage(void);
-
-	//	シングルトン参照
-	ResourceManager& resMng_;
-
 	std::weak_ptr<Raider> raider_;
 	std::array<std::weak_ptr<Survivor>,3> survivors_;
-
-	//	空のPlanet
-	Planet* nullPlanet = nullptr;
-
-	//	惑星
-	std::map<NAME, Planet*> planets_;
-
-	//	ステージアクティブになっている惑星の情報
-	NAME activeName_;
-	Planet* activePlanet_;
-
-	float step_;
 
 };

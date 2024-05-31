@@ -75,6 +75,8 @@ public:
 	//	地上、空中関係ないSTATE::PLAY中ステートの切り替え
 	void ChangeStateInPlay(STATE_INPLAY state);
 
+	void OnCollision(std::weak_ptr<Collider> collider) override;
+
 private:
 
 

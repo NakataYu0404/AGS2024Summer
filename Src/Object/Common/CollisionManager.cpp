@@ -5,12 +5,20 @@
 #include "../Player/Raider.h"
 #include "CollisionManager.h"
 
-CollisionManager::CollisionManager(void)
+CollisionManager* CollisionManager::instance_ = nullptr;
+
+void CollisionManager::CreateInstance()
 {
+	if (instance_ == nullptr)
+	{
+		instance_ = new CollisionManager();
+	}
+	instance_->Init();
 }
 
-CollisionManager::~CollisionManager(void)
+CollisionManager& CollisionManager::GetInstance(void)
 {
+	return *instance_;
 }
 
 void CollisionManager::Init(void)
@@ -40,12 +48,12 @@ void CollisionManager::Update(void)
 	{
 		//取得したコライダー情報
 		//actor:typ,CAPSULE, tag, player
-		auto actorCollider = actor.lock()->GetTransform().lock()->collider;
+		auto actorCollider = actor.lock()->GetTransform().lock()->collider_;
 		auto actorType = actorCollider->type_;
 		auto actorCategory = actorCollider->category_;
 
 		//プレイヤー以外であればループを抜ける
-		if (categoryMap_.count(actorCategory) == 0)
+		if ((actorCategory != Collider::Category::RAIDER && actorCategory != Collider::Category::SURVIVOR) || categoryMap_.count(actorCategory) == 0)
 		{
 			continue;
 		}
@@ -60,7 +68,7 @@ void CollisionManager::Update(void)
 
 			//それ以外のオブジェクト
 			//target:typ,CAPSULE, tag, enemy stage
-			auto targetCollider = target.lock()->GetTransform().lock()->collider;
+			auto targetCollider = target.lock()->GetTransform().lock()->collider_;
 			auto targetType = targetCollider->type_;
 			auto targetCategory = targetCollider->category_;
 
@@ -74,12 +82,13 @@ void CollisionManager::Update(void)
 				case Collider::TYPE::MODEL:		//カプセル対モデル
 				{
 
-					auto info = Capsule2Model_Collider_PushBack(actor.lock()->GetCapsule(), target.lock()->GetTransform());
+					auto info = Capsule2Model_Collider_PushBack(actor, target.lock()->GetTransform());
 
 					if (info.isHit)
 					{
 						targetCollider->hitInfo_.isHit = true;
 						targetCollider->hitInfo_.Normal = info.Normal;
+						targetCollider->hitInfo_.movedPos = info.movedPos;
 						actor.lock()->OnCollision(targetCollider);
 					}
 					else
@@ -92,8 +101,8 @@ void CollisionManager::Update(void)
 				break;
 				case Collider::TYPE::CAPSULE:	//カプセル対カプセル
 					if (Capsule2_Collider(
-						actor.lock()->GetCapsule(),
-						target.lock()->GetCapsule()
+						actor.lock()->GetCapsule().lock(),
+						target.lock()->GetCapsule().lock()
 					))
 					{
 						actor.lock()->OnCollision(targetCollider);
@@ -120,7 +129,7 @@ void CollisionManager::Draw(void)
 	}
 }
 
-void CollisionManager::Add(std::weak_ptr<ActorBase> collider)
+void CollisionManager::Add(std::shared_ptr<ActorBase> collider)
 {
 	actors_.push_back(collider);
 }
@@ -135,80 +144,74 @@ void CollisionManager::ClearCollider(void)
 	colliders_.clear();
 }
 
-Collider::Collision_Date CollisionManager::Capsule2Model_Collider_PushBack(const std::weak_ptr<Capsule> capsule, const std::weak_ptr<Transform> transform)
+Collider::Collision_Date CollisionManager::Capsule2Model_Collider_PushBack(const std::weak_ptr<ActorBase> actor, const std::weak_ptr<Transform> transform)
 {
+	//	capsuleがキャラクターで、transformがステージのことだろう
+	//	answerもおそらくstageよりのなんか
 
 	Collider::Collision_Date answer;
 	answer.isHit = false;
 
-	//bool answer = false;
-
-	answer.movedPos = capsule.lock()->GetCenter();
+	answer.movedPos = actor.lock()->GetTransform().lock()->pos;
 
 
-	// カプセルを移動させる	//TODO:Transform(transform)って何か理解する(Springのやつを見よう！)
-	std::shared_ptr<Transform> trans = transform.lock();
-	trans->pos = answer.movedPos;
+	// カプセルを移動させる
+	std::shared_ptr<Transform> trans = std::make_shared<Transform>();
+	trans->pos = actor.lock()->GetTransform().lock()->pos;
 	trans->Update();
-	std::shared_ptr<Capsule> cap = std::make_shared<Capsule>(capsule, trans);
+	std::shared_ptr<Capsule> cap = std::make_shared<Capsule>(actor.lock()->GetCapsule(), trans);
 
-	//// カプセルとの衝突判定
+	////// カプセルとの衝突判定
 	//for (const auto c : colliders_)
 	//{
 
-	auto hits = MV1CollCheck_Capsule(
-		transform.lock()->modelId, -1,
-		cap->GetPosTop(), cap->GetPosDown(), cap->GetRadius());
+		auto hits = MV1CollCheck_Capsule(
+			transform.lock()->modelId, -1,
+			cap->GetPosTop(), cap->GetPosDown(), cap->GetRadius());
 
-	//DxLib::MV1_COLL_RESULT_POLY_DIM
+		//DxLib::MV1_COLL_RESULT_POLY_DIM
 
 
-	// 衝突した複数のポリゴンと衝突回避するまで、
-	// プレイヤーの位置を移動させる
-	for (int i = 0; i < hits.HitNum; i++)
-	{
-
-		auto hit = hits.Dim[i];
-		//DxLib::MV1_COLL_RESULT_POLY
-
-		// 地面と異なり、衝突回避位置が不明なため、何度か移動させる
-		// この時、移動させる方向は、移動前座標に向いた方向であったり、
-		// 衝突したポリゴンの法線方向だったりする
-		for (int tryCnt = 0; tryCnt < 10; tryCnt++)
+		// 衝突した複数のポリゴンと衝突回避するまで、
+		// プレイヤーの位置を移動させる
+		for (int i = 0; i < hits.HitNum; i++)
 		{
 
-			// 再度、モデル全体と衝突検出するには、効率が悪過ぎるので、
-			// 最初の衝突判定で検出した衝突ポリゴン1枚と衝突判定を取る
-			int pHit = HitCheck_Capsule_Triangle(
-				cap->GetPosTop(), cap->GetPosDown(), cap->GetRadius(),
-				hit.Position[0], hit.Position[1], hit.Position[2]);
-			if (pHit)
+			auto hit = hits.Dim[i];
+			//DxLib::MV1_COLL_RESULT_POLY
+
+			// 地面と異なり、衝突回避位置が不明なため、何度か移動させる
+			// この時、移動させる方向は、移動前座標に向いた方向であったり、
+			// 衝突したポリゴンの法線方向だったりする
+			for (int tryCnt = 0; tryCnt < MAX_COLLISION_TRY; tryCnt++)
 			{
-				isAttack = true;
-				Normal_ = hit.Normal;
-				//// 法線の方向にちょっとだけ移動させる
-				//auto movedPos_ = VAdd(movedPos_, VScale(hit.Normal, 1.0f));
-				//answer.movedPos = VAdd(answer.movedPos, VScale(hit.Normal, 1.0f));
+
+				// 再度、モデル全体と衝突検出するには、効率が悪過ぎるので、
+				// 最初の衝突判定で検出した衝突ポリゴン1枚と衝突判定を取る
+				int pHit = HitCheck_Capsule_Triangle(
+					cap->GetPosTop(), cap->GetPosDown(), cap->GetRadius(),
+					hit.Position[0], hit.Position[1], hit.Position[2]);
+				if (pHit)
+				{
+					// 法線の方向にちょっとだけ移動させる
+					answer.movedPos = VAdd(answer.movedPos, VScale(hit.Normal, 2.0f));
+					//カプセルも一緒に移動させる
+					trans->pos = answer.movedPos;
+					trans->Update();
+
+					answer.isHit = true;
+					answer.Normal = hit.Normal;
 
 
-				// カプセルも一緒に移動させる
-				//trans.pos = answer.movedPos;
-				//trans.Update();
+					continue;
+				}
 
-
-				answer.isHit = true;
-				answer.Normal = hit.Normal;
-
-
-				continue;
+				break;
 			}
-
-			break;
 		}
-	}
 
-	// 検出した地面ポリゴン情報の後始末
-	MV1CollResultPolyDimTerminate(hits);
+		// 検出した地面ポリゴン情報の後始末
+		MV1CollResultPolyDimTerminate(hits);
 	//}
 
 	return answer;
@@ -221,7 +224,7 @@ bool CollisionManager::Capsule2_Collider(const std::weak_ptr<Capsule> a, const s
 
 	for (const auto i : actors_)
 	{
-		i.lock()->GetTransform().lock()->collider;
+		i.lock()->GetTransform().lock()->collider_;
 	}
 
 	//プレイヤーと敵の衝突判定

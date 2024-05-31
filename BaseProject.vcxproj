@@ -39,7 +39,6 @@
     <ClCompile Include="Src\Object\Mob\Victim.cpp" />
     <ClCompile Include="Src\Object\Player\PlayerBase.cpp" />
     <ClCompile Include="Src\Object\Player\Survivor.cpp" />
-    <ClCompile Include="Src\Object\Planet.cpp" />
     <ClCompile Include="Src\Object\Player\Raider.cpp" />
     <ClCompile Include="Src\Object\Shot\ShotBase.cpp" />
     <ClCompile Include="Src\Object\SkyDome.cpp" />
@@ -70,7 +69,6 @@
     <ClInclude Include="Src\Object\Mob\Victim.h" />
     <ClInclude Include="Src\Object\Player\PlayerBase.h" />
     <ClInclude Include="Src\Object\Player\Survivor.h" />
-    <ClInclude Include="Src\Object\Planet.h" />
     <ClInclude Include="Src\Object\Player.h" />
     <ClInclude Include="Src\Object\Player\Raider.h" />
     <ClInclude Include="Src\Object\Shot\ShotBase.h" />

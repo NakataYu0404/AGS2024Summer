@@ -17,6 +17,10 @@ void ActorBase::SetParam(void)
 {
 }
 
+void ActorBase::OnCollision(std::weak_ptr<Collider> collider)
+{
+}
+
 const std::weak_ptr<Transform> ActorBase::GetTransform(void) const
 {
 	return transform_;
