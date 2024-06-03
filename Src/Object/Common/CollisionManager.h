@@ -36,7 +36,7 @@ public:
 	void Init(void);
 	void Update(void);
 	void Draw(void);
-
+	void Destroy(void);
 
 	// 衝突判定に用いられるコライダ制御
 	void AddCollider(std::weak_ptr<Collider> collider);
@@ -46,6 +46,7 @@ public:
 
 	//カプセルとモデルの衝突判定
 	Collider::Collision_Date Capsule2Model_Collider_PushBack(const std::weak_ptr<ActorBase> actor, const std::weak_ptr<Transform> transform);
+	DxLib::MV1_COLL_RESULT_POLY Line_IsCollision_Gravity(const VECTOR LineTopPos, const VECTOR LineBotPos);
 
 	//カプセルとカプセルの衝突判定
 	bool Capsule2_Collider(const std::weak_ptr<Capsule> a, const std::weak_ptr<Capsule> b);

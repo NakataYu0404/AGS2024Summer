@@ -7,6 +7,7 @@
 class AnimationController;
 class Collider;
 class Capsule;
+class CollisionManager;
 
 class PlayerBase : public ActorBase
 {
@@ -23,6 +24,8 @@ public:
 		END
 	};
 
+	static constexpr float DEFAULT_GRAVITY_POW = 1.0f;
+
 	//	コンストラクタ
 	PlayerBase(void);
 
@@ -34,6 +37,11 @@ public:
 	void ClearCollider(void);
 
 	void AddCapsule(std::shared_ptr<Capsule> capsule);
+
+	float GetGravity(void);
+
+	//	vec方向にpowの勢いで吹っ飛ぶ stunTimeが終わると復帰
+	void SetBlowOff(VECTOR vec, float pow, float stunTime);	//	吹っ飛ばす対象.SetBlowOff(vec...)って感じで使う
 
 protected:
 
@@ -65,7 +73,7 @@ protected:
 
 	//	衝突判定
 	void Collision(void);
-	virtual void CollisionGravity(void) = 0;
+	virtual void CollisionGravity(void);
 
 	//	移動量の計算
 	virtual void CalcGravityPow(void) = 0;
@@ -75,6 +83,8 @@ protected:
 
 	//	自分→何かTransform直線距離(内部で正規化、値を正の数にします)
 	float Myself2OtherDistance(std::weak_ptr<Transform> toTran);
+
+	virtual void BlowOff(void) = 0;
 
 	//	回転完了までの時間
 	static constexpr float TIME_ROT = 0.3f;
@@ -125,4 +135,10 @@ protected:
 	//	丸影
 	int imgShadow_;
 
+	//	シングルトン参照
+	CollisionManager& colMng_;
+
+	VECTOR blowOffVec_;
+	float blowOffPow_;
+	float stunTime_;
 };

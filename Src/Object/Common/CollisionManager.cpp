@@ -33,6 +33,7 @@ void CollisionManager::Init(void)
 
 	//当たり判定のためのタグ管理
 	categoryMap_.emplace(Collider::Category::RAIDER, tags);
+	categoryMap_.emplace(Collider::Category::SURVIVOR, tags);
 
 
 	//tags.clear();
@@ -129,6 +130,11 @@ void CollisionManager::Draw(void)
 	}
 }
 
+void CollisionManager::Destroy(void)
+{
+	delete instance_;
+}
+
 void CollisionManager::Add(std::shared_ptr<ActorBase> collider)
 {
 	actors_.push_back(collider);
@@ -215,6 +221,28 @@ Collider::Collision_Date CollisionManager::Capsule2Model_Collider_PushBack(const
 	//}
 
 	return answer;
+}
+
+DxLib::MV1_COLL_RESULT_POLY CollisionManager::Line_IsCollision_Gravity(const VECTOR LineTopPos, const VECTOR LineBotPos)
+{
+	//	ステージモデルと行うので、ステージを探すようにする
+	for (auto actor : actors_)
+	{
+		//取得したコライダー情報
+		//actor:typ,CAPSULE, tag, player
+		auto actorCollider = actor.lock()->GetTransform().lock()->collider_;
+		auto actorCategory = actorCollider->category_;
+
+		//プレイヤー以外であればループをやり直す
+		if (actorCategory != Collider::Category::STAGE)
+		{
+			continue;
+		}
+
+		auto hit = MV1CollCheck_Line(actor.lock()->GetTransform().lock()->modelId, -1, LineTopPos, LineBotPos);
+
+		return hit;
+	}
 }
 
 bool CollisionManager::Capsule2_Collider(const std::weak_ptr<Capsule> a, const std::weak_ptr<Capsule> b)

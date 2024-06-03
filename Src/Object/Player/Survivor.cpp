@@ -9,6 +9,7 @@
 #include "../Common/AnimationController.h"
 #include "../Common/Capsule.h"
 #include "../Common/Collider.h"
+#include "../Common/CollisionManager.h"
 #include "Survivor.h"
 
 Survivor::Survivor(int survivorNum)
@@ -118,7 +119,6 @@ void Survivor::Draw(void)
 	//	丸影描画
 	DrawShadow();
 
-	DrawFormatString(0, 0, 0x000000, "jumppowX:%fjumppowY:%fjumppowZ:%f", jumpPow_.x, jumpPow_.y, jumpPow_.z);
 }
 
 bool Survivor::IsStateInPlay(STATE_INPLAY state)
@@ -234,6 +234,8 @@ void Survivor::OnCollision(std::weak_ptr<Collider> collider)
 		break;
 	case Collider::Category::STAGE:
 		transform_->pos = collider.lock()->hitInfo_.movedPos;
+		transform_->Update();
+
 		break;
 	default:
 		break;
@@ -396,7 +398,6 @@ void Survivor::SetGoalRotate(double rotRad)
 
 void Survivor::CollisionGravity(void)
 {
-
 	//	ジャンプ量を加算
 	movedPos_ = VAdd(movedPos_, jumpPow_);
 
@@ -407,42 +408,30 @@ void Survivor::CollisionGravity(void)
 	VECTOR dirUpGravity = AsoUtility::DIR_U;
 
 	//	重力の強さ
-	float gravityPow = gravityPow_;
+	float gravityPow = 1.0f;
 
 	float checkPow = 20.0f;
 	gravHitPosUp_ = VAdd(movedPos_, VScale(dirUpGravity, gravityPow));
 	gravHitPosUp_ = VAdd(gravHitPosUp_, VScale(dirUpGravity, checkPow * 2.0f));
 	gravHitPosDown_ = VAdd(movedPos_, VScale(dirGravity, checkPow));
 
-	for (const auto c : colliders_)
+	auto hit = colMng_.GetInstance().Line_IsCollision_Gravity(gravHitPosUp_, gravHitPosDown_);
+
+	if (hit.HitFlag > 0 && VDot(dirGravity, jumpPow_) > 0.9f)
 	{
+		//	衝突地点から、少し上に移動
+		movedPos_ = VAdd(hit.HitPosition, VScale(dirUpGravity, gravityPow * 2.0f));
 
-		//	地面との衝突
-		auto hit = MV1CollCheck_Line(
-			c->modelId_, -1, gravHitPosUp_, gravHitPosDown_);
+		//	ジャンプリセット
+		jumpPow_ = AsoUtility::VECTOR_ZERO;
+		stepJump_ = 0.0f;
 
-		//	当たってるか、重力とジャンプのベクトル方向がほぼ一緒
-		if (hit.HitFlag > 0 && VDot(dirGravity, jumpPow_) > 0.9f)
-		{
-			//	衝突地点から、少し上に移動
-			movedPos_ = VAdd(hit.HitPosition, VScale(dirUpGravity, 5.0f));
 
-			//	ジャンプリセット
-			jumpPow_ = AsoUtility::VECTOR_ZERO;
-			stepJump_ = 0.0f;
+		isJump_ = false;
 
-			if (isJump_)
-			{
-				statePlay_ = STATE_INPLAY::LAND;
-			}
-
-			isJump_ = false;
-
-			gravityPow_ = 10.0f;
-		}
+		gravityPow_ = DEFAULT_GRAVITY_POW;
 
 	}
-
 }
 
 void Survivor::CalcGravityPow(void)
@@ -484,4 +473,11 @@ bool Survivor::IsEndLanding(void)
 	}
 
 	return false;
+}
+
+void Survivor::BlowOff(void)
+{
+	ChangeStateInPlay(STATE_INPLAY::STUN);
+
+	movePow_ = VScale(blowOffVec_, blowOffPow_);
 }

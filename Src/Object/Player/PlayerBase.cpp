@@ -10,10 +10,11 @@
 #include "../Common/AnimationController.h"
 #include "../Common/Capsule.h"
 #include "../Common/Collider.h"
+#include "../Common/CollisionManager.h"
 #include "../Shot/ShotBase.h"
 #include "PlayerBase.h"
 
-PlayerBase::PlayerBase(void)
+PlayerBase::PlayerBase(void) : colMng_(CollisionManager::GetInstance())
 {
 	SetParam();
 }
@@ -35,6 +36,19 @@ void PlayerBase::ClearCollider(void)
 
 void PlayerBase::AddCapsule(std::shared_ptr<Capsule> capsule)
 {
+}
+
+float PlayerBase::GetGravity(void)
+{
+	return gravityPow_;
+}
+
+void PlayerBase::SetBlowOff(VECTOR vec, float pow, float stunTime)
+{
+	blowOffVec_ = vec;
+	blowOffPow_ = pow;
+	stunTime_ = stunTime;
+	BlowOff();
 }
 
 void PlayerBase::ChangeState(STATE state)
@@ -182,6 +196,44 @@ void PlayerBase::Collision(void)
 	//	移動
 	transform_->pos = movedPos_;
 
+}
+
+void PlayerBase::CollisionGravity(void)
+{
+	//	ジャンプ量を加算
+	movedPos_ = VAdd(movedPos_, jumpPow_);
+
+	//	重力方向
+	VECTOR dirGravity = AsoUtility::DIR_D;
+
+	//	重力方向の反対
+	VECTOR dirUpGravity = AsoUtility::DIR_U;
+
+	//	重力の強さ
+	float gravityPow = DEFAULT_GRAVITY_POW;
+
+	float checkPow = 10.0f;
+	gravHitPosUp_ = VAdd(movedPos_, VScale(dirUpGravity, gravityPow));
+	gravHitPosUp_ = VAdd(gravHitPosUp_, VScale(dirUpGravity, checkPow * 2.0f));
+	gravHitPosDown_ = VAdd(movedPos_, VScale(dirGravity, checkPow));
+
+	auto hit = colMng_.GetInstance().Line_IsCollision_Gravity(gravHitPosUp_, gravHitPosDown_);
+
+	if (hit.HitFlag> 0 && VDot(dirGravity, jumpPow_) > 0.9f)
+	{
+		//	衝突地点から、少し上に移動
+		movedPos_ = VAdd(hit.HitPosition, VScale(dirUpGravity, gravityPow * 2.0f));
+
+		//	ジャンプリセット
+		jumpPow_ = AsoUtility::VECTOR_ZERO;
+		stepJump_ = 0.0f;
+
+
+		isJump_ = false;
+
+		gravityPow_ = DEFAULT_GRAVITY_POW;
+
+	}
 }
 
 

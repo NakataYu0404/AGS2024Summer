@@ -89,6 +89,7 @@ void Application::Destroy(void)
 	InputManager::GetInstance().Destroy();
 	ResourceManager::GetInstance().Destroy();
 	SceneManager::GetInstance().Destroy();
+	CollisionManager::GetInstance().Destroy();
 
 	//	Effekseer‚ğI—¹‚·‚éB
 	Effkseer_End();

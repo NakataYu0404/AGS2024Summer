@@ -106,6 +106,8 @@ private:
 	//	着地モーション終了
 	bool IsEndLanding(void) override;
 
+	void BlowOff(void) override;
+
 	//	自分のプレイヤーNo.サバイバー内のみ
 	int plNum_;
 

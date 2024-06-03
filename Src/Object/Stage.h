@@ -15,6 +15,9 @@ public:
 
 	//	ステージの切り替え間隔
 	static constexpr float TIME_STAGE_CHANGE = 1.0f;
+	static constexpr float DEFAULT_GRAVITY_POW = 1.0f;
+
+
 
 	//	ステージ名
 	enum class NAME

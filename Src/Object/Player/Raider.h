@@ -28,7 +28,8 @@ public:
 
 	//	処刑に必要なボタン長押しフレーム量
 	static constexpr float EXECUTION_FLAME = 300;
-	static constexpr float ATTACK_FLAME = 90;
+	static constexpr float CHASE_FLAME = 90;
+	static constexpr float ATTACK_FLAME = 30;
 
 	//	空中にいたいか地上にいたいかで処理を変えたい(不可抗力で空中にいてしまってる場合は(落下とか)LANDで、自分から浮いてるときはAIR)
 	enum class STATE_PLPOS
@@ -45,13 +46,13 @@ public:
 		IDLE,
 		MOVE,
 		JUMP,
-		LAND,	//	着地
+		LAND,			//	着地
 		FALL_MYSELF,	//	自分で降下してる
 		FALL_NATURE,	//	勝手に落下してる
-		FLOAT,	//	自分で上昇してる
+		FLOAT,			//	自分で上昇してる
 		STUN,
 		ATTACK,
-		SHOT,
+		SHOT
 	};
 
 	enum class LEVEL_PL
@@ -73,6 +74,18 @@ public:
 		FALLING,
 		FLOAT,
 		VICTORY,
+		ATTACK_CHASE,
+		ATTACK_HIT,
+		ATTACK_END,
+		ATTACK_SHOT,
+	};
+
+	enum class ATTACK_TYPE
+	{
+		NONE,
+		CHASE,
+		HIT,
+		END,
 	};
 
 	enum class TARGET
@@ -99,6 +112,12 @@ public:
 
 	//	現在のSTATE::PLAY中ステートが入力したステートと同じか調べる
 	bool IsStateInPlay(STATE_INPLAY state);
+
+	//	StateがAttackか調べる(Survivorクラス用)
+	bool IsAttack(void);
+
+	bool IsAttackType(ATTACK_TYPE type);
+
 
 	void SetSurvivor(std::array<std::weak_ptr<Survivor>, SURVIVOR_NUM> surv);
 	void SetVictim(std::vector<std::weak_ptr<Victim>> tran);
@@ -143,6 +162,8 @@ private:
 	//	飛んでるかフラグをここで設定する(現在レベルによって変えるかどうか決められる)
 	void ChangeIsFly(bool isFly);
 
+	void ChangeAttack(ATTACK_TYPE type_);
+
 	//	移動
 	void ProcessMove(void) override;
 	void ProcessJump(void) override;
@@ -150,7 +171,11 @@ private:
 	void ProcessMoveFly(void);
 
 	//	攻撃
-	void Attack(void);
+	void AttackStart(void);
+	//	攻撃命中時の処理
+	void AttackHit(void);
+	//	攻撃終了時の処理
+	void AttackEnd(void);
 
 	//	処刑準備(ボタン長押し)
 	void PrepareExecution(void);
@@ -192,6 +217,8 @@ private:
 	void SetWaitFlame(float flame = -1);
 	void WaitFlame(void);
 
+	void BlowOff(void) override;
+
 	//	現在の処刑可能対象(範囲内でサバイバー優先)
 	TARGET exeTarget_;
 
@@ -199,6 +226,8 @@ private:
 	std::shared_ptr<Victim> ExecuteVic_;
 
 	float exeCnt_;
+
+	float chaseTime_;
 
 	float attackCnt_;
 
@@ -220,7 +249,7 @@ private:
 	//	飛翔判定
 	bool isFly_;
 
-	//	サバイバー、生贄のTransform
+	//	サバイバー、生贄
 	std::array<std::weak_ptr<Survivor>, SURVIVOR_NUM> survivor_;
 	std::vector<std::weak_ptr<Victim>> victim_;
 
@@ -242,4 +271,6 @@ private:
 	float waitFlame_;
 
 	std::shared_ptr<Transform> exeQube_;
+
+	ATTACK_TYPE attackType_;
 };

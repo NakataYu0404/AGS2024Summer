@@ -10,6 +10,7 @@
 #include "../Common/AnimationController.h"
 #include "../Common/Capsule.h"
 #include "../Common/Collider.h"
+#include "../Common/CollisionManager.h"
 #include "../Shot/ShotBase.h"
 #include "../Mob/Victim.h"
 #include "Survivor.h"
@@ -64,6 +65,7 @@ void Raider::Init(void)
 	//	初期状態
 	ChangeState(STATE::PLAY);
 
+	attackType_ = ATTACK_TYPE::NONE;
 }
 
 void Raider::SetParam(void)
@@ -95,7 +97,7 @@ void Raider::SetParam(void)
 	imgShadow_ = -1;
 
 
-	gravityPow_ = 10.0f;
+	gravityPow_ = DEFAULT_GRAVITY_POW;
 
 	rotRad_ = 0.0f;
 
@@ -115,6 +117,7 @@ void Raider::SetParam(void)
 	ExecuteVic_ = nullptr;
 
 	exeCnt_ = EXECUTION_FLAME;
+	chaseTime_ = CHASE_FLAME;
 	attackCnt_ = ATTACK_FLAME;
 }
 
@@ -162,16 +165,19 @@ void Raider::OnCollision(std::weak_ptr<Collider> collider)
 	switch (collider.lock()->category_)
 	{
 	case Collider::Category::SURVIVOR:
-
+		if (IsStateInPlay(STATE_INPLAY::ATTACK) && attackType_ == ATTACK_TYPE::CHASE)
+		{
+			ChangeAttack(ATTACK_TYPE::HIT);
+		}
 		break;
 	case Collider::Category::RAIDER:
-
 		break;
 	case Collider::Category::SHOT:
 
 		break;
 	case Collider::Category::STAGE:
 		transform_->pos = collider.lock()->hitInfo_.movedPos;
+		transform_->Update();
 		break;
 	default:
 		break;
@@ -180,7 +186,7 @@ void Raider::OnCollision(std::weak_ptr<Collider> collider)
 
 void Raider::DebugDraw(void)
 {
-	DrawFormatString(0, 0, 0x000000, "jumppowX:%fjumppowY:%fjumppowZ:%f", jumpPow_.x, jumpPow_.y, jumpPow_.z);
+	DrawFormatString(0, 0, 0x000000, "jumppowX:%f,jumppowY:%f,jumppowZ:%f", jumpPow_.x, jumpPow_.y, jumpPow_.z);
 	DrawFormatString(0, 30, 0x000000, "exp:%d", exp_);
 
 }
@@ -188,6 +194,11 @@ void Raider::DebugDraw(void)
 bool Raider::IsStateInPlay(STATE_INPLAY state)
 {
 	return statePlay_ == state;
+}
+
+bool Raider::IsAttackType(ATTACK_TYPE type)
+{
+	return attackType_ == type;
 }
 
 void Raider::SetSurvivor(std::array<std::weak_ptr<Survivor>, SURVIVOR_NUM> surv)
@@ -228,6 +239,8 @@ void Raider::InitAnimation(void)
 	animationController_->Add((int)ANIM_TYPE::FALLING, path + "FallIdle.mv1", 80.0f);
 	animationController_->Add((int)ANIM_TYPE::FLOAT, path + "FloatIdle.mv1", 80.0f);
 	animationController_->Add((int)ANIM_TYPE::VICTORY, path + "Victory.mv1", 60.0f);
+	animationController_->Add((int)ANIM_TYPE::ATTACK_HIT, path + "manyPunch.mv1", 80.0f);
+	animationController_->Add((int)ANIM_TYPE::ATTACK_END, path + "gurugurukick.mv1", 60.0f);
 
 	animationController_->Play((int)ANIM_TYPE::IDLE);
 
@@ -269,8 +282,10 @@ void Raider::ChangeStateAnimation(void)
 			break;
 		case Raider::STATE_INPLAY::STUN:
 			break;
+
 		default:
 			break;
+
 		}
 
 		break;
@@ -302,6 +317,21 @@ void Raider::ChangeStateAnimation(void)
 			break;
 		case Raider::STATE_INPLAY::STUN:
 			break;
+		case Raider::STATE_INPLAY::ATTACK:
+			switch (attackType_)
+			{
+			case Raider::ATTACK_TYPE::CHASE:
+				break;
+			case Raider::ATTACK_TYPE::HIT:
+				animationController_->Play((int)ANIM_TYPE::ATTACK_HIT);
+				break;
+			case Raider::ATTACK_TYPE::END:
+				animationController_->Play((int)ANIM_TYPE::ATTACK_END, false);
+				break;
+			}
+			break;
+		case Raider::STATE_INPLAY::SHOT:
+			break;
 		default:
 			break;
 		}
@@ -326,7 +356,9 @@ void Raider::UpdatePlay(void)
 		break;
 	}
 
-	Attack();
+	AttackStart();
+	AttackHit();
+	AttackEnd();
 	PrepareExecution();
 	Evolution();
 
@@ -412,11 +444,25 @@ void Raider::ChangeLandAir(void)
 void Raider::ChangeStateInPlay(STATE_INPLAY state)
 {
 	statePlay_ = state;
+
+	if (statePlay_ == STATE_INPLAY::ATTACK)
+	{
+		ChangeAttack(ATTACK_TYPE::CHASE);
+	}
+	else
+	{
+		ChangeAttack(ATTACK_TYPE::NONE);
+	}
 }
 
 void Raider::ChangeIsFly(bool isFly)
 {
 	isFly_ = isFly;
+}
+
+void Raider::ChangeAttack(ATTACK_TYPE type_)
+{
+	attackType_ = type_;
 }
 
 
@@ -485,7 +531,6 @@ void Raider::ProcessMove(void)
 	{
 		if (!isJump_ && IsEndLanding())
 		{
-
 			ChangeStateInPlay(STATE_INPLAY::IDLE);
 		}
 	}
@@ -626,6 +671,7 @@ void Raider::ProcessMoveFly(void)
 	{
 		//	空中Idleに
 		ChangeStateInPlay(STATE_INPLAY::IDLE);
+
 	}
 
 	//	下降したい
@@ -647,9 +693,9 @@ void Raider::ProcessMoveFly(void)
 
 }
 
-void Raider::Attack(void)
+void Raider::AttackStart(void)
 {
-	if (!InputManager::GetInstance().IsTrgMouseLeft() && !IsStateInPlay(STATE_INPLAY::ATTACK))
+	if (!InputManager::GetInstance().IsTrgMouseLeft() && !IsAttackType(ATTACK_TYPE::CHASE))
 	{
 		return;
 	}
@@ -666,21 +712,22 @@ void Raider::Attack(void)
 		if (!IsStateInPlay(STATE_INPLAY::ATTACK))
 		{
 			//	近接
+			movePow_ = { 0.0f,0.0f,0.0f };
 			goalQuaRot_ = transform_->quaRot.LookRotation(R2SDir(targetSurvivorNo_));
 			ChangeStateInPlay(STATE_INPLAY::ATTACK);
 			ChangeIsFly(true);
 			isJump_ = true;
-			attackCnt_ = ATTACK_FLAME;
+			chaseTime_ = CHASE_FLAME;
 		}
 		else
 		{
 			//	既にアタック状態に入ってる
 			transform_->pos = VAdd(transform_->pos, VScale(transform_->GetForward(), speed_ * 1.5f));
 			goalQuaRot_ = transform_->quaRot.Slerp(transform_->quaRot, transform_->quaRot.LookRotation(R2SDir(targetSurvivorNo_)), (TIME_ROT - stepRotTime_) / TIME_ROT);
-			attackCnt_--;
-			if (attackCnt_ <= 0)
+			chaseTime_--;
+			if (chaseTime_ <= 0)
 			{
-				attackCnt_ = ATTACK_FLAME;
+				chaseTime_ = CHASE_FLAME;
 				ChangeStateInPlay(STATE_INPLAY::IDLE);
 			}
 		}
@@ -689,6 +736,37 @@ void Raider::Attack(void)
 	{
 		MakeShot();
 		ChangeStateInPlay(STATE_INPLAY::SHOT);
+	}
+}
+
+void Raider::AttackHit(void)
+{
+	if (!IsAttackType(ATTACK_TYPE::HIT))
+	{
+		return;
+	}
+	if (attackCnt_ < 0)
+	{
+		attackCnt_ = ATTACK_FLAME;
+		ChangeAttack(ATTACK_TYPE::END);
+		return;
+	}
+	survivor_[targetSurvivorNo_].lock()->SetBlowOff(AsoUtility::VECTOR_ZERO,0.0f,10.0f);
+	attackCnt_--;
+	return;
+}
+
+void Raider::AttackEnd(void)
+{
+	if (!IsAttackType(ATTACK_TYPE::END))
+	{
+		return;
+	}
+
+	survivor_[targetSurvivorNo_].lock()->SetBlowOff(survivor_[targetSurvivorNo_].lock()->GetTransform().lock()->GetUp(),50.0f,300.0f);
+	if (animationController_->IsEnd())
+	{
+		ChangeStateInPlay(STATE_INPLAY::IDLE);
 	}
 }
 
@@ -905,7 +983,6 @@ void Raider::SetGoalRotate(double rotRad)
 
 void Raider::CollisionGravity(void)
 {
-
 	//	ジャンプ量を加算
 	movedPos_ = VAdd(movedPos_, jumpPow_);
 
@@ -916,44 +993,31 @@ void Raider::CollisionGravity(void)
 	VECTOR dirUpGravity = AsoUtility::DIR_U;
 
 	//	重力の強さ
-	float gravityPow = gravityPow_;
+	float gravityPow = 1.0f;
 
-	float checkPow = 20.0f;
+	float checkPow = 10.0f;
 	gravHitPosUp_ = VAdd(movedPos_, VScale(dirUpGravity, gravityPow));
 	gravHitPosUp_ = VAdd(gravHitPosUp_, VScale(dirUpGravity, checkPow * 2.0f));
 	gravHitPosDown_ = VAdd(movedPos_, VScale(dirGravity, checkPow));
 
-	for (const auto c : colliders_)
+	auto hit = colMng_.GetInstance().Line_IsCollision_Gravity(gravHitPosUp_, gravHitPosDown_);
+
+	if (hit.HitFlag > 0 && VDot(dirGravity, jumpPow_) > 0.9f)
 	{
-		
-		//	地面との衝突
-		auto hit = MV1CollCheck_Line(
-			c->modelId_, -1, gravHitPosUp_, gravHitPosDown_);
+		//	衝突地点から、少し上に移動
+		movedPos_ = VAdd(hit.HitPosition, VScale(dirUpGravity, gravityPow * 2.0f));
 
-		//	当たってるか、重力とジャンプのベクトル方向がほぼ一緒
-		if (hit.HitFlag > 0 && VDot(dirGravity, jumpPow_) > 0.9f)
-		{
-			//	衝突地点から、少し上に移動
-			movedPos_ = VAdd(hit.HitPosition, VScale(dirUpGravity, 5.0f));
+		//	ジャンプリセット
+		jumpPow_ = AsoUtility::VECTOR_ZERO;
+		stepJump_ = 0.0f;
 
-			//	ジャンプリセット
-			jumpPow_ = AsoUtility::VECTOR_ZERO;
-			stepJump_ = 0.0f;
 
-			if (isJump_)
-			{
-				ChangeStateInPlay(STATE_INPLAY::LAND);
-			}
+		isJump_ = false;
 
-			isJump_ = false;
-
-			gravityPow_ = 10.0f;
-		}
+		gravityPow_ = DEFAULT_GRAVITY_POW;
 
 	}
-
 }
-
 
 void Raider::CalcGravityPow(void)
 {
@@ -961,7 +1025,7 @@ void Raider::CalcGravityPow(void)
 	{
 		//	飛んでるなら重力とジャンプ力を無効に
 		jumpPow_ = AsoUtility::VECTOR_ZERO;
-		gravityPow_ = 10.0f;
+		gravityPow_ = DEFAULT_GRAVITY_POW;
 		return;
 	}
 
@@ -1096,5 +1160,12 @@ void Raider::WaitFlame(void)
 {
 	float delta = SceneManager::GetInstance().GetDeltaTime();
 	waitFlame_ -= delta;
+}
+
+void Raider::BlowOff(void)
+{
+	ChangeStateInPlay(STATE_INPLAY::STUN);
+	
+	movePow_ = VScale(blowOffVec_, blowOffPow_);
 }
 
