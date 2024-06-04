@@ -31,6 +31,9 @@ public:
 	static constexpr float LIMIT_X_UP_RAD = 80.0f * (DX_PI_F / 180.0f);
 	static constexpr float LIMIT_X_DW_RAD = 89.0f * (DX_PI_F / 180.0f);
 
+	//	
+	static constexpr float MIDPOS_STRETCH_POW = 5000.0f;
+
 	//	カメラモード
 	enum class MODE
 	{
@@ -68,6 +71,8 @@ public:
 	//	追従対象の設定
 	void SetFollow(const Transform* follow);
 
+	//	カメラの中心→視線方向に伸ばした先のPosを取得
+	VECTOR GetMidRayDestantionPos(void);
 private:
 
 	//	カメラが追従対象とするTransform
@@ -96,6 +101,9 @@ private:
 
 	Vector2 defaultMousePos_;
 
+	//	カメラの中心からまっすぐ〇距離レイを伸ばした先のPosition
+	VECTOR midRayDestinationPos_;
+
 	//	カメラを初期位置に戻す
 	void SetDefault(void);
 
@@ -109,6 +117,7 @@ private:
 	void SetBeforeDrawFixedPoint(void);
 	void SetBeforeDrawFollow(void);
 	void SetBeforeDrawSelfShot(void);
+
 
 };
 

@@ -45,10 +45,10 @@ float PlayerBase::GetGravity(void)
 
 void PlayerBase::SetBlowOff(VECTOR vec, float pow, float stunTime)
 {
+	BlowOff();
 	blowOffVec_ = vec;
 	blowOffPow_ = pow;
 	stunTime_ = stunTime;
-	BlowOff();
 }
 
 void PlayerBase::ChangeState(STATE state)
@@ -186,7 +186,6 @@ void PlayerBase::Rotate(void)
 
 void PlayerBase::Collision(void)
 {
-
 	//	現在座標を起点に移動後座標を決める
 	movedPos_ = VAdd(transform_->pos, movePow_);
 
@@ -244,3 +243,15 @@ float PlayerBase::Myself2OtherDistance(std::weak_ptr<Transform> toTran)
 	float Distance3D = sqrtf(powf(fabsf(DistanceXZ), 2) + powf(fabsf(Dif.y), 2));
 	return Distance3D;
 }
+
+VECTOR PlayerBase::Myself2OtherDir(std::weak_ptr<Transform> toTran)
+{
+	VECTOR ret;
+
+	VECTOR myPos = transform_->pos;
+	VECTOR otherPos = toTran.lock()->pos;
+
+	ret = AsoUtility::VNormalize(VSub(otherPos, myPos));
+	return ret;
+}
+

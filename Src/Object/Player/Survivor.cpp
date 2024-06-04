@@ -189,7 +189,11 @@ void Survivor::ChangeStateAnimation(void)
 
 void Survivor::UpdatePlay(void)
 {
-	UpdateLand();
+	if (!IsStateInPlay(STATE_INPLAY::STUN))
+	{
+		UpdateLand();
+	}
+
 	ChangeStateAnimation();
 
 	//	ˆÚ“®•ûŒü‚É‰ž‚¶‚½‰ñ“]
@@ -197,6 +201,8 @@ void Survivor::UpdatePlay(void)
 
 	//	d—Í‚É‚æ‚éˆÚ“®—Ê
 	CalcGravityPow();
+
+	Stun();
 
 	//	Õ“Ë”»’è
 	Collision();
@@ -426,6 +432,11 @@ void Survivor::CollisionGravity(void)
 		jumpPow_ = AsoUtility::VECTOR_ZERO;
 		stepJump_ = 0.0f;
 
+		if (isJump_)
+		{
+			statePlay_ = STATE_INPLAY::LAND;
+		}
+
 
 		isJump_ = false;
 
@@ -439,7 +450,7 @@ void Survivor::CalcGravityPow(void)
 
 	//	d—Í•ûŒü
 	VECTOR dirGravity = AsoUtility::DIR_D;
-
+	
 	//	d—Í‚Ì‹­‚³
 	gravityPow_ += 0.2f;
 
@@ -478,6 +489,20 @@ bool Survivor::IsEndLanding(void)
 void Survivor::BlowOff(void)
 {
 	ChangeStateInPlay(STATE_INPLAY::STUN);
+	goalQuaRot_ = transform_->quaRot.LookRotation(Myself2OtherDir(raiderTran_));
+}
 
-	movePow_ = VScale(blowOffVec_, blowOffPow_);
+void Survivor::Stun(void)
+{
+	if (!IsStateInPlay(STATE_INPLAY::STUN))
+	{
+		return;
+	}
+	movePow_ = AsoUtility::VECTOR_ZERO;
+	jumpPow_ = VScale(blowOffVec_, blowOffPow_);
+	stunTime_--;
+	if (stunTime_ < 0)
+	{
+		ChangeStateInPlay(STATE_INPLAY::IDLE);
+	}
 }

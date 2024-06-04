@@ -42,6 +42,7 @@ public :
 	//	再生終了
 	bool IsEnd(void) const;
 
+	float GetPlayTime(void) const;
 private :
 
 	//	モデルのハンドルID

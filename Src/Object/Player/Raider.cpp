@@ -119,6 +119,8 @@ void Raider::SetParam(void)
 	exeCnt_ = EXECUTION_FLAME;
 	chaseTime_ = CHASE_FLAME;
 	attackCnt_ = ATTACK_FLAME;
+
+	attackEndFlame_ = 20.0f;
 }
 
 void Raider::Update(void)
@@ -713,7 +715,7 @@ void Raider::AttackStart(void)
 		{
 			//	近接
 			movePow_ = { 0.0f,0.0f,0.0f };
-			goalQuaRot_ = transform_->quaRot.LookRotation(R2SDir(targetSurvivorNo_));
+			goalQuaRot_ = transform_->quaRot.LookRotation(Myself2OtherDir(survivor_[targetSurvivorNo_].lock()->GetTransform()));
 			ChangeStateInPlay(STATE_INPLAY::ATTACK);
 			ChangeIsFly(true);
 			isJump_ = true;
@@ -723,7 +725,7 @@ void Raider::AttackStart(void)
 		{
 			//	既にアタック状態に入ってる
 			transform_->pos = VAdd(transform_->pos, VScale(transform_->GetForward(), speed_ * 1.5f));
-			goalQuaRot_ = transform_->quaRot.Slerp(transform_->quaRot, transform_->quaRot.LookRotation(R2SDir(targetSurvivorNo_)), (TIME_ROT - stepRotTime_) / TIME_ROT);
+			goalQuaRot_ = transform_->quaRot.Slerp(transform_->quaRot, transform_->quaRot.LookRotation(Myself2OtherDir(survivor_[targetSurvivorNo_].lock()->GetTransform())), (TIME_ROT - stepRotTime_) / TIME_ROT);
 			chaseTime_--;
 			if (chaseTime_ <= 0)
 			{
@@ -762,8 +764,13 @@ void Raider::AttackEnd(void)
 	{
 		return;
 	}
+	else if (animationController_->GetPlayTime() <= attackEndFlame_)
+	{
+		survivor_[targetSurvivorNo_].lock()->SetBlowOff(AsoUtility::VECTOR_ZERO, 0.0f, 10.0f);
+		return;
+	}
 
-	survivor_[targetSurvivorNo_].lock()->SetBlowOff(survivor_[targetSurvivorNo_].lock()->GetTransform().lock()->GetUp(),50.0f,300.0f);
+	survivor_[targetSurvivorNo_].lock()->SetBlowOff(survivor_[targetSurvivorNo_].lock()->GetTransform().lock()->GetUp(), ATTACK_POW,120.0f);
 	if (animationController_->IsEnd())
 	{
 		ChangeStateInPlay(STATE_INPLAY::IDLE);
@@ -1011,6 +1018,10 @@ void Raider::CollisionGravity(void)
 		jumpPow_ = AsoUtility::VECTOR_ZERO;
 		stepJump_ = 0.0f;
 
+		if (isJump_)
+		{
+			statePlay_ = STATE_INPLAY::LAND;
+		}
 
 		isJump_ = false;
 
@@ -1130,17 +1141,6 @@ VECTOR Raider::ShotDir(void)
 		ret = SceneManager::GetInstance().GetCamera()->GetForward();
 	}
 
-	return ret;
-}
-
-VECTOR Raider::R2SDir(int num)
-{
-	VECTOR ret;
-
-	VECTOR raiPos = transform_->pos;
-	VECTOR suvPos = survivor_[num].lock()->GetTransform().lock()->pos;
-
-	ret = AsoUtility::VNormalize(VSub(suvPos, raiPos));
 	return ret;
 }
 

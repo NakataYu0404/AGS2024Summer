@@ -25,6 +25,7 @@ void Camera::Init(void)
 {
 	ChangeMode(MODE::FIXED_POINT);
 	defaultMousePos_ = { Application::SCREEN_SIZE_X/2, Application::SCREEN_SIZE_Y/2 };
+	midRayDestinationPos_ = AsoUtility::VECTOR_ZERO;
 }
 
 void Camera::Update(void)
@@ -48,6 +49,8 @@ void Camera::SetBeforeDraw(void)
 		break;
 	}
 
+	midRayDestinationPos_ = VScale(AsoUtility::VNormalize(VSub(targetPos_, pos_)), MIDPOS_STRETCH_POW);
+
 	//	ÉJÉÅÉâÇÃê›íË(à íuÇ∆íçéãì_Ç…ÇÊÇÈêßå‰)
 	SetCameraPositionAndTargetAndUpVec(
 		pos_, 
@@ -67,6 +70,11 @@ void Camera::Draw(void)
 void Camera::SetFollow(const Transform* follow)
 {
 	followTransform_ = follow;
+}
+
+VECTOR Camera::GetMidRayDestantionPos(void)
+{
+	return midRayDestinationPos_;
 }
 
 VECTOR Camera::GetPos(void) const

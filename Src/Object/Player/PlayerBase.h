@@ -9,6 +9,7 @@ class Collider;
 class Capsule;
 class CollisionManager;
 
+
 class PlayerBase : public ActorBase
 {
 
@@ -83,6 +84,7 @@ protected:
 
 	//	©•ª¨‰½‚©Transform’¼ü‹——£(“à•”‚Å³‹K‰»A’l‚ğ³‚Ì”‚É‚µ‚Ü‚·)
 	float Myself2OtherDistance(std::weak_ptr<Transform> toTran);
+	VECTOR Myself2OtherDir(std::weak_ptr<Transform> toTran);
 
 	virtual void BlowOff(void) = 0;
 

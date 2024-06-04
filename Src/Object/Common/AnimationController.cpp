@@ -207,3 +207,8 @@ bool AnimationController::IsEnd(void) const
 	return ret;
 
 }
+
+float AnimationController::GetPlayTime(void) const
+{
+	return playAnim_.step;
+}

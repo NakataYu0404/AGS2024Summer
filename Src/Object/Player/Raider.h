@@ -31,6 +31,8 @@ public:
 	static constexpr float CHASE_FLAME = 90;
 	static constexpr float ATTACK_FLAME = 30;
 
+	static constexpr float ATTACK_POW = 50.0f;
+
 	//	空中にいたいか地上にいたいかで処理を変えたい(不可抗力で空中にいてしまってる場合は(落下とか)LANDで、自分から浮いてるときはAIR)
 	enum class STATE_PLPOS
 	{
@@ -211,9 +213,6 @@ private:
 	bool CanTarget(int num);
 	VECTOR ShotDir(void);
 
-	//	レイダー→サバイバーの向き(正規化済み)
-	VECTOR R2SDir(int num);
-
 	void SetWaitFlame(float flame = -1);
 	void WaitFlame(void);
 
@@ -273,4 +272,6 @@ private:
 	std::shared_ptr<Transform> exeQube_;
 
 	ATTACK_TYPE attackType_;
+
+	float attackEndFlame_;
 };

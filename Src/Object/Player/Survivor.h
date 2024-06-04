@@ -107,6 +107,7 @@ private:
 	bool IsEndLanding(void) override;
 
 	void BlowOff(void) override;
+	void Stun(void);
 
 	//	自分のプレイヤーNo.サバイバー内のみ
 	int plNum_;
