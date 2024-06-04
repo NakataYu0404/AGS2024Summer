@@ -223,7 +223,7 @@ Collider::Collision_Date CollisionManager::Capsule2Model_Collider_PushBack(const
 	return answer;
 }
 
-DxLib::MV1_COLL_RESULT_POLY CollisionManager::Line_IsCollision_Gravity(const VECTOR LineTopPos, const VECTOR LineBotPos)
+DxLib::MV1_COLL_RESULT_POLY CollisionManager::Line_IsCollision_Stage(const VECTOR LineTopPos, const VECTOR LineBotPos)
 {
 	//	ステージモデルと行うので、ステージを探すようにする
 	for (auto actor : actors_)

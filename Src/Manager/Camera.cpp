@@ -49,14 +49,14 @@ void Camera::SetBeforeDraw(void)
 		break;
 	}
 
-	midRayDestinationPos_ = VScale(AsoUtility::VNormalize(VSub(targetPos_, pos_)), MIDPOS_STRETCH_POW);
-
 	//	カメラの設定(位置と注視点による制御)
 	SetCameraPositionAndTargetAndUpVec(
 		pos_, 
 		targetPos_, 
 		cameraUp_
 	);
+
+	midRayDestinationPos_ = VScale(GetForward(), MIDPOS_STRETCH_POW);
 
 	//	DXライブラリのカメラとEffekseerのカメラを同期する。
 	Effekseer_Sync3DSetting();

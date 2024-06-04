@@ -81,6 +81,23 @@ void PlayerBase::UpdateNone(void)
 {
 }
 
+void PlayerBase::ShotDestinationPosUpdate(void)
+{
+	cameraMidRayPos_ = SceneManager::GetInstance().GetCamera()->GetMidRayDestantionPos();
+
+	auto Hit = colMng_.Line_IsCollision_Stage(SceneManager::GetInstance().GetCamera()->GetPos(), cameraMidRayPos_);
+
+	if (Hit.HitFlag)
+	{
+		shotDestinationPos_ = Hit.HitPosition;
+	}
+	else
+	{
+		shotDestinationPos_ = cameraMidRayPos_;
+	}
+
+}
+
 void PlayerBase::DrawShadow(void)
 {
 
@@ -216,7 +233,7 @@ void PlayerBase::CollisionGravity(void)
 	gravHitPosUp_ = VAdd(gravHitPosUp_, VScale(dirUpGravity, checkPow * 2.0f));
 	gravHitPosDown_ = VAdd(movedPos_, VScale(dirGravity, checkPow));
 
-	auto hit = colMng_.GetInstance().Line_IsCollision_Gravity(gravHitPosUp_, gravHitPosDown_);
+	auto hit = colMng_.GetInstance().Line_IsCollision_Stage(gravHitPosUp_, gravHitPosDown_);
 
 	if (hit.HitFlag> 0 && VDot(dirGravity, jumpPow_) > 0.9f)
 	{

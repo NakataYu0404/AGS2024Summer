@@ -32,7 +32,7 @@ public:
 	static constexpr float LIMIT_X_DW_RAD = 89.0f * (DX_PI_F / 180.0f);
 
 	//	
-	static constexpr float MIDPOS_STRETCH_POW = 5000.0f;
+	static constexpr float MIDPOS_STRETCH_POW = 500.0f;
 
 	//	ÉJÉÅÉâÉÇÅ[Éh
 	enum class MODE

@@ -60,6 +60,7 @@ protected:
 	//	更新ステップ
 	virtual void UpdateNone(void);
 	virtual void UpdatePlay(void) = 0;
+	void ShotDestinationPosUpdate(void);
 
 	//	描画系
 	void DrawShadow(void);
@@ -143,4 +144,7 @@ protected:
 	VECTOR blowOffVec_;
 	float blowOffPow_;
 	float stunTime_;
+
+	VECTOR cameraMidRayPos_;
+	VECTOR shotDestinationPos_;
 };

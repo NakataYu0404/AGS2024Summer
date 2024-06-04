@@ -70,6 +70,8 @@ void Raider::Init(void)
 
 void Raider::SetParam(void)
 {
+	shotDestinationPos_ = AsoUtility::VECTOR_ZERO;
+	cameraMidRayPos_ = AsoUtility::VECTOR_ZERO;
 
 	animationController_ = nullptr;
 	state_ = STATE::NONE;
@@ -357,6 +359,8 @@ void Raider::UpdatePlay(void)
 	default:
 		break;
 	}
+
+	ShotDestinationPosUpdate();
 
 	AttackStart();
 	AttackHit();
@@ -1007,7 +1011,7 @@ void Raider::CollisionGravity(void)
 	gravHitPosUp_ = VAdd(gravHitPosUp_, VScale(dirUpGravity, checkPow * 2.0f));
 	gravHitPosDown_ = VAdd(movedPos_, VScale(dirGravity, checkPow));
 
-	auto hit = colMng_.GetInstance().Line_IsCollision_Gravity(gravHitPosUp_, gravHitPosDown_);
+	auto hit = colMng_.GetInstance().Line_IsCollision_Stage(gravHitPosUp_, gravHitPosDown_);
 
 	if (hit.HitFlag > 0 && VDot(dirGravity, jumpPow_) > 0.9f)
 	{
@@ -1128,17 +1132,17 @@ VECTOR Raider::ShotDir(void)
 {
 	//	自分から相手に向かうベクトルだから、カメラ回転とかは関係ない
 	VECTOR ret;
+	VECTOR raiPos = transform_->pos;
 
 	if (isTarget_)
 	{
-		VECTOR raiPos = transform_->pos;
 		VECTOR suvPos = survivor_[targetSurvivorNo_].lock()->GetTransform().lock()->pos;
 
 		ret = AsoUtility::VNormalize(VSub(suvPos, raiPos));
 	}
 	else
 	{
-		ret = SceneManager::GetInstance().GetCamera()->GetForward();
+ 		ret = AsoUtility::VNormalize(VSub(shotDestinationPos_, raiPos));
 	}
 
 	return ret;
