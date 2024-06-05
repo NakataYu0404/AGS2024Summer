@@ -107,6 +107,9 @@ public:
 	static VECTOR Normalize(const Vector2& v);
 	static VECTOR VNormalize(const VECTOR& v);
 
+	static VECTOR VDiv(const VECTOR& v, const float i);
+	static VECTOR VDiv(const VECTOR& v, const VECTOR v2);
+
 	//	2つのベクトルの間の角度
 	static double AngleDeg(const VECTOR& from, const VECTOR& to);
 

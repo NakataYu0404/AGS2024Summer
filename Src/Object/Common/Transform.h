@@ -26,12 +26,16 @@ public:
 
 	//	‘å‚«‚³
 	VECTOR scl;
+
 	//	‰ñ“]
 	VECTOR rot;
+
 	//	ˆÊ’u
 	VECTOR pos;
-	VECTOR localPos;
 	VECTOR headPos;
+	VECTOR midPos;
+
+	VECTOR localPos;
 
 	MATRIX matScl;
 	MATRIX matRot;

@@ -34,6 +34,7 @@ void Raider::Init(void)
 		ResourceManager::SRC::MDL_RAIDER));
 	transform_->scl = AsoUtility::VECTOR_ONE;
 	transform_->pos = { 0.0f, -30.0f, 0.0f };
+	transform_->headPos = MV1GetFramePosition(transform_->modelId, FRAME_HEAD);
 	transform_->quaRot = Quaternion();
 	transform_->quaRotLocal =
 		Quaternion::Euler({ 0.0f, AsoUtility::Deg2RadF(180.0f), 0.0f });
@@ -41,15 +42,15 @@ void Raider::Init(void)
 	//	アニメーションの設定
 	InitAnimation();
 
-	//exeQube_ = std::make_shared<Transform>();
-	//exeQube_->SetModel(resMng_.LoadModelDuplicate(
-	//	ResourceManager::SRC::EXEQUBE));
-	//exeQube_->scl = {2.0f,2.0f,2.0f};
-	//exeQube_->pos = transform_->pos;
-	//exeQube_->localPos = {0.0f,40.0f,0.0f};
-	//exeQube_->quaRot = transform_->quaRot;
-	//exeQube_->quaRotLocal = transform_->quaRotLocal;
-	//exeQube_->Update();
+	exeQube_ = std::make_shared<Transform>();
+	exeQube_->SetModel(resMng_.LoadModelDuplicate(
+		ResourceManager::SRC::EXEQUBE));
+	exeQube_->scl = {2.0f,2.0f,2.0f};
+	exeQube_->pos = transform_->midPos;
+	exeQube_->localPos = {0.0f,0.0f,0.0f};
+	exeQube_->quaRot = transform_->quaRot;
+	exeQube_->quaRotLocal = transform_->quaRotLocal;
+	exeQube_->Update();
 
 	transform_->MakeCollider(Collider::Category::RAIDER, Collider::TYPE::CAPSULE);
 
@@ -103,7 +104,7 @@ void Raider::SetParam(void)
 
 	rotRad_ = 0.0f;
 
-	levelRaider_ = LEVEL_PL::LV2;
+	levelRaider_ = LEVEL_PL::LV1;
 	exp_ = 0;
 
 	for (int i = 0; i < SURVIVOR_NUM; i++)
@@ -122,7 +123,8 @@ void Raider::SetParam(void)
 	chaseTime_ = CHASE_FLAME;
 	attackCnt_ = ATTACK_FLAME;
 
-	attackEndFlame_ = 20.0f;
+	attackEndFlame_ = 15.0f;
+	blowOffFlag_ = false;
 }
 
 void Raider::Update(void)
@@ -138,11 +140,11 @@ void Raider::Update(void)
 		UpdatePlay();
 		break;
 	}
-	//	モデル制御更新
-	transform_->Update();
-	UpdateShot();
 
-	LockOn();
+	//	モデル制御更新
+	transform_->headPos = MV1GetFramePosition(transform_->modelId, FRAME_HEAD);
+	transform_->midPos = AsoUtility::VDiv(VAdd(transform_->pos, transform_->headPos), 2);
+	transform_->Update();
 
 	//	アニメーション再生
 	animationController_->Update();
@@ -152,9 +154,15 @@ void Raider::Update(void)
 void Raider::Draw(void)
 {
 
+	DrawLine3D(shotDestinationPos_, transform_->pos, 0x000000);
+
 	//	モデルの描画
 	MV1DrawModel(transform_->modelId);
-	//MV1DrawModel(exeQube_->modelId);
+
+	if (exeTarget_ != TARGET::NONE)
+	{
+		MV1DrawModel(exeQube_->modelId);
+	}
 
 	DrawShot();
 
@@ -360,12 +368,10 @@ void Raider::UpdatePlay(void)
 		break;
 	}
 
-	ShotDestinationPosUpdate();
-
 	AttackStart();
 	AttackHit();
 	AttackEnd();
-	PrepareExecution();
+
 	Evolution();
 
 	ChangeLandAir();
@@ -384,6 +390,11 @@ void Raider::UpdatePlay(void)
 	//	回転させる
 	transform_->quaRot = playerRotY_;
 
+	ShotDestinationPosUpdate();
+
+	UpdateShot();
+
+	LockOn();
 }
 
 void Raider::UpdateShot(void)
@@ -425,6 +436,7 @@ void Raider::UpdateLand(void)
 	//	ジャンプ処理
 	ProcessJump();
 
+	PrepareExecution();
 }
 
 void Raider::UpdateAir(void)
@@ -583,7 +595,7 @@ void Raider::ProcessFly(void)
 	auto& ins = InputManager::GetInstance();
 	bool isHit = ins.IsTrgDown(KEY_INPUT_SPACE);
 
-  	if (isHit && (isJump_ && !IsEndLanding()))
+	if (isHit && (isJump_ && !IsEndLanding()))
 	{
 		ChangeIsFly(true);
 		stepJump_ = TIME_JUMP_IN;
@@ -718,7 +730,7 @@ void Raider::AttackStart(void)
 		if (!IsStateInPlay(STATE_INPLAY::ATTACK))
 		{
 			//	近接
-			movePow_ = { 0.0f,0.0f,0.0f };
+			movePow_ = AsoUtility::VECTOR_ZERO;
 			goalQuaRot_ = transform_->quaRot.LookRotation(Myself2OtherDir(survivor_[targetSurvivorNo_].lock()->GetTransform()));
 			ChangeStateInPlay(STATE_INPLAY::ATTACK);
 			ChangeIsFly(true);
@@ -734,6 +746,10 @@ void Raider::AttackStart(void)
 			if (chaseTime_ <= 0)
 			{
 				chaseTime_ = CHASE_FLAME;
+				if (levelRaider_ == LEVEL_PL::LV1)
+				{
+					ChangeIsFly(false);
+				}
 				ChangeStateInPlay(STATE_INPLAY::IDLE);
 			}
 		}
@@ -774,10 +790,21 @@ void Raider::AttackEnd(void)
 		return;
 	}
 
-	survivor_[targetSurvivorNo_].lock()->SetBlowOff(survivor_[targetSurvivorNo_].lock()->GetTransform().lock()->GetUp(), ATTACK_POW,120.0f);
+	//	一回だけホントの吹っ飛ばし処理をするようにしたいから、なんか良い案を考えたい
+	if (!blowOffFlag_)
+	{
+		survivor_[targetSurvivorNo_].lock()->SetBlowOff(survivor_[targetSurvivorNo_].lock()->GetTransform().lock()->GetUp(), ATTACK_POW, 120.0f);
+		blowOffFlag_ = true;
+	}
+
 	if (animationController_->IsEnd())
 	{
+		if (levelRaider_ == LEVEL_PL::LV1)
+		{
+			ChangeIsFly(false);
+		}
 		ChangeStateInPlay(STATE_INPLAY::IDLE);
+		blowOffFlag_ = false;
 	}
 }
 
@@ -785,9 +812,11 @@ void Raider::PrepareExecution(void)
 {
 	auto& ins = InputManager::GetInstance();
 
-
 	if (ins.IsTrgDown(KEY_INPUT_E))
 	{
+		ChangeStateInPlay(STATE_INPLAY::EXECUTION);
+		SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::EXECUTION);
+
 		//	処刑対象を決めるための処理
 		float exeDistance = MAX_DISTANCE_EXECUTION;
 
@@ -832,7 +861,18 @@ void Raider::PrepareExecution(void)
 	if (!ins.IsNew(KEY_INPUT_E))
 	{
 		exeCnt_ = EXECUTION_FLAME;
+		exeTarget_ = TARGET::NONE;
+		if (IsStateInPlay(STATE_INPLAY::EXECUTION))
+		{
+			ChangeStateInPlay(STATE_INPLAY::IDLE);
+		}
 		return;
+	}
+	else if (exeTarget_ != TARGET::NONE)
+	{
+		movePow_ = AsoUtility::VECTOR_ZERO;
+		//	ボタン押してて、ターゲットがNONEでも無かったら
+		ChangeStateInPlay(STATE_INPLAY::EXECUTION);
 	}
 
 	switch (exeTarget_)
@@ -846,6 +886,7 @@ void Raider::PrepareExecution(void)
 			{
 				exeCnt_ = EXECUTION_FLAME;
 				Execution(ExecuteSur_);
+				exeTarget_ = TARGET::NONE;
 			}
 		}
 		break;
@@ -858,14 +899,16 @@ void Raider::PrepareExecution(void)
 			{
 				exeCnt_ = EXECUTION_FLAME;
 				Execution(ExecuteVic_);
+				exeTarget_ = TARGET::NONE;
 			}
 		}
 		break;
 	}
-	//exeQube_->pos = transform_->pos;
-	//exeQube_->quaRot = transform_->quaRot;
-	//exeQube_->quaRotLocal = transform_->quaRotLocal;
-	//exeQube_->Update();
+	exeQube_->pos = transform_->midPos;
+	exeQube_->pos.y += 200.0f;
+	exeQube_->quaRot = transform_->quaRot;
+	exeQube_->quaRotLocal = transform_->quaRotLocal;
+	exeQube_->Update();
 
 }
 
@@ -1134,10 +1177,13 @@ VECTOR Raider::ShotDir(void)
 	VECTOR ret;
 	VECTOR raiPos = transform_->pos;
 
+	VECTOR s1 = survivor_[0].lock()->GetTransform().lock()->pos;
+	VECTOR s2 = survivor_[1].lock()->GetTransform().lock()->pos;
+	VECTOR s3 = survivor_[2].lock()->GetTransform().lock()->pos;
+
 	if (isTarget_)
 	{
-		VECTOR suvPos = survivor_[targetSurvivorNo_].lock()->GetTransform().lock()->pos;
-
+		VECTOR suvPos = survivor_[targetSurvivorNo_].lock()->GetTransform().lock()->midPos;
 		ret = AsoUtility::VNormalize(VSub(suvPos, raiPos));
 	}
 	else
@@ -1171,5 +1217,10 @@ void Raider::BlowOff(void)
 	ChangeStateInPlay(STATE_INPLAY::STUN);
 	
 	movePow_ = VScale(blowOffVec_, blowOffPow_);
+}
+
+void Raider::KnockOuted(void)
+{
+	//	死→サバイバー勝利シーンへ
 }
 

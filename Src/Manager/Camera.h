@@ -3,6 +3,7 @@
 #include "../Common/Quaternion.h"
 #include "../Common/Vector2.h"
 class Transform;
+class CollisionManager;
 
 class Camera
 {
@@ -27,12 +28,16 @@ public:
 	//	追従位置から注視点までの相対座標
 	static constexpr VECTOR LOCAL_F2T_POS = { 0.0f, 200.0f, 200.0f };
 
+	//	処刑時カメラ
+	static constexpr VECTOR LOCAL_F2C_POS_EXE = { 0.0f, 0.0f, -100.0f };
+	static constexpr VECTOR LOCAL_F2T_POS_EXE = { 0.0f, 0.0f, 100.0f };
+
 	//	カメラのX回転上限度角
 	static constexpr float LIMIT_X_UP_RAD = 80.0f * (DX_PI_F / 180.0f);
 	static constexpr float LIMIT_X_DW_RAD = 89.0f * (DX_PI_F / 180.0f);
 
 	//	
-	static constexpr float MIDPOS_STRETCH_POW = 500.0f;
+	static constexpr float MIDPOS_STRETCH_POW = 5000.0f;
 
 	//	カメラモード
 	enum class MODE
@@ -40,6 +45,7 @@ public:
 		NONE,
 		FIXED_POINT,
 		FOLLOW,
+		EXECUTION,
 		SELF_SHOT
 	};
 
@@ -117,7 +123,10 @@ private:
 	void SetBeforeDrawFixedPoint(void);
 	void SetBeforeDrawFollow(void);
 	void SetBeforeDrawSelfShot(void);
+	void SetBeforeDrawExeqution(void);
 
+	//	シングルトン参照
+	CollisionManager& colMng_;
 
 };
 

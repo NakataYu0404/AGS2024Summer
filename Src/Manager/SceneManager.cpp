@@ -267,5 +267,3 @@ void SceneManager::Fade(void)
 	}
 
 }
-
-

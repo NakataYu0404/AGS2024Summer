@@ -56,7 +56,7 @@ void ResourceManager::Init(void)
 	resourcesMap_.emplace(SRC::MDL_SURVIVOR, res);
 
 	//	サバイバー
-	res = new RES(RES_T::MODEL, PATH_MDL + "exeSphere.mv1");
+	res = new RES(RES_T::MODEL, PATH_MDL + "exeQube.mv1");
 	resourcesMap_.emplace(SRC::EXEQUBE, res);
 
 	//	プレイヤー影

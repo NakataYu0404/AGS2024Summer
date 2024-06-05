@@ -55,10 +55,11 @@ void Application::Init(void)
 	//	リソース管理初期化
 	ResourceManager::CreateInstance();
 
+	CollisionManager::CreateInstance();
+
 	//	シーン管理初期化
 	SceneManager::CreateInstance();
 
-	CollisionManager::CreateInstance();
 
 }
 

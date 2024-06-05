@@ -51,6 +51,17 @@ void PlayerBase::SetBlowOff(VECTOR vec, float pow, float stunTime)
 	stunTime_ = stunTime;
 }
 
+void PlayerBase::Damage(int damage)
+{
+	hp_ -= damage;
+
+	if (hp_ <= 0)
+	{
+		KnockOuted();
+	}
+
+}
+
 void PlayerBase::ChangeState(STATE state)
 {
 	//	状態変更
@@ -189,6 +200,7 @@ void PlayerBase::DrawShadow(void)
 
 	//	Ｚバッファを無効にする
 	SetUseZBuffer3D(FALSE);
+
 
 }
 void PlayerBase::Rotate(void)

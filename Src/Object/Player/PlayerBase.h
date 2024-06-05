@@ -44,6 +44,9 @@ public:
 	//	vec方向にpowの勢いで吹っ飛ぶ stunTimeが終わると復帰
 	void SetBlowOff(VECTOR vec, float pow, float stunTime);	//	吹っ飛ばす対象.SetBlowOff(vec...)って感じで使う
 
+	//	ダメージ受ける
+	void Damage(int damage);
+
 protected:
 
 	//	状態遷移
@@ -87,7 +90,11 @@ protected:
 	float Myself2OtherDistance(std::weak_ptr<Transform> toTran);
 	VECTOR Myself2OtherDir(std::weak_ptr<Transform> toTran);
 
+	//	Stunで設定された数値分吹っ飛ぶ処理
 	virtual void BlowOff(void) = 0;
+
+	//	Damage関数でHPなくなったら入る
+	virtual void KnockOuted(void) = 0;
 
 	//	回転完了までの時間
 	static constexpr float TIME_ROT = 0.3f;
@@ -147,4 +154,6 @@ protected:
 
 	VECTOR cameraMidRayPos_;
 	VECTOR shotDestinationPos_;
+
+	int hp_;
 };

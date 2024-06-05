@@ -19,7 +19,7 @@ public:
 	//	ジャンプ受付時間
 	static constexpr float TIME_JUMP_IN = 0.5f;
 
-	static constexpr int FRAME_HEAD = 6;
+	static constexpr int FRAME_HEAD = 4;
 
 	//	レイダーが殺した時に得るポイント 100で進化
 	static constexpr int POINT_EVOLUTION = 50;
@@ -79,7 +79,6 @@ public:
 
 private:
 
-
 	void InitAnimation(void) override;
 
 	//	現在のSTATEに合わせて変わるアニメーション
@@ -90,7 +89,6 @@ private:
 
 	//	地上、空中別の処理
 	void UpdateLand(void);
-
 
 	//	操作
 	void ProcessMove(void) override;
@@ -106,8 +104,15 @@ private:
 	//	着地モーション終了
 	bool IsEndLanding(void) override;
 
+
+	//	吹っ飛ばされ処理
 	void BlowOff(void) override;
+
+	//	スタン処理
 	void Stun(void);
+
+	//	HPが0になったときの処理
+	virtual void KnockOuted(void) override;
 
 	//	自分のプレイヤーNo.サバイバー内のみ
 	int plNum_;

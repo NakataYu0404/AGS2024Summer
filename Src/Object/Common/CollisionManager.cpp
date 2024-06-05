@@ -225,6 +225,14 @@ Collider::Collision_Date CollisionManager::Capsule2Model_Collider_PushBack(const
 
 DxLib::MV1_COLL_RESULT_POLY CollisionManager::Line_IsCollision_Stage(const VECTOR LineTopPos, const VECTOR LineBotPos)
 {
+	MV1_COLL_RESULT_POLY a;
+
+	if (this == nullptr)
+	{
+		a.HitFlag = false;
+		return a;
+	}
+
 	//	ステージモデルと行うので、ステージを探すようにする
 	for (auto actor : actors_)
 	{

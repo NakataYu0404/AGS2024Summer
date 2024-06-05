@@ -5,9 +5,10 @@
 #include "../Utility/AsoUtility.h"
 #include "../Manager/InputManager.h"
 #include "../Object/Common/Transform.h"
+#include "../Object/Common/CollisionManager.h"
 #include "Camera.h"
 
-Camera::Camera(void)
+Camera::Camera(void) : colMng_(CollisionManager::GetInstance())
 {
 	angles_ = VECTOR();
 	cameraUp_ = VECTOR();
@@ -47,6 +48,9 @@ void Camera::SetBeforeDraw(void)
 	case Camera::MODE::FOLLOW:
 		SetBeforeDrawFollow();
 		break;
+	case Camera::MODE::EXECUTION:
+		SetBeforeDrawExeqution();
+		break;
 	}
 
 	//	カメラの設定(位置と注視点による制御)
@@ -56,7 +60,7 @@ void Camera::SetBeforeDraw(void)
 		cameraUp_
 	);
 
-	midRayDestinationPos_ = VScale(GetForward(), MIDPOS_STRETCH_POW);
+	midRayDestinationPos_ = VAdd(pos_, VScale(GetForward(), MIDPOS_STRETCH_POW));
 
 	//	DXライブラリのカメラとEffekseerのカメラを同期する。
 	Effekseer_Sync3DSetting();
@@ -123,6 +127,9 @@ void Camera::ChangeMode(MODE mode)
 		break;
 	case Camera::MODE::FOLLOW:
 		break;
+	case Camera::MODE::EXECUTION:
+		break;
+
 	}
 
 }
@@ -168,7 +175,19 @@ void Camera::SyncFollow(void)
 
 	//	カメラ位置
 	localPos = rot_.PosAxis(LOCAL_F2C_POS);
-	pos_ = VAdd(pos, localPos);
+
+	VECTOR tmpPos = VAdd(pos, localPos);
+	auto Hit = colMng_.Line_IsCollision_Stage(tmpPos, targetPos_);
+
+	if (Hit.HitFlag)
+	{
+		pos_ = Hit.HitPosition;
+		ここもうちょっと良い形を考えよう！球体のコライダ用意してもいいし・・・
+	}
+	else
+	{
+		pos_ = VAdd(pos, localPos);
+	}
 
 	//	カメラの上方向
 	cameraUp_ = AsoUtility::DIR_U;
@@ -232,4 +251,31 @@ void Camera::SetBeforeDrawFollow(void)
 
 void Camera::SetBeforeDrawSelfShot(void)
 {
+}
+
+void Camera::SetBeforeDrawExeqution(void)
+{
+	//	同期先の位置
+	VECTOR pos = followTransform_->headPos;
+
+	//	重力の方向制御に従う
+	//	正面から設定されたY軸分、回転させる
+	angles_ = Quaternion::ToEuler(followTransform_->quaRot.AngleAxis(AsoUtility::Deg2RadF(180.0f),AsoUtility::AXIS_Y));
+	rotOutX_ = Quaternion::AngleAxis(angles_.y, AsoUtility::AXIS_Y);
+	//	正面から設定されたX軸分、回転させる
+	rot_ = rotOutX_.Mult(Quaternion::AngleAxis(angles_.x, AsoUtility::AXIS_X));
+
+	VECTOR localPos;
+
+	//	注視点(通常重力でいうところのY値を追従対象と同じにする)
+	localPos = rotOutX_.PosAxis(LOCAL_F2T_POS_EXE);
+	targetPos_ = VAdd(pos, localPos);
+
+	//	カメラ位置
+	localPos = rot_.PosAxis(LOCAL_F2C_POS_EXE);
+	pos_ = VAdd(pos, localPos);
+
+	//	カメラの上方向
+	cameraUp_ = AsoUtility::DIR_U;
+
 }

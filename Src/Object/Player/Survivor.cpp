@@ -102,7 +102,10 @@ void Survivor::Update(void)
 		break;
 	}
 
+
 	//	モデル制御更新
+	transform_->headPos = MV1GetFramePosition(transform_->modelId, FRAME_HEAD);
+
 	transform_->Update();
 
 	//	アニメーション再生
@@ -505,4 +508,9 @@ void Survivor::Stun(void)
 	{
 		ChangeStateInPlay(STATE_INPLAY::IDLE);
 	}
+}
+
+void Survivor::KnockOuted(void)
+{
+	ChangeStateInPlay(STATE_INPLAY::CRAWL);
 }

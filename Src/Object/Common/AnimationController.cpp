@@ -97,7 +97,6 @@ void AnimationController::Play(int type, bool isLoop,
 		stepEndLoopEnd_ = -1.0f;
 		switchLoopReverse_ = 1.0f;
 	}
-
 }
 
 void AnimationController::Update(void)

@@ -22,12 +22,14 @@ public:
 	//	ジャンプ受付時間
 	static constexpr float TIME_JUMP_IN = 0.5f;
 
+	static constexpr int FRAME_HEAD = 4;
+
 	//	サバイバーの数
 	//	GameSceneのやつを使えた方がいいけど、ヘッダーでインクルードすることになって良くない
 	static constexpr int SURVIVOR_NUM = 3;
 
 	//	処刑に必要なボタン長押しフレーム量
-	static constexpr float EXECUTION_FLAME = 300;
+	static constexpr float EXECUTION_FLAME = 60;
 	static constexpr float CHASE_FLAME = 90;
 	static constexpr float ATTACK_FLAME = 30;
 
@@ -54,7 +56,8 @@ public:
 		FLOAT,			//	自分で上昇してる
 		STUN,
 		ATTACK,
-		SHOT
+		SHOT,
+		EXECUTION,
 	};
 
 	enum class LEVEL_PL
@@ -80,6 +83,7 @@ public:
 		ATTACK_HIT,
 		ATTACK_END,
 		ATTACK_SHOT,
+		STUN,
 	};
 
 	enum class ATTACK_TYPE
@@ -125,7 +129,7 @@ public:
 	void SetVictim(std::vector<std::weak_ptr<Victim>> tran);
 
 	bool IsWaitNow(void);
-		
+			
 private:
 
 	//	ターゲット範囲の最大距離
@@ -217,6 +221,10 @@ private:
 	void WaitFlame(void);
 
 	void BlowOff(void) override;
+
+	virtual void KnockOuted(void) override;
+
+	bool blowOffFlag_;
 
 	//	現在の処刑可能対象(範囲内でサバイバー優先)
 	TARGET exeTarget_;

@@ -480,6 +480,16 @@ VECTOR AsoUtility::VNormalize(const VECTOR& v)
     return VNorm(v);
 }
 
+VECTOR AsoUtility::VDiv(const VECTOR& v, float i)
+{
+    return { v.x / i,v.y / i, v.z / i };
+}
+
+VECTOR AsoUtility::VDiv(const VECTOR& v, const VECTOR v2)
+{
+    return { v.x / v2.x,v.y / v2.y, v.z / v2.z };
+}
+
 double AsoUtility::AngleDeg(const VECTOR& from, const VECTOR& to)
 {
     //	sqrt(a) * sqrt(b) = sqrt(a * b) -- valid for real numbers
