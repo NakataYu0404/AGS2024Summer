@@ -181,8 +181,8 @@ void Camera::SyncFollow(void)
 
 	if (Hit.HitFlag)
 	{
-		pos_ = Hit.HitPosition;
-		ここもうちょっと良い形を考えよう！球体のコライダ用意してもいいし・・・
+		pos_ = VAdd(Hit.HitPosition,VScale(GetForward(),50.0f));
+		//ここもうちょっと良い形を考えよう！球体のコライダ用意してもいいし・・・
 	}
 	else
 	{

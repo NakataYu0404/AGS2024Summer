@@ -30,7 +30,7 @@ void Survivor::Init(void)
 	transform_->SetModel(resMng_.LoadModelDuplicate(
 		ResourceManager::SRC::MDL_SURVIVOR));
 	transform_->scl = AsoUtility::VECTOR_ONE;
-	transform_->pos = { 0.0f, -30.0f, 0.0f };
+	transform_->pos = { 400.0f* (plNum_+1), -30.0f, 400.0f* (plNum_ + 1) };
 	transform_->headPos = MV1GetFramePosition(transform_->modelId, FRAME_HEAD);
 	transform_->quaRot = Quaternion();
 	transform_->quaRotLocal =

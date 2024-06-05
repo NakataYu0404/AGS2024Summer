@@ -12,10 +12,11 @@ E:\Aso\2024Summer\AGS2024Summer\Src\Manager\SceneManager.cpp;E:\Aso\2024Summer\A
 E:\Aso\2024Summer\AGS2024Summer\Src\Object\Common\AnimationController.cpp;E:\Aso\2024Summer\AGS2024Summer\BaseProject\x64\Debug\AnimationController.obj
 E:\Aso\2024Summer\AGS2024Summer\Src\Object\Common\Capsule.cpp;E:\Aso\2024Summer\AGS2024Summer\BaseProject\x64\Debug\Capsule.obj
 E:\Aso\2024Summer\AGS2024Summer\Src\Object\Common\Collider.cpp;E:\Aso\2024Summer\AGS2024Summer\BaseProject\x64\Debug\Collider.obj
-E:\Aso\2024Summer\AGS2024Summer\Src\Object\Common\SpeechBalloon.cpp;E:\Aso\2024Summer\AGS2024Summer\BaseProject\x64\Debug\SpeechBalloon.obj
+E:\Aso\2024Summer\AGS2024Summer\Src\Object\Common\CollisionManager.cpp;E:\Aso\2024Summer\AGS2024Summer\BaseProject\x64\Debug\CollisionManager.obj
 E:\Aso\2024Summer\AGS2024Summer\Src\Object\Common\Transform.cpp;E:\Aso\2024Summer\AGS2024Summer\BaseProject\x64\Debug\Transform.obj
+E:\Aso\2024Summer\AGS2024Summer\Src\Object\Mob\Victim.cpp;E:\Aso\2024Summer\AGS2024Summer\BaseProject\x64\Debug\Victim.obj
+E:\Aso\2024Summer\AGS2024Summer\Src\Object\Player\PlayerBase.cpp;E:\Aso\2024Summer\AGS2024Summer\BaseProject\x64\Debug\PlayerBase.obj
 E:\Aso\2024Summer\AGS2024Summer\Src\Object\Player\Survivor.cpp;E:\Aso\2024Summer\AGS2024Summer\BaseProject\x64\Debug\Survivor.obj
-E:\Aso\2024Summer\AGS2024Summer\Src\Object\Planet.cpp;E:\Aso\2024Summer\AGS2024Summer\BaseProject\x64\Debug\Planet.obj
 E:\Aso\2024Summer\AGS2024Summer\Src\Object\Player\Raider.cpp;E:\Aso\2024Summer\AGS2024Summer\BaseProject\x64\Debug\Raider.obj
 E:\Aso\2024Summer\AGS2024Summer\Src\Object\Shot\ShotBase.cpp;E:\Aso\2024Summer\AGS2024Summer\BaseProject\x64\Debug\ShotBase.obj
 E:\Aso\2024Summer\AGS2024Summer\Src\Object\SkyDome.cpp;E:\Aso\2024Summer\AGS2024Summer\BaseProject\x64\Debug\SkyDome.obj

@@ -104,7 +104,7 @@ void Raider::SetParam(void)
 
 	rotRad_ = 0.0f;
 
-	levelRaider_ = LEVEL_PL::LV1;
+	levelRaider_ = LEVEL_PL::LV2;
 	exp_ = 0;
 
 	for (int i = 0; i < SURVIVOR_NUM; i++)
@@ -547,7 +547,7 @@ void Raider::ProcessMove(void)
 	}
 	else
 	{
-		if (!isJump_ && IsEndLanding())
+		if (!isJump_ && IsEndLanding() && !IsStateInPlay(STATE_INPLAY::EXECUTION))
 		{
 			ChangeStateInPlay(STATE_INPLAY::IDLE);
 		}
@@ -815,7 +815,6 @@ void Raider::PrepareExecution(void)
 	if (ins.IsTrgDown(KEY_INPUT_E))
 	{
 		ChangeStateInPlay(STATE_INPLAY::EXECUTION);
-		SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::EXECUTION);
 
 		//	処刑対象を決めるための処理
 		float exeDistance = MAX_DISTANCE_EXECUTION;
@@ -864,12 +863,14 @@ void Raider::PrepareExecution(void)
 		exeTarget_ = TARGET::NONE;
 		if (IsStateInPlay(STATE_INPLAY::EXECUTION))
 		{
+			SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::FOLLOW);
 			ChangeStateInPlay(STATE_INPLAY::IDLE);
 		}
 		return;
 	}
 	else if (exeTarget_ != TARGET::NONE)
 	{
+		SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::EXECUTION);
 		movePow_ = AsoUtility::VECTOR_ZERO;
 		//	ボタン押してて、ターゲットがNONEでも無かったら
 		ChangeStateInPlay(STATE_INPLAY::EXECUTION);
@@ -900,6 +901,7 @@ void Raider::PrepareExecution(void)
 				exeCnt_ = EXECUTION_FLAME;
 				Execution(ExecuteVic_);
 				exeTarget_ = TARGET::NONE;
+				SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::FOLLOW);
 			}
 		}
 		break;
