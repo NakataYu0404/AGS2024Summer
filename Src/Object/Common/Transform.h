@@ -3,12 +3,12 @@
 #include "../../Common/Quaternion.h"
 #include "Collider.h"
 
-///	<summary>
-///	モデル制御の基本情報
-///	大きさ：VECTOR基準
-///	回転　：Quaternion基準
-///	位置　：VECTOR基準
-///	</summary>
+//	/	<summary>
+//	/	モデル制御の基本情報
+//	/	大きさ：VECTOR基準
+//	/	回転　：Quaternion基準
+//	/	位置　：VECTOR基準
+//	/	</summary>
 class Transform
 {
 
@@ -50,10 +50,10 @@ public:
 	//	コライダ
 	std::shared_ptr<Collider> collider_;
 
-	///	<summary>
-	///	モデル制御の基本情報更新
-	///	</summary>
-	///	<param name=""></param>
+	//	/	<summary>
+	//	/	モデル制御の基本情報更新
+	//	/	</summary>
+	//	/	<param name=""></param>
 	void Update(void);
 	
 	void Release(void);

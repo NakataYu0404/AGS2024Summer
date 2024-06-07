@@ -49,7 +49,7 @@ void Victim::Update()
 	//	モデル制御更新
 	transform_->Update();
 
-	////	アニメーション再生
+	//	//	アニメーション再生
 	//	animationController_->Update();
 
 }

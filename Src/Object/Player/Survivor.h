@@ -6,9 +6,11 @@ class Survivor : public PlayerBase
 
 public:
 
+
 	//	スピード
 	static constexpr float SPEED_RUN = 15.0f;
 	static constexpr float SPEED_FLY = 20.0f;
+	static constexpr float SPEED_CRAWL = 7.0f;
 
 	//	回転完了までの時間
 	static constexpr float TIME_ROT = 0.3f;
@@ -20,7 +22,7 @@ public:
 	static constexpr float TIME_JUMP_IN = 0.5f;
 
 	static constexpr int FRAME_HEAD = 4;
-
+\
 	//	レイダーが殺した時に得るポイント 100で進化
 	static constexpr int POINT_EVOLUTION = 50;
 
@@ -49,6 +51,8 @@ public:
 		FALLING,
 		FLOAT,
 		VICTORY,
+		CRAWL_IDLE,
+		CRAWL_MOVE,
 	};
 
 	//	コンストラクタ(サバイバーのプレイヤー番号)
@@ -61,7 +65,6 @@ public:
 	void SetParam(void) override;
 	void Update(void) override;
 	void Draw(void) override;
-
 
 	//	現在のSTATE::PLAY中ステートが入力したステートと同じか調べる
 	bool IsStateInPlay(STATE_INPLAY state);

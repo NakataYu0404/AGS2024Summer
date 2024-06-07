@@ -26,19 +26,19 @@ void CollisionManager::Init(void)
 
 	std::vector<Collider::Category> tags;
 
-	//使用するタグを追加する
+	//	使用するタグを追加する
 	tags.clear();
 	tags.emplace_back(Collider::Category::SURVIVOR);
 	tags.emplace_back(Collider::Category::STAGE);
 
-	//当たり判定のためのタグ管理
+	//	当たり判定のためのタグ管理
 	categoryMap_.emplace(Collider::Category::RAIDER, tags);
 	categoryMap_.emplace(Collider::Category::SURVIVOR, tags);
 
 
-	//tags.clear();
-	//tags.emplace_back(Collider::TAG::RAIDER);
-	//categoryMap_.emplace(Collider::TAG::SURVIVOR, tags);
+	//	tags.clear();
+	//	tags.emplace_back(Collider::TAG::RAIDER);
+	//	categoryMap_.emplace(Collider::TAG::SURVIVOR, tags);
 
 }
 
@@ -47,13 +47,13 @@ void CollisionManager::Update(void)
 
 	for (auto actor : actors_)
 	{
-		//取得したコライダー情報
-		//actor:typ,CAPSULE, tag, player
+		//	取得したコライダー情報
+		//	actor:typ,CAPSULE, tag, player
 		auto actorCollider = actor.lock()->GetTransform().lock()->collider_;
 		auto actorType = actorCollider->type_;
 		auto actorCategory = actorCollider->category_;
 
-		//プレイヤー以外であればループを抜ける
+		//	プレイヤー以外であればループを抜ける
 		if ((actorCategory != Collider::Category::RAIDER && actorCategory != Collider::Category::SURVIVOR) || categoryMap_.count(actorCategory) == 0)
 		{
 			continue;
@@ -61,14 +61,14 @@ void CollisionManager::Update(void)
 
 		for (auto target : actors_)
 		{
-			//同じもの同士では判定しない
+			//	同じもの同士では判定しない
 			if (actor.lock() == target.lock())
 			{
 				continue;
 			}
 
-			//それ以外のオブジェクト
-			//target:typ,CAPSULE, tag, enemy stage
+			//	それ以外のオブジェクト
+			//	target:typ,CAPSULE, tag, enemy stage
 			auto targetCollider = target.lock()->GetTransform().lock()->collider_;
 			auto targetType = targetCollider->type_;
 			auto targetCategory = targetCollider->category_;
@@ -80,7 +80,7 @@ void CollisionManager::Update(void)
 			case Collider::TYPE::CAPSULE:
 				switch (targetType)
 				{
-				case Collider::TYPE::MODEL:		//カプセル対モデル
+				case Collider::TYPE::MODEL:		//	カプセル対モデル
 				{
 
 					auto info = Capsule2Model_Collider_PushBack(actor, target.lock()->GetTransform());
@@ -100,7 +100,7 @@ void CollisionManager::Update(void)
 
 				}
 				break;
-				case Collider::TYPE::CAPSULE:	//カプセル対カプセル
+				case Collider::TYPE::CAPSULE:	//	カプセル対カプセル
 					if (Capsule2_Collider(
 						actor.lock()->GetCapsule().lock(),
 						target.lock()->GetCapsule().lock()
@@ -161,47 +161,47 @@ Collider::Collision_Date CollisionManager::Capsule2Model_Collider_PushBack(const
 	answer.movedPos = actor.lock()->GetTransform().lock()->pos;
 
 
-	// カプセルを移動させる
+	//	カプセルを移動させる
 	std::shared_ptr<Transform> trans = std::make_shared<Transform>();
 	trans->pos = actor.lock()->GetTransform().lock()->pos;
 	trans->Update();
 	std::shared_ptr<Capsule> cap = std::make_shared<Capsule>(actor.lock()->GetCapsule(), trans);
 
-	////// カプセルとの衝突判定
-	//for (const auto c : colliders_)
-	//{
+	//	//	//	カプセルとの衝突判定
+	//	for (const auto c : colliders_)
+	//	{
 
 		auto hits = MV1CollCheck_Capsule(
 			transform.lock()->modelId, -1,
 			cap->GetPosTop(), cap->GetPosDown(), cap->GetRadius());
 
-		//DxLib::MV1_COLL_RESULT_POLY_DIM
+		//	DxLib::MV1_COLL_RESULT_POLY_DIM
 
 
-		// 衝突した複数のポリゴンと衝突回避するまで、
-		// プレイヤーの位置を移動させる
+		//	衝突した複数のポリゴンと衝突回避するまで、
+		//	プレイヤーの位置を移動させる
 		for (int i = 0; i < hits.HitNum; i++)
 		{
 
 			auto hit = hits.Dim[i];
-			//DxLib::MV1_COLL_RESULT_POLY
+			//	DxLib::MV1_COLL_RESULT_POLY
 
-			// 地面と異なり、衝突回避位置が不明なため、何度か移動させる
-			// この時、移動させる方向は、移動前座標に向いた方向であったり、
-			// 衝突したポリゴンの法線方向だったりする
+			//	地面と異なり、衝突回避位置が不明なため、何度か移動させる
+			//	この時、移動させる方向は、移動前座標に向いた方向であったり、
+			//	衝突したポリゴンの法線方向だったりする
 			for (int tryCnt = 0; tryCnt < MAX_COLLISION_TRY; tryCnt++)
 			{
 
-				// 再度、モデル全体と衝突検出するには、効率が悪過ぎるので、
-				// 最初の衝突判定で検出した衝突ポリゴン1枚と衝突判定を取る
+				//	再度、モデル全体と衝突検出するには、効率が悪過ぎるので、
+				//	最初の衝突判定で検出した衝突ポリゴン1枚と衝突判定を取る
 				int pHit = HitCheck_Capsule_Triangle(
 					cap->GetPosTop(), cap->GetPosDown(), cap->GetRadius(),
 					hit.Position[0], hit.Position[1], hit.Position[2]);
 				if (pHit)
 				{
-					// 法線の方向にちょっとだけ移動させる
+					//	法線の方向にちょっとだけ移動させる
 					answer.movedPos = VAdd(answer.movedPos, VScale(hit.Normal, 2.0f));
-					//カプセルも一緒に移動させる
+					//	カプセルも一緒に移動させる
 					trans->pos = answer.movedPos;
 					trans->Update();
 
@@ -216,9 +216,9 @@ Collider::Collision_Date CollisionManager::Capsule2Model_Collider_PushBack(const
 			}
 		}
 
-		// 検出した地面ポリゴン情報の後始末
+		//	検出した地面ポリゴン情報の後始末
 		MV1CollResultPolyDimTerminate(hits);
-	//}
+	//	}
 
 	return answer;
 }
@@ -236,12 +236,12 @@ DxLib::MV1_COLL_RESULT_POLY CollisionManager::Line_IsCollision_Stage(const VECTO
 	//	ステージモデルと行うので、ステージを探すようにする
 	for (auto actor : actors_)
 	{
-		//取得したコライダー情報
-		//actor:typ,CAPSULE, tag, player
+		//	取得したコライダー情報
+		//	actor:typ,CAPSULE, tag, player
 		auto actorCollider = actor.lock()->GetTransform().lock()->collider_;
 		auto actorCategory = actorCollider->category_;
 
-		//プレイヤー以外であればループをやり直す
+		//	プレイヤー以外であればループをやり直す
 		if (actorCategory != Collider::Category::STAGE)
 		{
 			continue;
@@ -255,19 +255,19 @@ DxLib::MV1_COLL_RESULT_POLY CollisionManager::Line_IsCollision_Stage(const VECTO
 
 bool CollisionManager::Capsule2_Collider(const std::weak_ptr<Capsule> a, const std::weak_ptr<Capsule> b)
 {
-	//弾が役割を終えていたら衝突判定を行わない
-	//PlayerのGetAliveがfalseなら
+	//	弾が役割を終えていたら衝突判定を行わない
+	//	PlayerのGetAliveがfalseなら
 
 	for (const auto i : actors_)
 	{
 		i.lock()->GetTransform().lock()->collider_;
 	}
 
-	//プレイヤーと敵の衝突判定
+	//	プレイヤーと敵の衝突判定
 	if (HitCheck_Capsule_Capsule(a.lock()->GetPosTop(), a.lock()->GetPosDown(), a.lock()->GetRadius(),
 									b.lock()->GetPosTop(), b.lock()->GetPosDown(), b.lock()->GetRadius()))
 	{
-		//isAttack = true;
+		//	isAttack = true;
 		return true;
 	}
 	else

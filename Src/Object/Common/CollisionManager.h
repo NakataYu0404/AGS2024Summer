@@ -2,7 +2,7 @@
 #include <vector>
 #include <map>
 #include <memory>
-//#include <iostream>
+//	#include <iostream>
 #include <functional>
 #include "Transform.h"
 #include "../ActorBase.h"
@@ -38,17 +38,17 @@ public:
 	void Draw(void);
 	void Destroy(void);
 
-	// 衝突判定に用いられるコライダ制御
+	//	衝突判定に用いられるコライダ制御
 	void AddCollider(std::weak_ptr<Collider> collider);
 	void ClearCollider(void);
 
 	void Add(std::shared_ptr<ActorBase> collider);
 
-	//カプセルとモデルの衝突判定
+	//	カプセルとモデルの衝突判定
 	Collider::Collision_Date Capsule2Model_Collider_PushBack(const std::weak_ptr<ActorBase> actor, const std::weak_ptr<Transform> transform);
 	DxLib::MV1_COLL_RESULT_POLY Line_IsCollision_Stage(const VECTOR LineTopPos, const VECTOR LineBotPos);
 
-	//カプセルとカプセルの衝突判定
+	//	カプセルとカプセルの衝突判定
 	bool Capsule2_Collider(const std::weak_ptr<Capsule> a, const std::weak_ptr<Capsule> b);
 
 private:
@@ -56,20 +56,20 @@ private:
 	//	静的インスタンス
 	static CollisionManager* instance_;
 
-	//当たったかの判定
+	//	当たったかの判定
 	bool isAttack = false;
 
-	//衝突したポリゴンの法線
+	//	衝突したポリゴンの法線
 	DxLib::VECTOR Normal_ = {};
 
-	// 衝突判定に用いられるコライダ
+	//	衝突判定に用いられるコライダ
 	std::vector<std::weak_ptr<ActorBase>> actors_;
 	std::vector<std::weak_ptr<Collider>> colliders_;
 
-	//衝突した場合の関数
+	//	衝突した場合の関数
 	std::function<void(void)> onCollision_;
 
-	//衝突判定のための管理
+	//	衝突判定のための管理
 	std::map<Collider::Category, std::vector<Collider::Category>> categoryMap_;
 
 };

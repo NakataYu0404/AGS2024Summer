@@ -33,7 +33,7 @@ void Raider::Init(void)
 	transform_->SetModel(resMng_.LoadModelDuplicate(
 		ResourceManager::SRC::MDL_RAIDER));
 	transform_->scl = AsoUtility::VECTOR_ONE;
-	transform_->pos = { 0.0f, -30.0f, 0.0f };
+	transform_->pos = { 0.0f, 0.0f, 0.0f };
 	transform_->headPos = MV1GetFramePosition(transform_->modelId, FRAME_HEAD);
 	transform_->quaRot = Quaternion();
 	transform_->quaRotLocal =
@@ -79,7 +79,7 @@ void Raider::SetParam(void)
 	statePlPos_ = STATE_PLPOS::LAND;
 	statePlay_ = STATE_INPLAY::IDLE;
 
-	speed_ = 0.0f;
+	speed_ = SPEED_RUN;
 	moveDir_ = AsoUtility::VECTOR_ZERO;
 	movePow_ = AsoUtility::VECTOR_ZERO;
 	movedPos_ = AsoUtility::VECTOR_ZERO;
@@ -567,11 +567,11 @@ void Raider::ProcessJump(void)
 		if (!isJump_)
 		{
 			//	制御無しジャンプ
-			//mAnimationController->Play((int)ANIM_TYPE::JUMP);
+			//	mAnimationController->Play((int)ANIM_TYPE::JUMP);
 			//	ループしないジャンプ
-			//mAnimationController->Play((int)ANIM_TYPE::JUMP, false);
+			//	mAnimationController->Play((int)ANIM_TYPE::JUMP, false);
 			//	切り取りアニメーション
-			//mAnimationController->Play((int)ANIM_TYPE::JUMP, false, 13.0f, 24.0f);
+			//	mAnimationController->Play((int)ANIM_TYPE::JUMP, false, 13.0f, 24.0f);
 			
 			//	無理やりアニメーション
 			ChangeStateInPlay(STATE_INPLAY::JUMP);
@@ -678,13 +678,13 @@ void Raider::ProcessMoveFly(void)
 			ChangeStateInPlay(STATE_INPLAY::MOVE);
 		}
 
-		//上方向にのみいどうしてたら（上昇操作）
+		//	上方向にのみいどうしてたら（上昇操作）
 		if (dir.y == 1.0f && AsoUtility::EqualsVZero({ dir.x,0.0f,dir.z }))
 		{
 			ChangeStateInPlay(STATE_INPLAY::FLOAT);
 		}
 	}
-	//移動してなかったら
+	//	移動してなかったら
 	else if (AsoUtility::EqualsVZero(dir) && isFly_)
 	{
 		//	空中Idleに
@@ -794,6 +794,7 @@ void Raider::AttackEnd(void)
 	if (!blowOffFlag_)
 	{
 		survivor_[targetSurvivorNo_].lock()->SetBlowOff(survivor_[targetSurvivorNo_].lock()->GetTransform().lock()->GetUp(), ATTACK_POW, 120.0f);
+		survivor_[targetSurvivorNo_].lock()->Damage(50);
 		blowOffFlag_ = true;
 	}
 
@@ -881,7 +882,7 @@ void Raider::PrepareExecution(void)
 	case Raider::TARGET::SURVIVOR:
 		if (ExecuteSur_ != nullptr)
 		{
-			//カウントダウン
+			//	カウントダウン
 			exeCnt_ -= 1.0f;
 			if (exeCnt_ <= 0.0f)
 			{
@@ -894,7 +895,7 @@ void Raider::PrepareExecution(void)
 	case Raider::TARGET::VICTIM:
 		if (ExecuteVic_ != nullptr)
 		{
-			//カウントダウン
+			//	カウントダウン
 			exeCnt_ -= 1.0f;
 			if (exeCnt_ <= 0.0f)
 			{
@@ -1011,7 +1012,7 @@ void Raider::SetGoalRotate(double rotRad)
 
 		cameraRot.x *= cosf(rotRad);
 
-		//もし空中で上昇しながらもXZ平面に移動してたら
+		//	もし空中で上昇しながらもXZ平面に移動してたら
 		if (InputManager::GetInstance().IsNew(KEY_INPUT_SPACE) && IsStateInPlay(STATE_INPLAY::MOVE) && statePlPos_ == STATE_PLPOS::AIR)
 		{
 			//	x軸の角度を45度に
@@ -1163,7 +1164,7 @@ bool Raider::CanTarget(int num)
 	R2SDistance_[num] = Myself2OtherDistance(survivor_[num].lock()->GetTransform().lock());
 	if(R2SDistance_[num] < MAX_DISTANCE_TARGET)
 	{
-		//この関数がFALSEならカメラ内に入っている
+		//	この関数がFALSEならカメラ内に入っている
 		if(CheckCameraViewClip(survivor_[num].lock()->GetTransform().lock()->pos) == FALSE ||
 			CheckCameraViewClip(survivor_[num].lock()->GetTransform().lock()->headPos) == FALSE)
 		{
@@ -1197,7 +1198,7 @@ VECTOR Raider::ShotDir(void)
 }
 
 //	TODO:待ち状態かどうかをチェックするための関数になってるけど、移動とか、攻撃とかいろんなのに使いたいから、汎用性を増させる
-//			時間が切れるまでこの処理しかしないのはあんまり
+//	時間が切れるまでこの処理しかしないのはあんまり
 void Raider::SetWaitFlame(float flame)
 {
 	if (flame < 0.0f)

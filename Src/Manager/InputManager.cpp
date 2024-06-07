@@ -254,7 +254,7 @@ void InputManager::SetJPadInState(JOYPAD_NO jpNo)
 		stateNow.ButtonsNew[i] = stateNew.ButtonsNew[i];
 
 		stateNow.IsOld[i] = stateNow.IsNew[i];
-		//stateNow.IsNew[i] = stateNow.ButtonsNew[i] == 128 || stateNow.ButtonsNew[i] == 255;
+		//	stateNow.IsNew[i] = stateNow.ButtonsNew[i] == 128 || stateNow.ButtonsNew[i] == 255;
 		stateNow.IsNew[i] = stateNow.ButtonsNew[i] > 0;
 
 		stateNow.IsTrgDown[i] = stateNow.IsNew[i] && !stateNow.IsOld[i];
@@ -293,9 +293,9 @@ InputManager::JOYPAD_IN_STATE InputManager::GetJPadInputState(JOYPAD_NO no)
 
 		int idx;
 
-		//	  Y
+		//	Y
 		//	X   B
-		//	  A
+		//	A
 
 		idx = static_cast<int>(JOYPAD_BTN::TOP);
 		ret.ButtonsNew[idx] = d.Buttons[3];//	Y
@@ -333,9 +333,9 @@ InputManager::JOYPAD_IN_STATE InputManager::GetJPadInputState(JOYPAD_NO no)
 		auto d = GetJPadDInputState(no);
 		int idx;
 
-		//	  Å¢
+		//	Å¢
 		//	Å†  ÅZ
-		//	  Å~
+		//	Å~
 
 		idx = static_cast<int>(JOYPAD_BTN::TOP);
 		ret.ButtonsNew[idx] = d.Buttons[3];//	Å¢

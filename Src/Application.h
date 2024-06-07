@@ -11,11 +11,11 @@ public:
 	static constexpr int SCREEN_SIZE_Y = 900;
 
 	//	データパス関連
-	//-------------------------------------------
+	//	-------------------------------------------
 	static const std::string PATH_IMAGE;
 	static const std::string PATH_MODEL;
 	static const std::string PATH_EFFECT;
-	//-------------------------------------------
+	//	-------------------------------------------
 
 	//	明示的にインステンスを生成する
 	static void CreateInstance(void);

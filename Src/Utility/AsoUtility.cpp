@@ -501,8 +501,8 @@ double AsoUtility::AngleDeg(const VECTOR& from, const VECTOR& to)
         return 0.0f;
     }
 
-    //float dot = std::clamp(Dot(from, to) / denominator, -1.0f, 1.0f);
-    //auto dot = Dot(from, to) / denominator;
+    //	float dot = std::clamp(Dot(from, to) / denominator, -1.0f, 1.0f);
+    //	auto dot = Dot(from, to) / denominator;
     auto dot = VDot(from, to) / denominator;
     if (dot < -1.0f)
     {

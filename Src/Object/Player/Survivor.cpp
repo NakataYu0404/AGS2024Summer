@@ -30,7 +30,7 @@ void Survivor::Init(void)
 	transform_->SetModel(resMng_.LoadModelDuplicate(
 		ResourceManager::SRC::MDL_SURVIVOR));
 	transform_->scl = AsoUtility::VECTOR_ONE;
-	transform_->pos = { 400.0f* (plNum_+1), -30.0f, 400.0f* (plNum_ + 1) };
+	transform_->pos = { 400.0f * (plNum_ + 1), -30.0f, 400.0f * (plNum_ + 1) };
 	transform_->headPos = MV1GetFramePosition(transform_->modelId, FRAME_HEAD);
 	transform_->quaRot = Quaternion();
 	transform_->quaRotLocal =
@@ -82,10 +82,11 @@ void Survivor::SetParam(void)
 
 	imgShadow_ = -1;
 
-
 	gravityPow_ = 10.0f;
 
 	rotRad_ = 0.0f;
+
+	hp_ = MAX_HP;
 }
 
 void Survivor::Update(void)
@@ -158,6 +159,8 @@ void Survivor::InitAnimation(void)
 	animationController_->Add((int)ANIM_TYPE::FALLING, path + "FallIdle.mv1", 80.0f);
 	animationController_->Add((int)ANIM_TYPE::FLOAT, path + "FloatIdle.mv1", 80.0f);
 	animationController_->Add((int)ANIM_TYPE::VICTORY, path + "Victory.mv1", 60.0f);
+	animationController_->Add((int)ANIM_TYPE::CRAWL_IDLE, path + "CrawlMove.mv1", 60.0f);
+	animationController_->Add((int)ANIM_TYPE::CRAWL_MOVE, path + "CrawlIdle.mv1", 60.0f);
 
 	animationController_->Play((int)ANIM_TYPE::IDLE);
 
@@ -183,6 +186,9 @@ void Survivor::ChangeStateAnimation(void)
 			animationController_->Play((int)ANIM_TYPE::JUMP, false, 29.0f, 45.0f, false, true);
 			break;
 		case Survivor::STATE_INPLAY::STUN:
+			break;
+		case Survivor::STATE_INPLAY::CRAWL:
+			animationController_->Play((int)ANIM_TYPE::CRAWL_MOVE);
 			break;
 		default:
 			break;
@@ -218,9 +224,11 @@ void Survivor::UpdatePlay(void)
 void Survivor::UpdateLand(void)
 {
 	ProcessMove();
-	//	ジャンプ処理
-	ProcessJump();
-
+	if (!IsStateInPlay(STATE_INPLAY::CRAWL))
+	{
+		//	ジャンプ処理
+		ProcessJump();
+	}
 }
 
 void Survivor::ChangeStateInPlay(STATE_INPLAY state)
@@ -319,7 +327,14 @@ void Survivor::ProcessMove(void)
 	if (!AsoUtility::EqualsVZero(dir)/* && (isJump_ || IsEndLanding())*/) {
 
 		//	移動処理
-		speed_ = SPEED_RUN;
+		if (!IsStateInPlay(STATE_INPLAY::CRAWL))
+		{
+			speed_ = SPEED_RUN;
+		}
+		else
+		{
+			speed_ = SPEED_CRAWL;
+		}
 
 		moveDir_ = dir;
 		movePow_ = VScale(dir, speed_);
@@ -327,7 +342,7 @@ void Survivor::ProcessMove(void)
 		//	回転処理
 		SetGoalRotate(rotRad_);
 
-		if (!isJump_ && IsEndLanding())
+		if ((!isJump_ && IsEndLanding()) && !IsStateInPlay(STATE_INPLAY::CRAWL))
 		{
 			ChangeStateInPlay(STATE_INPLAY::MOVE);
 		}
@@ -335,7 +350,7 @@ void Survivor::ProcessMove(void)
 	}
 	else
 	{
-		if (!isJump_ && IsEndLanding())
+		if ((!isJump_ && IsEndLanding()) && !IsStateInPlay(STATE_INPLAY::CRAWL))
 		{
 
 			ChangeStateInPlay(STATE_INPLAY::IDLE);
@@ -357,11 +372,11 @@ void Survivor::ProcessJump(void)
 		if (!isJump_)
 		{
 			//	制御無しジャンプ
-			//mAnimationController->Play((int)ANIM_TYPE::JUMP);
+			//	mAnimationController->Play((int)ANIM_TYPE::JUMP);
 			//	ループしないジャンプ
-			//mAnimationController->Play((int)ANIM_TYPE::JUMP, false);
+			//	mAnimationController->Play((int)ANIM_TYPE::JUMP, false);
 			//	切り取りアニメーション
-			//mAnimationController->Play((int)ANIM_TYPE::JUMP, false, 13.0f, 24.0f);
+			//	mAnimationController->Play((int)ANIM_TYPE::JUMP, false, 13.0f, 24.0f);
 			//	無理やりアニメーション
 			ChangeStateInPlay(STATE_INPLAY::JUMP);
 			animationController_->Play((int)ANIM_TYPE::JUMP, true, 13.0f, 25.0f);

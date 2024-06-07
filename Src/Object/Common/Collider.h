@@ -7,7 +7,7 @@ class Collider
 
 public:
 
-	//対象種別
+	//	対象種別
 	enum class Category
 	{
 		RAIDER,
@@ -16,14 +16,14 @@ public:
 		SHOT,
 	};
 
-	// 衝突種別
+	//	衝突種別
 	enum class TYPE
 	{
 		MODEL,
 		CAPSULE,
 	};
 
-	//衝突情報
+	//	衝突情報
 	struct Collision_Date
 	{
 		bool isHit;
@@ -34,19 +34,19 @@ public:
 		DxLib::VECTOR Normal;
 	};
 
-	// コンストラクタ
+	//	コンストラクタ
 	Collider(Category tag, TYPE type, int modelId);
 
-	// デストラクタ
+	//	デストラクタ
 	~Collider(void);
 
-	// 対象種別
+	//	対象種別
 	Category category_;
 
-	// 衝突種別
+	//	衝突種別
 	TYPE type_;
 
-	// モデルのハンドルID
+	//	モデルのハンドルID
 	int modelId_;
 
 	Collision_Date hitInfo_;
