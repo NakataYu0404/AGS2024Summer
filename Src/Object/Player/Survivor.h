@@ -10,7 +10,7 @@ public:
 	//	スピード
 	static constexpr float SPEED_RUN = 15.0f;
 	static constexpr float SPEED_FLY = 20.0f;
-	static constexpr float SPEED_CRAWL = 7.0f;
+	static constexpr float SPEED_CRAWL = 3.0f;
 
 	//	回転完了までの時間
 	static constexpr float TIME_ROT = 0.3f;

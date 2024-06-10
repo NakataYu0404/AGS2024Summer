@@ -159,8 +159,8 @@ void Survivor::InitAnimation(void)
 	animationController_->Add((int)ANIM_TYPE::FALLING, path + "FallIdle.mv1", 80.0f);
 	animationController_->Add((int)ANIM_TYPE::FLOAT, path + "FloatIdle.mv1", 80.0f);
 	animationController_->Add((int)ANIM_TYPE::VICTORY, path + "Victory.mv1", 60.0f);
-	animationController_->Add((int)ANIM_TYPE::CRAWL_IDLE, path + "CrawlMove.mv1", 60.0f);
-	animationController_->Add((int)ANIM_TYPE::CRAWL_MOVE, path + "CrawlIdle.mv1", 60.0f);
+	animationController_->Add((int)ANIM_TYPE::CRAWL_IDLE, path + "CrawlIdle.mv1", 60.0f);
+	animationController_->Add((int)ANIM_TYPE::CRAWL_MOVE, path + "CrawlMove.mv1", 60.0f);
 
 	animationController_->Play((int)ANIM_TYPE::IDLE);
 
