@@ -4,6 +4,7 @@
 class ResourceManager;
 class SceneManager;
 class Capsule;
+class Sphere;
 
 class ActorBase
 {
@@ -29,6 +30,7 @@ public:
 
 	//	衝突用カプセルの取得
 	const std::weak_ptr<Capsule> GetCapsule(void) const;
+	const std::weak_ptr<Sphere> GetSphere(void) const;
 
 
 protected:
@@ -42,4 +44,5 @@ protected:
 
 	//	衝突判定用のカプセル
 	std::shared_ptr<Capsule> capsule_;
+	std::shared_ptr<Sphere> sphere_;
 };

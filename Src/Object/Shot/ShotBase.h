@@ -1,5 +1,9 @@
 #pragma once
+#include <memory>
 #include "../ActorBase.h"
+
+class CollisionManager;
+class Sphere;
 
 class ShotBase : public ActorBase
 {
@@ -28,6 +32,9 @@ protected:
 	VECTOR moveDir_;
 
 private:
+
+	//	シングルトン参照
+	CollisionManager& colMng_;
 
 };
 

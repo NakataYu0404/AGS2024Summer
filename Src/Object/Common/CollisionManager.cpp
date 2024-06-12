@@ -1,6 +1,7 @@
 
 #include"../../Utility/AsoUtility.h"
 #include"Capsule.h"
+#include"Sphere.h"
 #include"Collider.h"
 #include "../Player/Raider.h"
 #include "CollisionManager.h"
@@ -29,7 +30,9 @@ void CollisionManager::Init(void)
 	//	使用するタグを追加する
 	tags.clear();
 	tags.emplace_back(Collider::Category::SURVIVOR);
+	tags.emplace_back(Collider::Category::RAIDER);
 	tags.emplace_back(Collider::Category::STAGE);
+	tags.emplace_back(Collider::Category::SHOT);
 
 	//	当たり判定のためのタグ管理
 	categoryMap_.emplace(Collider::Category::RAIDER, tags);
@@ -102,13 +105,38 @@ void CollisionManager::Update(void)
 				break;
 				case Collider::TYPE::CAPSULE:	//	カプセル対カプセル
 					if (Capsule2_Collider(
-						actor.lock()->GetCapsule().lock(),
-						target.lock()->GetCapsule().lock()
+						actor.lock()->GetCapsule(),
+						target.lock()->GetCapsule()
 					))
 					{
 						actor.lock()->OnCollision(targetCollider);
 						target.lock()->OnCollision(actorCollider);
 					}
+					break;
+				case Collider::TYPE::SPHERE:
+					if (Sphere2Capsule_Collider(target.lock()->GetSphere(), actor.lock()->GetCapsule()))
+					{
+						actor.lock()->OnCollision(targetCollider);
+						target.lock()->OnCollision(actorCollider);
+					}
+					break;
+				}
+				break;
+			case Collider::TYPE::SPHERE:
+				switch (targetType)
+				{
+				case Collider::TYPE::MODEL:
+					break;
+				case Collider::TYPE::CAPSULE:
+					if (Sphere2Capsule_Collider(actor.lock()->GetSphere(), target.lock()->GetCapsule()))
+					{
+						actor.lock()->OnCollision(targetCollider);
+						target.lock()->OnCollision(actorCollider);
+					}
+					break;
+				case Collider::TYPE::SPHERE:
+					break;
+				default:
 					break;
 				}
 				break;
@@ -241,7 +269,7 @@ DxLib::MV1_COLL_RESULT_POLY CollisionManager::Line_IsCollision_Stage(const VECTO
 		auto actorCollider = actor.lock()->GetTransform().lock()->collider_;
 		auto actorCategory = actorCollider->category_;
 
-		//	プレイヤー以外であればループをやり直す
+		//	ステージ以外であればループをやり直す
 		if (actorCategory != Collider::Category::STAGE)
 		{
 			continue;
@@ -255,14 +283,6 @@ DxLib::MV1_COLL_RESULT_POLY CollisionManager::Line_IsCollision_Stage(const VECTO
 
 bool CollisionManager::Capsule2_Collider(const std::weak_ptr<Capsule> a, const std::weak_ptr<Capsule> b)
 {
-	//	弾が役割を終えていたら衝突判定を行わない
-	//	PlayerのGetAliveがfalseなら
-
-	for (const auto i : actors_)
-	{
-		i.lock()->GetTransform().lock()->collider_;
-	}
-
 	//	プレイヤーと敵の衝突判定
 	if (HitCheck_Capsule_Capsule(a.lock()->GetPosTop(), a.lock()->GetPosDown(), a.lock()->GetRadius(),
 									b.lock()->GetPosTop(), b.lock()->GetPosDown(), b.lock()->GetRadius()))
@@ -276,4 +296,14 @@ bool CollisionManager::Capsule2_Collider(const std::weak_ptr<Capsule> a, const s
 		return false;
 	}
 
+}
+
+bool CollisionManager::Sphere2Capsule_Collider(const std::weak_ptr<Sphere> a, const std::weak_ptr<Capsule> b)
+{
+	if (HitCheck_Sphere_Capsule(a.lock()->GetPos(), a.lock()->GetRadius(), b.lock()->GetPosTop(), b.lock()->GetPosDown(), b.lock()->GetRadius()))
+	{
+		return true;
+	}
+
+	return false;
 }

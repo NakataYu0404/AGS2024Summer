@@ -9,6 +9,7 @@
 #include "../Common/CollisionManager.h"
 #include "../Common/AnimationController.h"
 #include "../Common/Capsule.h"
+#include "../Common/Sphere.h"
 #include "../Common/Collider.h"
 #include "../Common/CollisionManager.h"
 #include "../Shot/ShotBase.h"
@@ -177,7 +178,7 @@ void Raider::OnCollision(std::weak_ptr<Collider> collider)
 	switch (collider.lock()->category_)
 	{
 	case Collider::Category::SURVIVOR:
-		if (IsStateInPlay(STATE_INPLAY::ATTACK) && attackType_ == ATTACK_TYPE::CHASE)
+		if (IsStateInPlay(STATE_INPLAY::ATTACK) && attackType_ == ATTACK_TYPE::CHASE && collider.lock()->modelId_ == survivor_[targetSurvivorNo_].lock()->GetTransform().lock()->modelId)
 		{
 			ChangeAttack(ATTACK_TYPE::HIT);
 		}
@@ -917,7 +918,7 @@ void Raider::PrepareExecution(void)
 
 void Raider::Execution(std::shared_ptr<Survivor> target)
 {
-	target->SetState(PlayerBase::STATE::DEAD);
+	target->ChangeStateInPlay(Survivor::STATE_INPLAY::DOWN);
 	exp_ += Survivor::POINT_EVOLUTION;
 }
 
@@ -969,10 +970,11 @@ void Raider::MakeShot(void)
 			return;
 		}
 	}
-	std::shared_ptr<ShotBase>shot = std::make_shared<ShotBase>();
+	std::shared_ptr<ShotBase> shot = std::make_shared<ShotBase>();
 	shot->Init();
 	ShotInit(shot);
 	shot_.push_back(shot);
+	colMng_.Add(shot);
 
 }
 
@@ -1168,7 +1170,10 @@ bool Raider::CanTarget(int num)
 		if(CheckCameraViewClip(survivor_[num].lock()->GetTransform().lock()->pos) == FALSE ||
 			CheckCameraViewClip(survivor_[num].lock()->GetTransform().lock()->headPos) == FALSE)
 		{
-			return true;
+			if (!survivor_[num].lock()->IsStateInPlay(Survivor::STATE_INPLAY::CRAWL) && !survivor_[num].lock()->IsStateInPlay(Survivor::STATE_INPLAY::DOWN))
+			{
+				return true;
+			}
 		}
 	}
 	return false;

@@ -162,6 +162,9 @@ void Survivor::InitAnimation(void)
 	animationController_->Add((int)ANIM_TYPE::CRAWL_IDLE, path + "CrawlIdle.mv1", 60.0f);
 	animationController_->Add((int)ANIM_TYPE::CRAWL_MOVE, path + "CrawlMove.mv1", 60.0f);
 
+	//	TODO:ŠwZ‚Ìƒlƒbƒg‚ª‚µ‚å‚Ú‚¢‚©‚ç‰Æ‚ÅAnim’T‚µ‚Ä‚¢‚ê‚é
+	animationController_->Add((int)ANIM_TYPE::DOWN, path + "Victory.mv1", 60.0f);
+
 	animationController_->Play((int)ANIM_TYPE::IDLE);
 
 }
@@ -190,6 +193,9 @@ void Survivor::ChangeStateAnimation(void)
 		case Survivor::STATE_INPLAY::CRAWL:
 			animationController_->Play((int)ANIM_TYPE::CRAWL_MOVE);
 			break;
+		case Survivor::STATE_INPLAY::DOWN:
+			animationController_->Play((int)ANIM_TYPE::DOWN);
+			break;
 		default:
 			break;
 		}
@@ -198,7 +204,7 @@ void Survivor::ChangeStateAnimation(void)
 
 void Survivor::UpdatePlay(void)
 {
-	if (!IsStateInPlay(STATE_INPLAY::STUN))
+	if (!IsStateInPlay(STATE_INPLAY::STUN) && !IsStateInPlay(STATE_INPLAY::DOWN))
 	{
 		UpdateLand();
 	}
@@ -247,7 +253,6 @@ void Survivor::OnCollision(std::weak_ptr<Collider> collider)
 
 		break;
 	case Collider::Category::SHOT:
-
 		break;
 	case Collider::Category::STAGE:
 		transform_->pos = collider.lock()->hitInfo_.movedPos;

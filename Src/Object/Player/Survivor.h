@@ -22,7 +22,7 @@ public:
 	static constexpr float TIME_JUMP_IN = 0.5f;
 
 	static constexpr int FRAME_HEAD = 4;
-\
+
 	//	レイダーが殺した時に得るポイント 100で進化
 	static constexpr int POINT_EVOLUTION = 50;
 
@@ -37,6 +37,7 @@ public:
 		FALL,	//	勝手に落下してる
 		STUN,
 		CRAWL,	//	死にかけで這っている
+		DOWN,
 	};
 
 	//	アニメーション種別
@@ -53,6 +54,7 @@ public:
 		VICTORY,
 		CRAWL_IDLE,
 		CRAWL_MOVE,
+		DOWN,
 	};
 
 	//	コンストラクタ(サバイバーのプレイヤー番号)

@@ -21,6 +21,7 @@ public:
 	{
 		MODEL,
 		CAPSULE,
+		SPHERE,
 	};
 
 	//	П’УЋПоХс

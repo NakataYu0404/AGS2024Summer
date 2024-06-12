@@ -13,6 +13,7 @@ using namespace std;
 class Transform;
 class Collider;
 class Capsule;
+class Sphere;
 class ActorBase;
 class Player;
 
@@ -48,8 +49,11 @@ public:
 	Collider::Collision_Date Capsule2Model_Collider_PushBack(const std::weak_ptr<ActorBase> actor, const std::weak_ptr<Transform> transform);
 	DxLib::MV1_COLL_RESULT_POLY Line_IsCollision_Stage(const VECTOR LineTopPos, const VECTOR LineBotPos);
 
-	//	カプセルとカプセルの衝突判定
+	//	元からあるカプセルコライダを使ったカプセルとカプセルの衝突判定
 	bool Capsule2_Collider(const std::weak_ptr<Capsule> a, const std::weak_ptr<Capsule> b);
+
+	//	入力したスフィア情報と、元からあるカプセルコライダとの当たり判定
+	bool Sphere2Capsule_Collider(const std::weak_ptr<Sphere> a, const std::weak_ptr<Capsule> b);
 
 private:
 

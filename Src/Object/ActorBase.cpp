@@ -30,3 +30,8 @@ const std::weak_ptr<Capsule> ActorBase::GetCapsule(void) const
 {
 	return capsule_;
 }
+
+const std::weak_ptr<Sphere> ActorBase::GetSphere(void) const
+{
+	return sphere_;
+}
