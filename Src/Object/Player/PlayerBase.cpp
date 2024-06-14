@@ -77,7 +77,6 @@ void PlayerBase::ChangeState(STATE state)
 		ChangeStatePlay();
 		break;
 	}
-
 }
 
 void PlayerBase::ChangeStateNone(void)
@@ -203,6 +202,7 @@ void PlayerBase::DrawShadow(void)
 
 
 }
+
 void PlayerBase::Rotate(void)
 {
 

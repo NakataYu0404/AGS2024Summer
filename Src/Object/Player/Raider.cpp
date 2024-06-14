@@ -68,6 +68,7 @@ void Raider::Init(void)
 	ChangeState(STATE::PLAY);
 
 	attackType_ = ATTACK_TYPE::NONE;
+	executionType_ = EXE_TYPE::NONE;
 }
 
 void Raider::SetParam(void)
@@ -186,7 +187,6 @@ void Raider::OnCollision(std::weak_ptr<Collider> collider)
 	case Collider::Category::RAIDER:
 		break;
 	case Collider::Category::SHOT:
-
 		break;
 	case Collider::Category::STAGE:
 		transform_->pos = collider.lock()->hitInfo_.movedPos;
@@ -212,6 +212,11 @@ bool Raider::IsStateInPlay(STATE_INPLAY state)
 bool Raider::IsAttackType(ATTACK_TYPE type)
 {
 	return attackType_ == type;
+}
+
+bool Raider::IsExeType(EXE_TYPE type)
+{
+	return executionType_ == type;
 }
 
 void Raider::SetSurvivor(std::array<std::weak_ptr<Survivor>, SURVIVOR_NUM> surv)
@@ -254,6 +259,7 @@ void Raider::InitAnimation(void)
 	animationController_->Add((int)ANIM_TYPE::VICTORY, path + "Victory.mv1", 60.0f);
 	animationController_->Add((int)ANIM_TYPE::ATTACK_HIT, path + "manyPunch.mv1", 80.0f);
 	animationController_->Add((int)ANIM_TYPE::ATTACK_END, path + "gurugurukick.mv1", 60.0f);
+	animationController_->Add((int)ANIM_TYPE::EXECUTION, path + "fingerGun2.mv1", 120.0f);
 
 	animationController_->Play((int)ANIM_TYPE::IDLE);
 
@@ -294,6 +300,9 @@ void Raider::ChangeStateAnimation(void)
 			animationController_->Play((int)ANIM_TYPE::FLOAT);
 			break;
 		case Raider::STATE_INPLAY::STUN:
+			break;
+		case Raider::STATE_INPLAY::EXECUTION:
+			animationController_->Play((int)ANIM_TYPE::EXECUTION, false);
 			break;
 
 		default:
@@ -380,7 +389,15 @@ void Raider::UpdatePlay(void)
 	ChangeStateAnimation();
 
 	//	移動方向に応じた回転
-	Rotate();
+	if (!IsStateInPlay(STATE_INPLAY::EXECUTION))
+	{
+		Rotate();
+	}
+	else
+	{
+		playerRotY_ = Quaternion::Quaternion();
+		goalQuaRot_ = playerRotY_;
+	}
 
 	//	重力による移動量
 	CalcGravityPow();
@@ -484,6 +501,11 @@ void Raider::ChangeAttack(ATTACK_TYPE type_)
 	attackType_ = type_;
 }
 
+void Raider::ChangeExecution(EXE_TYPE type_)
+{
+	executionType_ = type_;
+}
+
 
 void Raider::ProcessMove(void)
 {
@@ -540,7 +562,7 @@ void Raider::ProcessMove(void)
 		//	回転処理
 		SetGoalRotate(rotRad_);
 
-		if (!isJump_ && IsEndLanding())
+		if (!isJump_ && IsEndLanding() && !IsStateInPlay(STATE_INPLAY::EXECUTION))
 		{
 			ChangeStateInPlay(STATE_INPLAY::MOVE);
 		}
@@ -795,7 +817,7 @@ void Raider::AttackEnd(void)
 	if (!blowOffFlag_)
 	{
 		survivor_[targetSurvivorNo_].lock()->SetBlowOff(survivor_[targetSurvivorNo_].lock()->GetTransform().lock()->GetUp(), ATTACK_POW, 120.0f);
-		survivor_[targetSurvivorNo_].lock()->Damage(50);
+		survivor_[targetSurvivorNo_].lock()->Damage(HALF_HP);
 		blowOffFlag_ = true;
 	}
 
@@ -814,9 +836,13 @@ void Raider::PrepareExecution(void)
 {
 	auto& ins = InputManager::GetInstance();
 
+	if (IsExeType(EXE_TYPE::EXEQUTED) || IsExeType(EXE_TYPE::EVOLUTION))
+	{
+		return;
+	}
+
 	if (ins.IsTrgDown(KEY_INPUT_E))
 	{
-		ChangeStateInPlay(STATE_INPLAY::EXECUTION);
 
 		//	処刑対象を決めるための処理
 		float exeDistance = MAX_DISTANCE_EXECUTION;
@@ -863,10 +889,11 @@ void Raider::PrepareExecution(void)
 	{
 		exeCnt_ = EXECUTION_FLAME;
 		exeTarget_ = TARGET::NONE;
-		if (IsStateInPlay(STATE_INPLAY::EXECUTION))
+		if (IsStateInPlay(STATE_INPLAY::EXECUTION) && IsExeType(EXE_TYPE::PREPARE))
 		{
 			SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::FOLLOW);
 			ChangeStateInPlay(STATE_INPLAY::IDLE);
+			ChangeExecution(EXE_TYPE::NONE);
 		}
 		return;
 	}
@@ -876,6 +903,7 @@ void Raider::PrepareExecution(void)
 		movePow_ = AsoUtility::VECTOR_ZERO;
 		//	ボタン押してて、ターゲットがNONEでも無かったら
 		ChangeStateInPlay(STATE_INPLAY::EXECUTION);
+		ChangeExecution(EXE_TYPE::PREPARE);
 	}
 
 	switch (exeTarget_)
@@ -908,11 +936,6 @@ void Raider::PrepareExecution(void)
 		}
 		break;
 	}
-	exeQube_->pos = transform_->midPos;
-	exeQube_->pos.y += 200.0f;
-	exeQube_->quaRot = transform_->quaRot;
-	exeQube_->quaRotLocal = transform_->quaRotLocal;
-	exeQube_->Update();
 
 }
 
@@ -920,11 +943,13 @@ void Raider::Execution(std::shared_ptr<Survivor> target)
 {
 	target->ChangeStateInPlay(Survivor::STATE_INPLAY::DOWN);
 	exp_ += Survivor::POINT_EVOLUTION;
+	ChangeExecution(EXE_TYPE::EXEQUTED);
 }
 
 void Raider::Execution(std::shared_ptr<Victim> target)
 {
 	exp_ += Victim::POINT_EVOLUTION;
+	ChangeExecution(EXE_TYPE::EXEQUTED);
 }
 
 void Raider::Evolution(void)
@@ -950,32 +975,72 @@ void Raider::Evolution(void)
 	default:
 		break;
 	}
+
+	ChangeExecution(EXE_TYPE::EVOLUTION);
+
+}
+
+void Raider::ExeEvoUpdate()
+{
+	if (!IsStateInPlay(STATE_INPLAY::EXECUTION))
+	{
+		return;
+	}
+
+	if (IsExeType(EXE_TYPE::EXEQUTED))
+	{
+		ここから　処刑後と進化のムービー、分岐作り
+		if (exeCnt_ > 0)
+		{
+			exeCnt_--;
+		}
+
+	}
+	if (IsExeType(EXE_TYPE::EVOLUTION))
+	{
+		if (exeCnt_ > 0)
+		{
+			exeCnt_--;
+		}
+
+	}
+
+
+
+	exeQube_->pos = transform_->midPos;
+	exeQube_->pos.y += 200.0f;
+	exeQube_->quaRot = transform_->quaRot;
+	exeQube_->quaRotLocal = transform_->quaRotLocal;
+	exeQube_->Update();
 }
 
 void Raider::MakeShot(void)
 {
-	//	弾
+	//	弾の作成
 	for (auto& i : shot_)
 	{
-		//	iがnullなら抜ける iがnullなのは最初だけ
+		//	iがnullなのは弾を作成していない時のみ
 		if (i == nullptr)
 		{
 			break;
 		}
-		//	死んだ弾に第二の人生歩ませる
+		//	死んだ弾を再利用(push_backは重い)
 		if (i->IsAlive() == false)
 		{
 			i->Init();
-			ShotInit(i);	
+			ShotInit(i);
+			//	多重Hitを防ぐため当たったらコライダは消えるようにしてあるので、再度登録
+			colMng_.Add(i);
 			return;
 		}
 	}
+
+	//	弾を新規作成
 	std::shared_ptr<ShotBase> shot = std::make_shared<ShotBase>();
 	shot->Init();
 	ShotInit(shot);
 	shot_.push_back(shot);
 	colMng_.Add(shot);
-
 }
 
 void Raider::ShotInit(std::shared_ptr<ShotBase> shot)

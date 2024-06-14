@@ -50,6 +50,7 @@ public:
 protected:
 
 	static constexpr int MAX_HP = 100;
+	static constexpr int HALF_HP = MAX_HP / 2;
 
 	//	ó‘Ô‘JˆÚ
 	void ChangeState(STATE state);

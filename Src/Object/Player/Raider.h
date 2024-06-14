@@ -84,6 +84,7 @@ public:
 		ATTACK_END,
 		ATTACK_SHOT,
 		STUN,
+		EXECUTION
 	};
 
 	enum class ATTACK_TYPE
@@ -92,6 +93,14 @@ public:
 		CHASE,
 		HIT,
 		END,
+	};
+
+	enum class EXE_TYPE
+	{
+		NONE,
+		PREPARE,
+		EXEQUTED,
+		EVOLUTION
 	};
 
 	enum class TARGET
@@ -123,6 +132,7 @@ public:
 	bool IsAttack(void);
 
 	bool IsAttackType(ATTACK_TYPE type);
+	bool IsExeType(EXE_TYPE type);
 
 
 	void SetSurvivor(std::array<std::weak_ptr<Survivor>, SURVIVOR_NUM> surv);
@@ -169,6 +179,7 @@ private:
 	void ChangeIsFly(bool isFly);
 
 	void ChangeAttack(ATTACK_TYPE type_);
+	void ChangeExecution(EXE_TYPE type_);
 
 	//	à⁄ìÆ
 	void ProcessMove(void) override;
@@ -192,6 +203,8 @@ private:
 
 	//	êiâª
 	void Evolution(void);
+
+	void ExeEvoUpdate();
 
 	void MakeShot(void);
 
@@ -280,6 +293,7 @@ private:
 	std::shared_ptr<Transform> exeQube_;
 
 	ATTACK_TYPE attackType_;
+	EXE_TYPE executionType_;
 
 	float attackEndFlame_;
 };

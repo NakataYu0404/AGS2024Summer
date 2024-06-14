@@ -57,7 +57,6 @@ void Survivor::Init(void)
 
 void Survivor::SetParam(void)
 {
-
 	animationController_ = nullptr;
 	state_ = STATE::NONE;
 	statePlay_ = STATE_INPLAY::IDLE;
@@ -247,12 +246,12 @@ void Survivor::OnCollision(std::weak_ptr<Collider> collider)
 	switch (collider.lock()->category_)
 	{
 	case Collider::Category::SURVIVOR:
-
 		break;
 	case Collider::Category::RAIDER:
 
 		break;
 	case Collider::Category::SHOT:
+		Damage(HALF_HP);
 		break;
 	case Collider::Category::STAGE:
 		transform_->pos = collider.lock()->hitInfo_.movedPos;

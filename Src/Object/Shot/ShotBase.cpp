@@ -12,6 +12,7 @@ ShotBase::ShotBase(void):colMng_(CollisionManager::GetInstance())
 
 ShotBase::~ShotBase(void)
 {
+
 }
 
 void ShotBase::Init(void)
@@ -33,7 +34,7 @@ void ShotBase::Init(void)
 	//	カプセルコライダ
 	sphere_ = std::make_shared<Sphere>(transform_);
 	sphere_->SetLocalPos({ 0.0f, 0.0f, 0.0f });
-	sphere_->SetRadius(10.0f);
+	sphere_->SetRadius(20.0f);
 }
 
 void ShotBase::SetParam(void)
@@ -45,12 +46,20 @@ void ShotBase::SetParam(void)
 
 void ShotBase::Update(void)
 {
+	if (!isAlive_)
+	{
+		return;
+	}
 	transform_->pos = VAdd(transform_->pos, VScale(moveDir_, speed_));
 	transform_->Update();
 }
 
 void ShotBase::Draw(void)
 {
+	if (!isAlive_)
+	{
+		return;
+	}
 	MV1DrawModel(transform_->modelId);
 	sphere_->Draw();
 }
@@ -84,4 +93,29 @@ void ShotBase::SetAlive(bool isAlive)
 
 void ShotBase::OnCollision(std::weak_ptr<Collider> collider)
 {
+	//	何に当たっても消える
+
+
+	//	他のクラスにこのクラスから影響させるのは避ける(余計な参照権を与えない)
+	auto cate = collider.lock()->category_;
+	switch (cate)
+	{
+	case Collider::Category::RAIDER:
+		
+		break;
+	case Collider::Category::SURVIVOR:
+		SetAlive(false);
+
+		break;
+	case Collider::Category::STAGE:
+		SetAlive(false);
+
+		break;
+	case Collider::Category::SHOT:
+
+		break;
+	default:
+		break;
+	}
+
 }

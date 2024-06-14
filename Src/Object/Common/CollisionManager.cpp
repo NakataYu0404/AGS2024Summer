@@ -48,22 +48,39 @@ void CollisionManager::Init(void)
 void CollisionManager::Update(void)
 {
 
-	for (auto actor : actors_)
+	//	ループを抜けたときに削除するコライダの要素番号を保存する
+	std::vector<int> deleteAct;
+	deleteAct.clear();
+
+	//	TODO:当たっていた時のOnCollisionが、
+	//		 サバとレイダーを例とすると、actor=survivorナンバーとactor=raiderナンバーのときで二回当たってしまう
+	//		 なので、当たったのは自分の要素番号でなのか相手の番号でなのか知れた方がいいかも
+
+	//	範囲for文を使用していたが、「特定のIndexで要素を触りたい」ため、普通のfor文に
+	for (int actNum = 0; actNum < actors_.size(); actNum++)
 	{
+		auto actor = actors_[actNum];
+
 		//	取得したコライダー情報
-		//	actor:typ,CAPSULE, tag, player
 		auto actorCollider = actor.lock()->GetTransform().lock()->collider_;
 		auto actorType = actorCollider->type_;
 		auto actorCategory = actorCollider->category_;
 
-		//	プレイヤー以外であればループを抜ける
-		if ((actorCategory != Collider::Category::RAIDER && actorCategory != Collider::Category::SURVIVOR) || categoryMap_.count(actorCategory) == 0)
+		//	現在のコライダが動くものでなければやりなおし
+		if ((actorCategory != Collider::Category::RAIDER &&
+			actorCategory != Collider::Category::SURVIVOR) ||
+			categoryMap_.count(actorCategory) == 0)
 		{
 			continue;
 		}
 
-		for (auto target : actors_)
+		std::vector<int> deleteTar;
+		deleteTar.clear();
+
+		for (int tarNum = 0; tarNum < actors_.size(); tarNum++)
 		{
+			auto target = actors_[tarNum];
+
 			//	同じもの同士では判定しない
 			if (actor.lock() == target.lock())
 			{
@@ -106,18 +123,20 @@ void CollisionManager::Update(void)
 				case Collider::TYPE::CAPSULE:	//	カプセル対カプセル
 					if (Capsule2_Collider(
 						actor.lock()->GetCapsule(),
-						target.lock()->GetCapsule()
-					))
+						target.lock()->GetCapsule()))
 					{
 						actor.lock()->OnCollision(targetCollider);
 						target.lock()->OnCollision(actorCollider);
 					}
 					break;
-				case Collider::TYPE::SPHERE:
-					if (Sphere2Capsule_Collider(target.lock()->GetSphere(), actor.lock()->GetCapsule()))
+				case Collider::TYPE::SPHERE:	//	カプセル対スフィア
+					if (Sphere2Capsule_Collider(
+						target.lock()->GetSphere(),
+						actor.lock()->GetCapsule()))
 					{
 						actor.lock()->OnCollision(targetCollider);
 						target.lock()->OnCollision(actorCollider);
+						deleteTar.push_back(tarNum);
 					}
 					break;
 				}
@@ -128,10 +147,13 @@ void CollisionManager::Update(void)
 				case Collider::TYPE::MODEL:
 					break;
 				case Collider::TYPE::CAPSULE:
-					if (Sphere2Capsule_Collider(actor.lock()->GetSphere(), target.lock()->GetCapsule()))
+					if (Sphere2Capsule_Collider(
+						actor.lock()->GetSphere(),
+						target.lock()->GetCapsule()))
 					{
 						actor.lock()->OnCollision(targetCollider);
 						target.lock()->OnCollision(actorCollider);
+						deleteAct.push_back(actNum);
 					}
 					break;
 				case Collider::TYPE::SPHERE:
@@ -145,7 +167,14 @@ void CollisionManager::Update(void)
 			}
 
 		}
-
+		for (auto del : deleteTar)
+		{
+			actors_.erase(actors_.begin() + del);
+		}
+	}
+	for (auto del : deleteAct)
+	{
+		actors_.erase(actors_.begin() + del);
 	}
 
 }

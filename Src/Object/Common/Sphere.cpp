@@ -23,7 +23,7 @@ Sphere::~Sphere(void)
 void Sphere::Draw(void)
 {
 	//	カプセルの中心
-	DrawSphere3D(GetPos(), 5.0f, 10, COLOR, COLOR, true);
+	DrawSphere3D(GetPos(), radius_, 10, COLOR, COLOR, true);
 }
 
 VECTOR Sphere::GetLocalPos(void) const
