@@ -39,7 +39,7 @@ void Camera::SetBeforeDraw(void)
 
 	//	クリップ距離を設定する(SetDrawScreenでリセットされる)
 	SetCameraNearFar(CAMERA_NEAR, CAMERA_FAR);
-
+	
 	switch (mode_)
 	{
 	case Camera::MODE::FIXED_POINT:
@@ -48,8 +48,11 @@ void Camera::SetBeforeDraw(void)
 	case Camera::MODE::FOLLOW:
 		SetBeforeDrawFollow();
 		break;
-	case Camera::MODE::EXECUTION:
-		SetBeforeDrawExeqution();
+	case Camera::MODE::EXECUTION_LV1:
+		SetBeforeDrawExequtionLv1();
+		break;
+	case Camera::MODE::EXECUTION_LV2:
+		SetBeforeDrawExequtionLv2();
 		break;
 	}
 
@@ -127,7 +130,7 @@ void Camera::ChangeMode(MODE mode)
 		break;
 	case Camera::MODE::FOLLOW:
 		break;
-	case Camera::MODE::EXECUTION:
+	case Camera::MODE::EXECUTION_LV1:
 		break;
 
 	}
@@ -253,7 +256,34 @@ void Camera::SetBeforeDrawSelfShot(void)
 {
 }
 
-void Camera::SetBeforeDrawExeqution(void)
+void Camera::SetBeforeDrawExequtionLv1(void)
+{
+	//	同期先の位置
+	VECTOR pos = followTransform_->headPos;
+
+	//	重力の方向制御に従う
+	//	正面から設定されたY軸分、回転させる
+	angles_ = Quaternion::ToEuler(followTransform_->quaRot.AngleAxis(AsoUtility::Deg2RadF(180.0f), AsoUtility::AXIS_Y));
+	rotOutX_ = Quaternion::AngleAxis(angles_.y, AsoUtility::AXIS_Y);
+	//	正面から設定されたX軸分、回転させる
+	rot_ = rotOutX_.Mult(Quaternion::AngleAxis(angles_.x, AsoUtility::AXIS_X));
+
+	VECTOR localPos;
+
+	//	注視点(通常重力でいうところのY値を追従対象と同じにする)
+	localPos = rotOutX_.PosAxis(LOCAL_F2T_POS_EXE_LV1);
+	targetPos_ = VAdd(pos, localPos);
+
+	//	カメラ位置
+	localPos = rot_.PosAxis(LOCAL_F2C_POS_EXE_LV1);
+	pos_ = VAdd(pos, localPos);
+
+	//	カメラの上方向
+	cameraUp_ = AsoUtility::DIR_U;
+
+}
+
+void Camera::SetBeforeDrawExequtionLv2(void)
 {
 	//	同期先の位置
 	VECTOR pos = followTransform_->headPos;
@@ -268,11 +298,11 @@ void Camera::SetBeforeDrawExeqution(void)
 	VECTOR localPos;
 
 	//	注視点(通常重力でいうところのY値を追従対象と同じにする)
-	localPos = rotOutX_.PosAxis(LOCAL_F2T_POS_EXE);
+	localPos = rotOutX_.PosAxis(LOCAL_F2T_POS_EXE_LV2);
 	targetPos_ = VAdd(pos, localPos);
 
 	//	カメラ位置
-	localPos = rot_.PosAxis(LOCAL_F2C_POS_EXE);
+	localPos = rot_.PosAxis(LOCAL_F2C_POS_EXE_LV2);
 	pos_ = VAdd(pos, localPos);
 
 	//	カメラの上方向

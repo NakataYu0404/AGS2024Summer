@@ -211,3 +211,8 @@ float AnimationController::GetPlayTime(void) const
 {
 	return playAnim_.step;
 }
+
+void AnimationController::ChangeModel(int modelId)
+{
+	modelId_ = modelId;
+}

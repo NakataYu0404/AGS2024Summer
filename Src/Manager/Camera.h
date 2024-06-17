@@ -29,8 +29,12 @@ public:
 	static constexpr VECTOR LOCAL_F2T_POS = { 0.0f, 200.0f, 200.0f };
 
 	//	処刑時カメラ
-	static constexpr VECTOR LOCAL_F2C_POS_EXE = { 0.0f, 0.0f, -100.0f };
-	static constexpr VECTOR LOCAL_F2T_POS_EXE = { 0.0f, 0.0f, 100.0f };
+	static constexpr VECTOR LOCAL_F2C_POS_EXE_LV1 = { 0.0f, 0.0f, -150.0f };
+	static constexpr VECTOR LOCAL_F2T_POS_EXE_LV1 = { 0.0f, 0.0f, 100.0f };
+
+	//	処刑時カメラ
+	static constexpr VECTOR LOCAL_F2C_POS_EXE_LV2 = { 0.0f, 0.0f, -200.0f };
+	static constexpr VECTOR LOCAL_F2T_POS_EXE_LV2 = { 0.0f, 0.0f, 100.0f };
 
 	//	カメラのX回転上限度角
 	static constexpr float LIMIT_X_UP_RAD = 80.0f * (DX_PI_F / 180.0f);
@@ -44,7 +48,8 @@ public:
 		NONE,
 		FIXED_POINT,
 		FOLLOW,
-		EXECUTION,
+		EXECUTION_LV1,
+		EXECUTION_LV2,
 		SELF_SHOT
 	};
 
@@ -122,7 +127,8 @@ private:
 	void SetBeforeDrawFixedPoint(void);
 	void SetBeforeDrawFollow(void);
 	void SetBeforeDrawSelfShot(void);
-	void SetBeforeDrawExeqution(void);
+	void SetBeforeDrawExequtionLv1(void);
+	void SetBeforeDrawExequtionLv2(void);
 
 	//	シングルトン参照
 	CollisionManager& colMng_;

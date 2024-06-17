@@ -43,6 +43,8 @@ public :
 	bool IsEnd(void) const;
 
 	float GetPlayTime(void) const;
+
+	void ChangeModel(int modelId);
 private :
 
 	//	ƒ‚ƒfƒ‹‚Ìƒnƒ“ƒhƒ‹ID

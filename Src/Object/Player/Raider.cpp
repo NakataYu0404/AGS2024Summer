@@ -32,10 +32,10 @@ void Raider::Init(void)
 
 	//	モデルの基本設定
 	transform_->SetModel(resMng_.LoadModelDuplicate(
-		ResourceManager::SRC::MDL_RAIDER));
+		ResourceManager::SRC::MDL_RAIDER_LV1));
 	transform_->scl = AsoUtility::VECTOR_ONE;
 	transform_->pos = { 0.0f, 0.0f, 0.0f };
-	transform_->headPos = MV1GetFramePosition(transform_->modelId, FRAME_HEAD);
+	transform_->headPos = MV1GetFramePosition(transform_->modelId, FRAME_HEAD_LV1);
 	transform_->quaRot = Quaternion();
 	transform_->quaRotLocal =
 		Quaternion::Euler({ 0.0f, AsoUtility::Deg2RadF(180.0f), 0.0f });
@@ -81,7 +81,7 @@ void Raider::SetParam(void)
 	statePlPos_ = STATE_PLPOS::LAND;
 	statePlay_ = STATE_INPLAY::IDLE;
 
-	speed_ = SPEED_RUN;
+	speed_ = SPEED_RUN_LV1;
 	moveDir_ = AsoUtility::VECTOR_ZERO;
 	movePow_ = AsoUtility::VECTOR_ZERO;
 	movedPos_ = AsoUtility::VECTOR_ZERO;
@@ -106,7 +106,7 @@ void Raider::SetParam(void)
 
 	rotRad_ = 0.0f;
 
-	levelRaider_ = LEVEL_PL::LV2;
+	levelRaider_ = LEVEL_PL::LV1;
 	exp_ = 0;
 
 	for (int i = 0; i < SURVIVOR_NUM; i++)
@@ -144,7 +144,18 @@ void Raider::Update(void)
 	}
 
 	//	モデル制御更新
-	transform_->headPos = MV1GetFramePosition(transform_->modelId, FRAME_HEAD);
+	switch (levelRaider_)
+	{
+	case Raider::LEVEL_PL::LV1:
+	transform_->headPos = MV1GetFramePosition(transform_->modelId, FRAME_HEAD_LV1);
+		break;
+	case Raider::LEVEL_PL::LV2:
+	transform_->headPos = MV1GetFramePosition(transform_->modelId, FRAME_HEAD_LV2);
+		break;
+	case Raider::LEVEL_PL::LV3:
+		break;
+	}
+
 	transform_->midPos = AsoUtility::VDiv(VAdd(transform_->pos, transform_->headPos), 2);
 	transform_->Update();
 
@@ -161,7 +172,7 @@ void Raider::Draw(void)
 	//	モデルの描画
 	MV1DrawModel(transform_->modelId);
 
-	if (exeTarget_ != TARGET::NONE)
+	if (IsStateInPlay(STATE_INPLAY::EXECUTION_LV1))
 	{
 		MV1DrawModel(exeQube_->modelId);
 	}
@@ -241,123 +252,240 @@ bool Raider::IsWaitNow(void)
 	}
 
 	return false;
+
 }
 
 void Raider::InitAnimation(void)
 {
+	std::string path = Application::PATH_MODEL + "Player/Anim/";
+	std::string path2 = Application::PATH_MODEL + "Player/Raider/Lv2Anim/";
 
-	std::string path = Application::PATH_MODEL + "Player/";
 	animationController_ = std::make_shared<AnimationController>(transform_->modelId);
+
+	//int a = MV1LoadModel("Data/Model/");
+
+	//animationController_->Add((int)ANIM_TYPE::IDLE, path + "Idle.mv1", 20.0f);
 	animationController_->Add((int)ANIM_TYPE::IDLE, path + "Idle.mv1", 20.0f);
 	animationController_->Add((int)ANIM_TYPE::RUN, path + "Run.mv1", 20.0f);
 	animationController_->Add((int)ANIM_TYPE::FAST_RUN, path + "FastRun.mv1", 20.0f);
 	animationController_->Add((int)ANIM_TYPE::JUMP, path + "Jump.mv1", 60.0f);
-	animationController_->Add((int)ANIM_TYPE::WARP_PAUSE, path + "WarpPose.mv1", 60.0f);
 	animationController_->Add((int)ANIM_TYPE::FLY, path + "Flying.mv1", 60.0f);
 	animationController_->Add((int)ANIM_TYPE::FALLING, path + "FallIdle.mv1", 80.0f);
 	animationController_->Add((int)ANIM_TYPE::FLOAT, path + "FloatIdle.mv1", 80.0f);
 	animationController_->Add((int)ANIM_TYPE::VICTORY, path + "Victory.mv1", 60.0f);
 	animationController_->Add((int)ANIM_TYPE::ATTACK_HIT, path + "manyPunch.mv1", 80.0f);
 	animationController_->Add((int)ANIM_TYPE::ATTACK_END, path + "gurugurukick.mv1", 60.0f);
-	animationController_->Add((int)ANIM_TYPE::EXECUTION, path + "fingerGun2.mv1", 120.0f);
+	animationController_->Add((int)ANIM_TYPE::EXECUTION_LV1, path + "fingerGun2.mv1", 120.0f);
+
+	animationController_->Add((int)ANIM_TYPE::IDLE_LV2, path2 + "Idle2.mv1", 20.0f);
+	animationController_->Add((int)ANIM_TYPE::RUN_LV2, path2 + "walk.mv1", 20.0f);
+	animationController_->Add((int)ANIM_TYPE::FAST_RUN_LV2, path2 + "run.mv1", 20.0f);
+	animationController_->Add((int)ANIM_TYPE::JUMP_LV2, path2 + "jump.mv1", 60.0f);
+	animationController_->Add((int)ANIM_TYPE::FLY_LV2, path2 + "idle1.mv1", 60.0f);
+	animationController_->Add((int)ANIM_TYPE::FALLING_LV2, path2 + "idle1.mv1", 80.0f);
+	animationController_->Add((int)ANIM_TYPE::FLOAT_LV2, path2 + "idle1.mv1", 80.0f);
+	animationController_->Add((int)ANIM_TYPE::VICTORY_LV2, path2 + "idle1.mv1", 60.0f);
+	animationController_->Add((int)ANIM_TYPE::ATTACK_HIT_LV2, path2 + "atk1.mv1", 80.0f);
+	animationController_->Add((int)ANIM_TYPE::ATTACK_END_LV2, path2 + "roar.mv1", 120.0f);
+	animationController_->Add((int)ANIM_TYPE::EXECUTION_LV2, path2 + "atk2.mv1", 120.0f);
 
 	animationController_->Play((int)ANIM_TYPE::IDLE);
-
+	
 }
 
 void Raider::ChangeStateAnimation(void)
 {
-
-	switch (statePlPos_)
+	switch (levelRaider_)
 	{
-	case Raider::STATE_PLPOS::NONE:
-		break;
-	case Raider::STATE_PLPOS::LAND:
-
-		switch (statePlay_)
+	case Raider::LEVEL_PL::LV1:
+		switch (statePlPos_)
 		{
-		case Raider::STATE_INPLAY::NONE:
+		case Raider::STATE_PLPOS::NONE:
 			break;
-		case Raider::STATE_INPLAY::IDLE:
-			animationController_->Play((int)ANIM_TYPE::IDLE);
-			break;
-		case Raider::STATE_INPLAY::MOVE:
-			animationController_->Play((int)ANIM_TYPE::RUN);
-			break;
-		case Raider::STATE_INPLAY::JUMP:
-			break;
-		case Raider::STATE_INPLAY::LAND:
-			//	着地モーション
-			animationController_->Play((int)ANIM_TYPE::JUMP, false, 29.0f, 45.0f, false, true);
-			break;
-		case Raider::STATE_INPLAY::FALL_MYSELF:
-			animationController_->Play((int)ANIM_TYPE::FALLING);
-			break;
-		case Raider::STATE_INPLAY::FALL_NATURE:
-			animationController_->Play((int)ANIM_TYPE::FALLING);
-			break;
-		case Raider::STATE_INPLAY::FLOAT:
-			animationController_->Play((int)ANIM_TYPE::FLOAT);
-			break;
-		case Raider::STATE_INPLAY::STUN:
-			break;
-		case Raider::STATE_INPLAY::EXECUTION:
-			animationController_->Play((int)ANIM_TYPE::EXECUTION, false);
-			break;
+		case Raider::STATE_PLPOS::LAND:
 
-		default:
-			break;
-
-		}
-
-		break;
-	case Raider::STATE_PLPOS::AIR:
-
-		switch (statePlay_)
-		{
-		case Raider::STATE_INPLAY::NONE:
-			break;
-		case Raider::STATE_INPLAY::IDLE:
-			animationController_->Play((int)ANIM_TYPE::IDLE);
-			break;
-		case Raider::STATE_INPLAY::MOVE:
-			animationController_->Play((int)ANIM_TYPE::FLY);
-			break;
-		case Raider::STATE_INPLAY::JUMP:
-			break;
-		case Raider::STATE_INPLAY::LAND:
-			
-			break;
-		case Raider::STATE_INPLAY::FALL_MYSELF:
-			animationController_->Play((int)ANIM_TYPE::FALLING);
-			break;
-		case Raider::STATE_INPLAY::FALL_NATURE:
-			animationController_->Play((int)ANIM_TYPE::FALLING);
-			break;
-		case Raider::STATE_INPLAY::FLOAT:
-			animationController_->Play((int)ANIM_TYPE::FLOAT);
-			break;
-		case Raider::STATE_INPLAY::STUN:
-			break;
-		case Raider::STATE_INPLAY::ATTACK:
-			switch (attackType_)
+			switch (statePlay_)
 			{
-			case Raider::ATTACK_TYPE::CHASE:
+			case Raider::STATE_INPLAY::NONE:
 				break;
-			case Raider::ATTACK_TYPE::HIT:
-				animationController_->Play((int)ANIM_TYPE::ATTACK_HIT);
+			case Raider::STATE_INPLAY::IDLE:
+				animationController_->Play((int)ANIM_TYPE::IDLE);
 				break;
-			case Raider::ATTACK_TYPE::END:
-				animationController_->Play((int)ANIM_TYPE::ATTACK_END, false);
+			case Raider::STATE_INPLAY::MOVE:
+				animationController_->Play((int)ANIM_TYPE::RUN);
+				break;
+			case Raider::STATE_INPLAY::JUMP:
+				break;
+			case Raider::STATE_INPLAY::LAND:
+				//	着地モーション
+				animationController_->Play((int)ANIM_TYPE::JUMP, false, 29.0f, 45.0f, false, true);
+				break;
+			case Raider::STATE_INPLAY::FALL_MYSELF:
+				animationController_->Play((int)ANIM_TYPE::FALLING);
+				break;
+			case Raider::STATE_INPLAY::FALL_NATURE:
+				animationController_->Play((int)ANIM_TYPE::FALLING);
+				break;
+			case Raider::STATE_INPLAY::FLOAT:
+				animationController_->Play((int)ANIM_TYPE::FLOAT);
+				break;
+			case Raider::STATE_INPLAY::STUN:
+				break;
+			case Raider::STATE_INPLAY::EXECUTION_LV1:
+				animationController_->Play((int)ANIM_TYPE::EXECUTION_LV1, false);
+				break;
+
+			default:
+				break;
+
+			}
+
+			break;
+		case Raider::STATE_PLPOS::AIR:
+
+			switch (statePlay_)
+			{
+			case Raider::STATE_INPLAY::NONE:
+				break;
+			case Raider::STATE_INPLAY::IDLE:
+				animationController_->Play((int)ANIM_TYPE::IDLE);
+				break;
+			case Raider::STATE_INPLAY::MOVE:
+				animationController_->Play((int)ANIM_TYPE::FLY);
+				break;
+			case Raider::STATE_INPLAY::JUMP:
+				break;
+			case Raider::STATE_INPLAY::LAND:
+
+				break;
+			case Raider::STATE_INPLAY::FALL_MYSELF:
+				animationController_->Play((int)ANIM_TYPE::FALLING);
+				break;
+			case Raider::STATE_INPLAY::FALL_NATURE:
+				animationController_->Play((int)ANIM_TYPE::FALLING);
+				break;
+			case Raider::STATE_INPLAY::FLOAT:
+				animationController_->Play((int)ANIM_TYPE::FLOAT);
+				break;
+			case Raider::STATE_INPLAY::STUN:
+				break;
+			case Raider::STATE_INPLAY::ATTACK:
+				switch (attackType_)
+				{
+				case Raider::ATTACK_TYPE::CHASE:
+					break;
+				case Raider::ATTACK_TYPE::HIT:
+					animationController_->Play((int)ANIM_TYPE::ATTACK_HIT);
+					break;
+				case Raider::ATTACK_TYPE::END:
+					animationController_->Play((int)ANIM_TYPE::ATTACK_END, false);
+					break;
+				}
+				break;
+			case Raider::STATE_INPLAY::SHOT:
+				break;
+			default:
 				break;
 			}
 			break;
-		case Raider::STATE_INPLAY::SHOT:
+		}
+
+		break;
+	case Raider::LEVEL_PL::LV2:
+		switch (statePlPos_)
+		{
+		case Raider::STATE_PLPOS::NONE:
 			break;
-		default:
+		case Raider::STATE_PLPOS::LAND:
+
+			switch (statePlay_)
+			{
+			case Raider::STATE_INPLAY::NONE:
+				break;
+			case Raider::STATE_INPLAY::IDLE:
+				animationController_->Play((int)ANIM_TYPE::IDLE_LV2);
+				break;
+			case Raider::STATE_INPLAY::MOVE:
+				animationController_->Play((int)ANIM_TYPE::RUN_LV2);
+				break;
+			case Raider::STATE_INPLAY::JUMP:
+				break;
+			case Raider::STATE_INPLAY::LAND:
+				//	着地モーション
+				animationController_->Play((int)ANIM_TYPE::JUMP_LV2, false, 29.0f, 45.0f, false, true);
+				break;
+			case Raider::STATE_INPLAY::FALL_MYSELF:
+				animationController_->Play((int)ANIM_TYPE::FALLING_LV2);
+				break;
+			case Raider::STATE_INPLAY::FALL_NATURE:
+				animationController_->Play((int)ANIM_TYPE::FALLING_LV2);
+				break;
+			case Raider::STATE_INPLAY::FLOAT:
+				animationController_->Play((int)ANIM_TYPE::FLOAT_LV2);
+				break;
+			case Raider::STATE_INPLAY::STUN:
+				break;
+			case Raider::STATE_INPLAY::EXECUTION_LV1:
+				animationController_->Play((int)ANIM_TYPE::EXECUTION_LV2, false);
+				break;
+
+			default:
+				break;
+
+			}
+
+			break;
+		case Raider::STATE_PLPOS::AIR:
+
+			switch (statePlay_)
+			{
+			case Raider::STATE_INPLAY::NONE:
+				break;
+			case Raider::STATE_INPLAY::IDLE:
+				animationController_->Play((int)ANIM_TYPE::IDLE_LV2);
+				break;
+			case Raider::STATE_INPLAY::MOVE:
+				animationController_->Play((int)ANIM_TYPE::FLY_LV2);
+				break;
+			case Raider::STATE_INPLAY::JUMP:
+				break;
+			case Raider::STATE_INPLAY::LAND:
+
+				break;
+			case Raider::STATE_INPLAY::FALL_MYSELF:
+				animationController_->Play((int)ANIM_TYPE::FALLING_LV2);
+				break;
+			case Raider::STATE_INPLAY::FALL_NATURE:
+				animationController_->Play((int)ANIM_TYPE::FALLING_LV2);
+				break;
+			case Raider::STATE_INPLAY::FLOAT:
+				animationController_->Play((int)ANIM_TYPE::FLOAT_LV2);
+				break;
+			case Raider::STATE_INPLAY::STUN:
+				break;
+			case Raider::STATE_INPLAY::ATTACK:
+				switch (attackType_)
+				{
+				case Raider::ATTACK_TYPE::CHASE:
+					break;
+				case Raider::ATTACK_TYPE::HIT:
+					animationController_->Play((int)ANIM_TYPE::ATTACK_HIT_LV2);
+					break;
+				case Raider::ATTACK_TYPE::END:
+					animationController_->Play((int)ANIM_TYPE::ATTACK_END_LV2, false);
+					break;
+				}
+				break;
+			case Raider::STATE_INPLAY::SHOT:
+				break;
+			default:
+				break;
+			}
 			break;
 		}
 
+		break;
+	case Raider::LEVEL_PL::LV3:
 		break;
 	default:
 		break;
@@ -382,14 +510,14 @@ void Raider::UpdatePlay(void)
 	AttackHit();
 	AttackEnd();
 
-	Evolution();
+	ExeEvoUpdate();
 
 	ChangeLandAir();
 
 	ChangeStateAnimation();
 
 	//	移動方向に応じた回転
-	if (!IsStateInPlay(STATE_INPLAY::EXECUTION))
+	if (!IsStateInPlay(STATE_INPLAY::EXECUTION_LV1))
 	{
 		Rotate();
 	}
@@ -446,7 +574,7 @@ void Raider::DrawShot(void)
 void Raider::UpdateLand(void)
 {
 	ProcessMove();
-	if (levelRaider_ != LEVEL_PL::LV1)
+	if (levelRaider_ == LEVEL_PL::LV3)
 	{
 		//	飛行処理
 		ProcessFly();
@@ -489,6 +617,11 @@ void Raider::ChangeStateInPlay(STATE_INPLAY state)
 	{
 		ChangeAttack(ATTACK_TYPE::NONE);
 	}
+	
+	if (statePlay_ != STATE_INPLAY::EXECUTION_LV1)
+	{
+		ChangeExecution(EXE_TYPE::NONE);
+	}
 }
 
 void Raider::ChangeIsFly(bool isFly)
@@ -520,7 +653,7 @@ void Raider::ProcessMove(void)
 
 	VECTOR dir = AsoUtility::VECTOR_ZERO;
 
-	if (!IsStateInPlay(STATE_INPLAY::FALL_MYSELF))
+	if (!IsStateInPlay(STATE_INPLAY::FALL_MYSELF) && !IsStateInPlay(STATE_INPLAY::EXECUTION_LV1))
 	{
 		//	カメラ方向に前進したい
 		if (ins.IsNew(KEY_INPUT_W))
@@ -554,7 +687,17 @@ void Raider::ProcessMove(void)
 	if (!AsoUtility::EqualsVZero(dir)/* && (isJump_ || IsEndLanding())*/) {
 
 		//	移動処理
-		speed_ = SPEED_RUN;
+		switch (levelRaider_)
+		{
+		case Raider::LEVEL_PL::LV1:
+			speed_ = SPEED_RUN_LV1;
+			break;
+		case Raider::LEVEL_PL::LV2:
+			speed_ = SPEED_RUN_LV2;
+			break;
+		case Raider::LEVEL_PL::LV3:
+			break;
+		}
 
 		moveDir_ = dir;
 		movePow_ = VScale(dir, speed_);
@@ -562,7 +705,7 @@ void Raider::ProcessMove(void)
 		//	回転処理
 		SetGoalRotate(rotRad_);
 
-		if (!isJump_ && IsEndLanding() && !IsStateInPlay(STATE_INPLAY::EXECUTION))
+		if (!isJump_ && IsEndLanding() && !IsStateInPlay(STATE_INPLAY::EXECUTION_LV1))
 		{
 			ChangeStateInPlay(STATE_INPLAY::MOVE);
 		}
@@ -570,7 +713,7 @@ void Raider::ProcessMove(void)
 	}
 	else
 	{
-		if (!isJump_ && IsEndLanding() && !IsStateInPlay(STATE_INPLAY::EXECUTION))
+		if (!isJump_ && IsEndLanding() && !IsStateInPlay(STATE_INPLAY::EXECUTION_LV1))
 		{
 			ChangeStateInPlay(STATE_INPLAY::IDLE);
 		}
@@ -608,7 +751,17 @@ void Raider::ProcessJump(void)
  		stepJump_ += scnMng_.GetDeltaTime();
 		if (stepJump_ < TIME_JUMP_IN)
 		{
- 			jumpPow_ = VScale(AsoUtility::DIR_U, POW_JUMP);
+			switch (levelRaider_)
+			{
+			case Raider::LEVEL_PL::LV1:
+				jumpPow_ = VScale(AsoUtility::DIR_U, POW_JUMP_LV1);
+				break;
+			case Raider::LEVEL_PL::LV2:
+				jumpPow_ = VScale(AsoUtility::DIR_U, POW_JUMP_LV2);
+				break;
+			case Raider::LEVEL_PL::LV3:
+				break;
+			}
 		}
 	}
 }
@@ -769,7 +922,7 @@ void Raider::AttackStart(void)
 			if (chaseTime_ <= 0)
 			{
 				chaseTime_ = CHASE_FLAME;
-				if (levelRaider_ == LEVEL_PL::LV1)
+				if (levelRaider_ != LEVEL_PL::LV3)
 				{
 					ChangeIsFly(false);
 				}
@@ -823,7 +976,7 @@ void Raider::AttackEnd(void)
 
 	if (animationController_->IsEnd())
 	{
-		if (levelRaider_ == LEVEL_PL::LV1)
+		if (levelRaider_ != LEVEL_PL::LV3)
 		{
 			ChangeIsFly(false);
 		}
@@ -889,7 +1042,7 @@ void Raider::PrepareExecution(void)
 	{
 		exeCnt_ = EXECUTION_FLAME;
 		exeTarget_ = TARGET::NONE;
-		if (IsStateInPlay(STATE_INPLAY::EXECUTION) && IsExeType(EXE_TYPE::PREPARE))
+		if (IsStateInPlay(STATE_INPLAY::EXECUTION_LV1) && IsExeType(EXE_TYPE::PREPARE))
 		{
 			SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::FOLLOW);
 			ChangeStateInPlay(STATE_INPLAY::IDLE);
@@ -899,10 +1052,20 @@ void Raider::PrepareExecution(void)
 	}
 	else if (exeTarget_ != TARGET::NONE)
 	{
-		SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::EXECUTION);
+		switch (levelRaider_)
+		{
+		case Raider::LEVEL_PL::LV1:
+			SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::EXECUTION_LV1);
+			break;
+		case Raider::LEVEL_PL::LV2:
+			SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::EXECUTION_LV2);
+			break;
+		case Raider::LEVEL_PL::LV3:
+			break;
+		}
 		movePow_ = AsoUtility::VECTOR_ZERO;
 		//	ボタン押してて、ターゲットがNONEでも無かったら
-		ChangeStateInPlay(STATE_INPLAY::EXECUTION);
+		ChangeStateInPlay(STATE_INPLAY::EXECUTION_LV1);
 		ChangeExecution(EXE_TYPE::PREPARE);
 	}
 
@@ -915,7 +1078,7 @@ void Raider::PrepareExecution(void)
 			exeCnt_ -= 1.0f;
 			if (exeCnt_ <= 0.0f)
 			{
-				exeCnt_ = EXECUTION_FLAME;
+				exeCnt_ = EXECUTION_FLAME*3.0f;
 				Execution(ExecuteSur_);
 				exeTarget_ = TARGET::NONE;
 			}
@@ -928,10 +1091,9 @@ void Raider::PrepareExecution(void)
 			exeCnt_ -= 1.0f;
 			if (exeCnt_ <= 0.0f)
 			{
-				exeCnt_ = EXECUTION_FLAME;
+				exeCnt_ = EXECUTION_FLAME*3.0f;
 				Execution(ExecuteVic_);
 				exeTarget_ = TARGET::NONE;
-				SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::FOLLOW);
 			}
 		}
 		break;
@@ -954,11 +1116,6 @@ void Raider::Execution(std::shared_ptr<Victim> target)
 
 void Raider::Evolution(void)
 {
-	if (exp_ < MAX_EVOLUTION_POINT)
-	{
-		return;
-	}
-
 	switch (levelRaider_)
 	{
 	case Raider::LEVEL_PL::LV1:
@@ -975,24 +1132,38 @@ void Raider::Evolution(void)
 	default:
 		break;
 	}
-
+	
 	ChangeExecution(EXE_TYPE::EVOLUTION);
 
 }
 
 void Raider::ExeEvoUpdate()
 {
-	if (!IsStateInPlay(STATE_INPLAY::EXECUTION))
+	if (!IsStateInPlay(STATE_INPLAY::EXECUTION_LV1))
 	{
 		return;
 	}
 
 	if (IsExeType(EXE_TYPE::EXEQUTED))
 	{
-		ここから　処刑後と進化のムービー、分岐作り
+		//TODO:ここから　処刑後と進化のムービー、分岐作り
 		if (exeCnt_ > 0)
 		{
 			exeCnt_--;
+		}
+		else
+		{
+			if (exp_ < MAX_EVOLUTION_POINT)
+			{
+				ChangeStateInPlay(STATE_INPLAY::IDLE);
+				SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::FOLLOW);
+				return;
+			}
+			else
+			{
+				Evolution();
+				exeCnt_ = EXECUTION_FLAME*8.0f;
+			}
 		}
 
 	}
@@ -1002,10 +1173,17 @@ void Raider::ExeEvoUpdate()
 		{
 			exeCnt_--;
 		}
+		else
+		{
+			transform_->SetModel(resMng_.LoadModelDuplicate(
+				ResourceManager::SRC::MDL_RAIDER_LV2));
+			animationController_->ChangeModel(transform_->modelId);
+			ChangeExecution(EXE_TYPE::NONE);
+			ChangeStateInPlay(STATE_INPLAY::IDLE);
+			SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::FOLLOW);
+		}
 
 	}
-
-
 
 	exeQube_->pos = transform_->midPos;
 	exeQube_->pos.y += 200.0f;

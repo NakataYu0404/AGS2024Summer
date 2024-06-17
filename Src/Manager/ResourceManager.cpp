@@ -44,15 +44,27 @@ void ResourceManager::Init(void)
 	resourcesMap_.emplace(SRC::IMG_SPEECHBALLOON, res);
 	
 	//	プレイヤー
-	res = new RES(RES_T::MODEL, PATH_MDL + "Player/Player.mv1");
+	res = new RES(RES_T::MODEL, PATH_MDL + "Player/Victim/Player.mv1");
 	resourcesMap_.emplace(SRC::MDL_PLAYER, res);
 
+	////	レイダー
+	//res = new RES(RES_T::MODEL, PATH_MDL + "Player/BotX.mv1");
+	//resourcesMap_.emplace(SRC::MDL_RAIDER_LV1, res);
+
 	//	レイダー
-	res = new RES(RES_T::MODEL, PATH_MDL + "Player/BotX.mv1");
-	resourcesMap_.emplace(SRC::MDL_RAIDER, res);
+	res = new RES(RES_T::MODEL, PATH_MDL + "Player/Raider/Lv1Raider.mv1");
+	resourcesMap_.emplace(SRC::MDL_RAIDER_LV1, res);
+
+	//	レイダー
+	res = new RES(RES_T::MODEL, PATH_MDL + "Player/Raider/Lv2Raider.mv1");
+	resourcesMap_.emplace(SRC::MDL_RAIDER_LV2, res);
+
+	//	レイダー
+	res = new RES(RES_T::MODEL, PATH_MDL + "Player/Raider/Lv2Raider.mv1");
+	resourcesMap_.emplace(SRC::MDL_RAIDER_LV3, res);
 
 	//	サバイバー
-	res = new RES(RES_T::MODEL, PATH_MDL + "Player/BotY.mv1");
+	res = new RES(RES_T::MODEL, PATH_MDL + "Player/Survivor/BotY.mv1");
 	resourcesMap_.emplace(SRC::MDL_SURVIVOR, res);
 
 	//	サバイバー

@@ -147,7 +147,7 @@ void Survivor::SetState(PlayerBase::STATE state)
 void Survivor::InitAnimation(void)
 {
 
-	std::string path = Application::PATH_MODEL + "Player/";
+	std::string path = Application::PATH_MODEL + "Player/Anim/";
 	animationController_ = std::make_shared<AnimationController>(transform_->modelId);
 	animationController_->Add((int)ANIM_TYPE::IDLE, path + "Idle.mv1", 20.0f);
 	animationController_->Add((int)ANIM_TYPE::RUN, path + "Run.mv1", 20.0f);

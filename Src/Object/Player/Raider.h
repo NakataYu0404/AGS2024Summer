@@ -10,19 +10,23 @@ class Raider : public PlayerBase
 public:
 
 	//	スピード
-	static constexpr float SPEED_RUN = 15.0f;
+	static constexpr float SPEED_RUN_LV1 = 15.0f;
+	static constexpr float SPEED_RUN_LV2 = 25.0f;
 	static constexpr float SPEED_FLY = 20.0f;
 
 	//	回転完了までの時間
 	static constexpr float TIME_ROT = 0.3f;
 
 	//	ジャンプ力
-	static constexpr float POW_JUMP = 15.0f;
+	static constexpr float POW_JUMP_LV1 = 15.0f;
+
+	static constexpr float POW_JUMP_LV2 = 200.0f;
 
 	//	ジャンプ受付時間
 	static constexpr float TIME_JUMP_IN = 0.5f;
 
-	static constexpr int FRAME_HEAD = 4;
+	static constexpr int FRAME_HEAD_LV1 = 5;
+	static constexpr int FRAME_HEAD_LV2 = 73;
 
 	//	サバイバーの数
 	//	GameSceneのやつを使えた方がいいけど、ヘッダーでインクルードすることになって良くない
@@ -57,7 +61,7 @@ public:
 		STUN,
 		ATTACK,
 		SHOT,
-		EXECUTION,
+		EXECUTION_LV1,
 	};
 
 	enum class LEVEL_PL
@@ -66,6 +70,7 @@ public:
 		LV2,
 		LV3,
 	};
+
 
 	//	アニメーション種別
 	enum class ANIM_TYPE
@@ -84,7 +89,23 @@ public:
 		ATTACK_END,
 		ATTACK_SHOT,
 		STUN,
-		EXECUTION
+		EXECUTION_LV1,
+
+		IDLE_LV2,
+		RUN_LV2,
+		FAST_RUN_LV2,
+		JUMP_LV2,
+		WARP_PAUSE_LV2,
+		FLY_LV2,
+		FALLING_LV2,
+		FLOAT_LV2,
+		VICTORY_LV2,
+		ATTACK_CHASE_LV2,
+		ATTACK_HIT_LV2,
+		ATTACK_END_LV2,
+		ATTACK_SHOT_LV2,
+		STUN_LV2,
+		EXECUTION_LV2,
 	};
 
 	enum class ATTACK_TYPE
@@ -203,6 +224,8 @@ private:
 
 	//	進化
 	void Evolution(void);
+
+	void EvoAnimation(LEVEL_PL lv);
 
 	void ExeEvoUpdate();
 
