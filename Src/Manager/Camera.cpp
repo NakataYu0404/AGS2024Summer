@@ -45,8 +45,11 @@ void Camera::SetBeforeDraw(void)
 	case Camera::MODE::FIXED_POINT:
 		SetBeforeDrawFixedPoint();
 		break;
-	case Camera::MODE::FOLLOW:
-		SetBeforeDrawFollow();
+	case Camera::MODE::FOLLOW_LV1:
+		SetBeforeDrawFollowLv1();
+		break;
+	case Camera::MODE::FOLLOW_LV2:
+		SetBeforeDrawFollowLv2();
 		break;
 	case Camera::MODE::EXECUTION_LV1:
 		SetBeforeDrawExequtionLv1();
@@ -128,7 +131,7 @@ void Camera::ChangeMode(MODE mode)
 	{
 	case Camera::MODE::FIXED_POINT:
 		break;
-	case Camera::MODE::FOLLOW:
+	case Camera::MODE::FOLLOW_LV1:
 		break;
 	case Camera::MODE::EXECUTION_LV1:
 		break;
@@ -157,7 +160,7 @@ void Camera::SetDefault(void)
 
 }
 
-void Camera::SyncFollow(void)
+void Camera::SyncFollowLv1(void)
 {
 
 	//	同期先の位置
@@ -178,6 +181,46 @@ void Camera::SyncFollow(void)
 
 	//	カメラ位置
 	localPos = rot_.PosAxis(LOCAL_F2C_POS);
+
+	VECTOR tmpPos = VAdd(pos, localPos);
+	auto Hit = colMng_.Line_IsCollision_Stage(tmpPos, targetPos_);
+
+	if (Hit.HitFlag)
+	{
+		pos_ = VAdd(Hit.HitPosition,VScale(GetForward(),50.0f));
+		//	ここもうちょっと良い形を考えよう！球体のコライダ用意してもいいし・・・
+	}
+	else
+	{
+		pos_ = VAdd(pos, localPos);
+	}
+
+	//	カメラの上方向
+	cameraUp_ = AsoUtility::DIR_U;
+
+}
+
+void Camera::SyncFollowLv2(void)
+{
+
+	//	同期先の位置
+	VECTOR pos = followTransform_->pos;
+
+	//	重力の方向制御に従う
+	//	正面から設定されたY軸分、回転させる
+	rotOutX_ = Quaternion::AngleAxis(angles_.y, AsoUtility::AXIS_Y);
+
+	//	正面から設定されたX軸分、回転させる
+	rot_ = rotOutX_.Mult(Quaternion::AngleAxis(angles_.x, AsoUtility::AXIS_X));
+
+	VECTOR localPos;
+
+	//	注視点(通常重力でいうところのY値を追従対象と同じにする)
+	localPos = rotOutX_.PosAxis(LOCAL_F2T_POS);
+	targetPos_ = VAdd(pos, localPos);
+
+	//	カメラ位置
+	localPos = rot_.PosAxis(LOCAL_F2C_POS_LV2);
 
 	VECTOR tmpPos = VAdd(pos, localPos);
 	auto Hit = colMng_.Line_IsCollision_Stage(tmpPos, targetPos_);
@@ -243,13 +286,22 @@ void Camera::SetBeforeDrawFixedPoint(void)
 	//	何もしない
 }
 
-void Camera::SetBeforeDrawFollow(void)
+void Camera::SetBeforeDrawFollowLv1(void)
 {
 	//	カメラ操作
 	ProcessRot();
 
 	//	追従対象との相対位置を同期
-	SyncFollow();
+	SyncFollowLv1();
+}
+
+void Camera::SetBeforeDrawFollowLv2(void)
+{
+	//	カメラ操作
+	ProcessRot();
+
+	//	追従対象との相対位置を同期
+	SyncFollowLv2();
 }
 
 void Camera::SetBeforeDrawSelfShot(void)

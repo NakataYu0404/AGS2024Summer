@@ -62,6 +62,16 @@ void PlayerBase::Damage(int damage)
 
 }
 
+PlayerBase::STATE PlayerBase::GetState(void)
+{
+	return state_;
+}
+
+void PlayerBase::SetState(PlayerBase::STATE state)
+{
+	state_ = state;
+}
+
 void PlayerBase::ChangeState(STATE state)
 {
 	//	ó‘Ô•ÏX

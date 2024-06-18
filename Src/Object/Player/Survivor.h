@@ -26,6 +26,9 @@ public:
 	//	レイダーが殺した時に得るポイント 100で進化
 	static constexpr int POINT_EVOLUTION = 50;
 
+	static constexpr float REVIVE_TIMER = 1200;
+	static constexpr float DEAD_TIMER = 1800;
+
 	//	STATE::PLAY中のSTATE
 	enum class STATE_INPLAY
 	{
@@ -75,7 +78,6 @@ public:
 
 	Survivor::STATE_INPLAY GetStatePlay(void);
 
-	void SetState(PlayerBase::STATE state);
 
 	//	地上、空中関係ないSTATE::PLAY中ステートの切り替え
 	void ChangeStateInPlay(STATE_INPLAY state);
@@ -109,6 +111,7 @@ private:
 	//	着地モーション終了
 	bool IsEndLanding(void) override;
 
+	void CrawlDownUpdate(void);
 
 	//	吹っ飛ばされ処理
 	void BlowOff(void) override;
@@ -131,5 +134,7 @@ private:
 	//	レイダーのTransform
 	std::weak_ptr<Transform> raiderTran_;
 
+	float reviveTimer_;
+	float deadTimer_;
 };
 

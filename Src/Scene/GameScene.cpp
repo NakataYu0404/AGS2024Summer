@@ -87,7 +87,7 @@ void GameScene::Init(void)
 	colMng_.Add(stage_);
 
 	SceneManager::GetInstance().GetCamera()->SetFollow(raider_->GetTransform().lock().get());
-	SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::FOLLOW);
+	SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::FOLLOW_LV1);
 }
 
 void GameScene::Update(void)
@@ -122,6 +122,14 @@ void GameScene::Update(void)
 			break;
 		}
 		v->Update();
+	}
+
+	if ((survivors_[0]->IsStateInPlay(Survivor::STATE_INPLAY::CRAWL) || survivors_[0]->IsStateInPlay(Survivor::STATE_INPLAY::DOWN) || survivors_[0]->GetState() == PlayerBase::STATE::DEAD) &&
+		(survivors_[1]->IsStateInPlay(Survivor::STATE_INPLAY::CRAWL) || survivors_[1]->IsStateInPlay(Survivor::STATE_INPLAY::DOWN) || survivors_[1]->GetState() == PlayerBase::STATE::DEAD) &&
+		(survivors_[2]->IsStateInPlay(Survivor::STATE_INPLAY::CRAWL) || survivors_[2]->IsStateInPlay(Survivor::STATE_INPLAY::DOWN) || survivors_[2]->GetState() == PlayerBase::STATE::DEAD))
+	{
+		//	ゲームオーバー
+		int a = 0;
 	}
 
 	colMng_.Update();

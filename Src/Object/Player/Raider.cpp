@@ -46,7 +46,7 @@ void Raider::Init(void)
 	exeQube_ = std::make_shared<Transform>();
 	exeQube_->SetModel(resMng_.LoadModelDuplicate(
 		ResourceManager::SRC::EXEQUBE));
-	exeQube_->scl = {2.0f,2.0f,2.0f};
+	exeQube_->scl = {4.0f,4.0f,4.0f};
 	exeQube_->pos = transform_->midPos;
 	exeQube_->localPos = {0.0f,0.0f,0.0f};
 	exeQube_->quaRot = transform_->quaRot;
@@ -172,7 +172,7 @@ void Raider::Draw(void)
 	//	モデルの描画
 	MV1DrawModel(transform_->modelId);
 
-	if (IsStateInPlay(STATE_INPLAY::EXECUTION_LV1))
+	if (IsStateInPlay(STATE_INPLAY::EXECUTION))
 	{
 		MV1DrawModel(exeQube_->modelId);
 	}
@@ -331,7 +331,7 @@ void Raider::ChangeStateAnimation(void)
 				break;
 			case Raider::STATE_INPLAY::STUN:
 				break;
-			case Raider::STATE_INPLAY::EXECUTION_LV1:
+			case Raider::STATE_INPLAY::EXECUTION:
 				animationController_->Play((int)ANIM_TYPE::EXECUTION_LV1, false);
 				break;
 
@@ -425,7 +425,7 @@ void Raider::ChangeStateAnimation(void)
 				break;
 			case Raider::STATE_INPLAY::STUN:
 				break;
-			case Raider::STATE_INPLAY::EXECUTION_LV1:
+			case Raider::STATE_INPLAY::EXECUTION:
 				animationController_->Play((int)ANIM_TYPE::EXECUTION_LV2, false);
 				break;
 
@@ -517,7 +517,7 @@ void Raider::UpdatePlay(void)
 	ChangeStateAnimation();
 
 	//	移動方向に応じた回転
-	if (!IsStateInPlay(STATE_INPLAY::EXECUTION_LV1))
+	if (!IsStateInPlay(STATE_INPLAY::EXECUTION))
 	{
 		Rotate();
 	}
@@ -618,7 +618,7 @@ void Raider::ChangeStateInPlay(STATE_INPLAY state)
 		ChangeAttack(ATTACK_TYPE::NONE);
 	}
 	
-	if (statePlay_ != STATE_INPLAY::EXECUTION_LV1)
+	if (statePlay_ != STATE_INPLAY::EXECUTION)
 	{
 		ChangeExecution(EXE_TYPE::NONE);
 	}
@@ -653,7 +653,7 @@ void Raider::ProcessMove(void)
 
 	VECTOR dir = AsoUtility::VECTOR_ZERO;
 
-	if (!IsStateInPlay(STATE_INPLAY::FALL_MYSELF) && !IsStateInPlay(STATE_INPLAY::EXECUTION_LV1))
+	if (!IsStateInPlay(STATE_INPLAY::FALL_MYSELF) && !IsStateInPlay(STATE_INPLAY::EXECUTION))
 	{
 		//	カメラ方向に前進したい
 		if (ins.IsNew(KEY_INPUT_W))
@@ -705,7 +705,7 @@ void Raider::ProcessMove(void)
 		//	回転処理
 		SetGoalRotate(rotRad_);
 
-		if (!isJump_ && IsEndLanding() && !IsStateInPlay(STATE_INPLAY::EXECUTION_LV1))
+		if (!isJump_ && IsEndLanding() && !IsStateInPlay(STATE_INPLAY::EXECUTION))
 		{
 			ChangeStateInPlay(STATE_INPLAY::MOVE);
 		}
@@ -713,7 +713,7 @@ void Raider::ProcessMove(void)
 	}
 	else
 	{
-		if (!isJump_ && IsEndLanding() && !IsStateInPlay(STATE_INPLAY::EXECUTION_LV1))
+		if (!isJump_ && IsEndLanding() && !IsStateInPlay(STATE_INPLAY::EXECUTION))
 		{
 			ChangeStateInPlay(STATE_INPLAY::IDLE);
 		}
@@ -741,8 +741,20 @@ void Raider::ProcessJump(void)
 			
 			//	無理やりアニメーション
 			ChangeStateInPlay(STATE_INPLAY::JUMP);
-			animationController_->Play((int)ANIM_TYPE::JUMP, true, 13.0f, 25.0f);
-			animationController_->SetEndLoop(23.0f, 25.0f, 5.0f);
+
+			switch (levelRaider_)
+			{
+			case Raider::LEVEL_PL::LV1:
+				animationController_->Play((int)ANIM_TYPE::JUMP, true, 13.0f, 25.0f);
+				animationController_->SetEndLoop(23.0f, 25.0f, 5.0f);
+				break;
+			case Raider::LEVEL_PL::LV2:
+				animationController_->Play((int)ANIM_TYPE::JUMP_LV2, true, 13.0f, 25.0f);
+				animationController_->SetEndLoop(23.0f, 25.0f, 5.0f);
+				break;
+			case Raider::LEVEL_PL::LV3:
+				break;
+			}
 		}
 
 		isJump_ = true;
@@ -1042,9 +1054,20 @@ void Raider::PrepareExecution(void)
 	{
 		exeCnt_ = EXECUTION_FLAME;
 		exeTarget_ = TARGET::NONE;
-		if (IsStateInPlay(STATE_INPLAY::EXECUTION_LV1) && IsExeType(EXE_TYPE::PREPARE))
+		if (IsStateInPlay(STATE_INPLAY::EXECUTION) && IsExeType(EXE_TYPE::PREPARE))
 		{
-			SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::FOLLOW);
+			switch (levelRaider_)
+			{
+			case Raider::LEVEL_PL::LV1:
+				SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::FOLLOW_LV1);
+				break;
+			case Raider::LEVEL_PL::LV2:
+				SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::FOLLOW_LV2);
+				break;
+			case Raider::LEVEL_PL::LV3:
+				break;
+			}
+
 			ChangeStateInPlay(STATE_INPLAY::IDLE);
 			ChangeExecution(EXE_TYPE::NONE);
 		}
@@ -1065,7 +1088,7 @@ void Raider::PrepareExecution(void)
 		}
 		movePow_ = AsoUtility::VECTOR_ZERO;
 		//	ボタン押してて、ターゲットがNONEでも無かったら
-		ChangeStateInPlay(STATE_INPLAY::EXECUTION_LV1);
+		ChangeStateInPlay(STATE_INPLAY::EXECUTION);
 		ChangeExecution(EXE_TYPE::PREPARE);
 	}
 
@@ -1133,13 +1156,12 @@ void Raider::Evolution(void)
 		break;
 	}
 	
-	ChangeExecution(EXE_TYPE::EVOLUTION);
 
 }
 
 void Raider::ExeEvoUpdate()
 {
-	if (!IsStateInPlay(STATE_INPLAY::EXECUTION_LV1))
+	if (!IsStateInPlay(STATE_INPLAY::EXECUTION))
 	{
 		return;
 	}
@@ -1156,18 +1178,30 @@ void Raider::ExeEvoUpdate()
 			if (exp_ < MAX_EVOLUTION_POINT)
 			{
 				ChangeStateInPlay(STATE_INPLAY::IDLE);
-				SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::FOLLOW);
+				switch (levelRaider_)
+				{
+				case Raider::LEVEL_PL::LV1:
+					SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::FOLLOW_LV1);
+					break;
+				case Raider::LEVEL_PL::LV2:
+					SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::FOLLOW_LV2);
+					break;
+				case Raider::LEVEL_PL::LV3:
+					break;
+				default:
+					break;
+				}
 				return;
 			}
 			else
 			{
-				Evolution();
+				ChangeExecution(EXE_TYPE::EVOLUTION);
 				exeCnt_ = EXECUTION_FLAME*8.0f;
 			}
 		}
 
 	}
-	if (IsExeType(EXE_TYPE::EVOLUTION))
+	else if (IsExeType(EXE_TYPE::EVOLUTION))
 	{
 		if (exeCnt_ > 0)
 		{
@@ -1175,12 +1209,26 @@ void Raider::ExeEvoUpdate()
 		}
 		else
 		{
-			transform_->SetModel(resMng_.LoadModelDuplicate(
-				ResourceManager::SRC::MDL_RAIDER_LV2));
+			Evolution();
+			switch (levelRaider_)
+			{
+			case Raider::LEVEL_PL::LV2:
+				transform_->SetModel(resMng_.LoadModelDuplicate(
+					ResourceManager::SRC::MDL_RAIDER_LV2));
+				SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::FOLLOW_LV2);
+				break;
+			case Raider::LEVEL_PL::LV3:
+				transform_->SetModel(resMng_.LoadModelDuplicate(
+					ResourceManager::SRC::MDL_RAIDER_LV3));
+				SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::FOLLOW_LV1);
+				break;
+			default:
+				break;
+			}
 			animationController_->ChangeModel(transform_->modelId);
+
 			ChangeExecution(EXE_TYPE::NONE);
 			ChangeStateInPlay(STATE_INPLAY::IDLE);
-			SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::FOLLOW);
 		}
 
 	}

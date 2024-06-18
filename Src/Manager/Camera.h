@@ -24,6 +24,7 @@ public:
 
 	//	追従位置からカメラ位置までの相対座標
 	static constexpr VECTOR LOCAL_F2C_POS = { 0.0f, 0.0f, -650.0f };
+	static constexpr VECTOR LOCAL_F2C_POS_LV2 = { 0.0f, 0.0f, -1000.0f };
 
 	//	追従位置から注視点までの相対座標
 	static constexpr VECTOR LOCAL_F2T_POS = { 0.0f, 200.0f, 200.0f };
@@ -47,7 +48,8 @@ public:
 	{
 		NONE,
 		FIXED_POINT,
-		FOLLOW,
+		FOLLOW_LV1,
+		FOLLOW_LV2,
 		EXECUTION_LV1,
 		EXECUTION_LV2,
 		SELF_SHOT
@@ -118,14 +120,16 @@ private:
 	void SetDefault(void);
 
 	//	追従対象との位置同期を取る
-	void SyncFollow(void);
+	void SyncFollowLv1(void);
+	void SyncFollowLv2(void);
 
 	//	カメラ操作
 	void ProcessRot(void);
 
 	//	モード別更新ステップ
 	void SetBeforeDrawFixedPoint(void);
-	void SetBeforeDrawFollow(void);
+	void SetBeforeDrawFollowLv1(void);
+	void SetBeforeDrawFollowLv2(void);
 	void SetBeforeDrawSelfShot(void);
 	void SetBeforeDrawExequtionLv1(void);
 	void SetBeforeDrawExequtionLv2(void);

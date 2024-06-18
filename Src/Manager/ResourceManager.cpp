@@ -60,7 +60,7 @@ void ResourceManager::Init(void)
 	resourcesMap_.emplace(SRC::MDL_RAIDER_LV2, res);
 
 	//	レイダー
-	res = new RES(RES_T::MODEL, PATH_MDL + "Player/Raider/Lv2Raider.mv1");
+	res = new RES(RES_T::MODEL, PATH_MDL + "Player/BotX.mv1");
 	resourcesMap_.emplace(SRC::MDL_RAIDER_LV3, res);
 
 	//	サバイバー

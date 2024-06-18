@@ -47,6 +47,8 @@ public:
 	//	ƒ_ƒ[ƒWó‚¯‚é
 	void Damage(int damage);
 
+	STATE GetState(void);
+	void SetState(STATE);
 protected:
 
 	static constexpr int MAX_HP = 100;

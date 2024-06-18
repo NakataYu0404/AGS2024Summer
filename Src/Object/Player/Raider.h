@@ -61,7 +61,7 @@ public:
 		STUN,
 		ATTACK,
 		SHOT,
-		EXECUTION_LV1,
+		EXECUTION,
 	};
 
 	enum class LEVEL_PL

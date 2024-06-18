@@ -86,6 +86,9 @@ void Survivor::SetParam(void)
 	rotRad_ = 0.0f;
 
 	hp_ = MAX_HP;
+
+	reviveTimer_ = REVIVE_TIMER;
+	deadTimer_ = DEAD_TIMER;
 }
 
 void Survivor::Update(void)
@@ -139,11 +142,6 @@ Survivor::STATE_INPLAY Survivor::GetStatePlay(void)
 	return statePlay_;
 }
 
-void Survivor::SetState(PlayerBase::STATE state)
-{
-	state_ = state;
-}
-
 void Survivor::InitAnimation(void)
 {
 
@@ -162,7 +160,7 @@ void Survivor::InitAnimation(void)
 	animationController_->Add((int)ANIM_TYPE::CRAWL_MOVE, path + "CrawlMove.mv1", 60.0f);
 
 	//	TODO:学校のネットがしょぼいから家でAnim探していれる
-	animationController_->Add((int)ANIM_TYPE::DOWN, path + "Victory.mv1", 60.0f);
+	animationController_->Add((int)ANIM_TYPE::DOWN, path + "CrawlMove.mv1", 60.0f);
 
 	animationController_->Play((int)ANIM_TYPE::IDLE);
 
@@ -206,12 +204,15 @@ void Survivor::UpdatePlay(void)
 	if (!IsStateInPlay(STATE_INPLAY::STUN) && !IsStateInPlay(STATE_INPLAY::DOWN))
 	{
 		UpdateLand();
+
 	}
 
-	ChangeStateAnimation();
+	CrawlDownUpdate();
 
 	//	移動方向に応じた回転
 	Rotate();
+
+	ChangeStateAnimation();
 
 	//	重力による移動量
 	CalcGravityPow();
@@ -506,6 +507,39 @@ bool Survivor::IsEndLanding(void)
 	}
 
 	return false;
+}
+
+void Survivor::CrawlDownUpdate(void)
+{
+	if (!IsStateInPlay(STATE_INPLAY::CRAWL) && !IsStateInPlay(STATE_INPLAY::DOWN))
+	{
+		return;
+	}
+
+	if (IsStateInPlay(STATE_INPLAY::CRAWL))
+	{
+		if (reviveTimer_ <= 0.0f)
+		{
+			ChangeStateInPlay(STATE_INPLAY::IDLE);
+			reviveTimer_ = REVIVE_TIMER;
+			return;
+		}
+		reviveTimer_--;
+		return;
+	}
+
+	if (IsStateInPlay(STATE_INPLAY::DOWN))
+	{
+
+		if (deadTimer_ <= 0.0f)
+		{
+			ChangeState(STATE::DEAD);
+			deadTimer_ = DEAD_TIMER;
+			return;
+		}
+		deadTimer_--;
+		return;
+	}
 }
 
 void Survivor::BlowOff(void)
