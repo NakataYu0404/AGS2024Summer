@@ -1,4 +1,5 @@
 #include <Dxlib.h>
+#include "../../Application.h"
 #include "../../Utility/AsoUtility.h"
 #include "../../Manager/ResourceManager.h"
 #include "../Common/AnimationController.h"
@@ -6,6 +7,7 @@
 
 Victim::Victim()
 {
+	animationController_ = nullptr;
 }
 
 Victim::~Victim()
@@ -25,6 +27,8 @@ void Victim::Init()
 	transform_->quaRotLocal =
 		Quaternion::Euler({ 0.0f, AsoUtility::Deg2RadF(180.0f), 0.0f });
 	transform_->Update();
+
+	InitAnimation();
 
 	//	丸影画像
 	imgShadow_ = resMng_.Load(ResourceManager::SRC::IMG_PLAYERSHADOW).handleId_;
@@ -50,7 +54,7 @@ void Victim::Update()
 	transform_->Update();
 
 	//	//	アニメーション再生
-	//	animationController_->Update();
+	animationController_->Update();
 
 }
 
@@ -70,6 +74,12 @@ void Victim::SetParam()
 
 void Victim::InitAnimation(void)
 {
+	std::string path = Application::PATH_MODEL + "Player/Anim/";
+	animationController_ = std::make_shared<AnimationController>(transform_->modelId);
+	animationController_->Add((int)ANIM_TYPE::IDLE, path + "scared.mv1", 60.0f);
+	animationController_->Add((int)ANIM_TYPE::DEAD, path + "Run.mv1", 60.0f);
+
+	animationController_->Play((int)ANIM_TYPE::IDLE);
 }
 
 void Victim::ChangeState(STATE state)

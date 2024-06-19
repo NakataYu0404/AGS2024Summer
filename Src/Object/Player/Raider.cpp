@@ -276,6 +276,9 @@ void Raider::InitAnimation(void)
 	animationController_->Add((int)ANIM_TYPE::ATTACK_HIT, path + "manyPunch.mv1", 80.0f);
 	animationController_->Add((int)ANIM_TYPE::ATTACK_END, path + "gurugurukick.mv1", 60.0f);
 	animationController_->Add((int)ANIM_TYPE::EXECUTION_LV1, path + "fingerGun2.mv1", 120.0f);
+	animationController_->Add((int)ANIM_TYPE::EVOLUTION_LV1, path + "Dying.mv1", 120.0f);
+
+	animationController_->Add((int)ANIM_TYPE::SCREAM, path + "scream.mv1", 60.0f);
 
 	animationController_->Add((int)ANIM_TYPE::IDLE_LV2, path2 + "Idle2.mv1", 20.0f);
 	animationController_->Add((int)ANIM_TYPE::RUN_LV2, path2 + "walk.mv1", 20.0f);
@@ -332,9 +335,23 @@ void Raider::ChangeStateAnimation(void)
 			case Raider::STATE_INPLAY::STUN:
 				break;
 			case Raider::STATE_INPLAY::EXECUTION:
-				animationController_->Play((int)ANIM_TYPE::EXECUTION_LV1, false);
+				switch (executionType_)
+				{
+				case Raider::EXE_TYPE::NONE:
+					break;
+				case Raider::EXE_TYPE::PREPARE:
+					animationController_->Play((int)ANIM_TYPE::EXECUTION_LV1, false);
+					break;
+				case Raider::EXE_TYPE::EXEQUTED:
+					animationController_->Play((int)ANIM_TYPE::SCREAM, false);
+					break;
+				case Raider::EXE_TYPE::EVOLUTION:
+					animationController_->Play((int)ANIM_TYPE::EVOLUTION_LV1, false);
+					break;
+				default:
+					break;
+				}
 				break;
-
 			default:
 				break;
 
@@ -426,9 +443,22 @@ void Raider::ChangeStateAnimation(void)
 			case Raider::STATE_INPLAY::STUN:
 				break;
 			case Raider::STATE_INPLAY::EXECUTION:
-				animationController_->Play((int)ANIM_TYPE::EXECUTION_LV2, false);
+				switch (executionType_)
+				{
+				case Raider::EXE_TYPE::NONE:
+					break;
+				case Raider::EXE_TYPE::PREPARE:
+					animationController_->Play((int)ANIM_TYPE::EXECUTION_LV2, false);
+					break;
+				case Raider::EXE_TYPE::EXEQUTED:
+					animationController_->Play((int)ANIM_TYPE::ATTACK_END_LV2, false);
+					break;
+				case Raider::EXE_TYPE::EVOLUTION:
+					break;
+				default:
+					break;
+				}
 				break;
-
 			default:
 				break;
 
@@ -1209,28 +1239,43 @@ void Raider::ExeEvoUpdate()
 		}
 		else
 		{
-			Evolution();
 			switch (levelRaider_)
 			{
 			case Raider::LEVEL_PL::LV2:
-				transform_->SetModel(resMng_.LoadModelDuplicate(
-					ResourceManager::SRC::MDL_RAIDER_LV2));
 				SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::FOLLOW_LV2);
 				break;
 			case Raider::LEVEL_PL::LV3:
-				transform_->SetModel(resMng_.LoadModelDuplicate(
-					ResourceManager::SRC::MDL_RAIDER_LV3));
 				SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::FOLLOW_LV1);
 				break;
 			default:
 				break;
 			}
-			animationController_->ChangeModel(transform_->modelId);
-
 			ChangeExecution(EXE_TYPE::NONE);
 			ChangeStateInPlay(STATE_INPLAY::IDLE);
 		}
 
+		if ((animationController_->GetPlayType() == (int)ANIM_TYPE::EVOLUTION_LV1 || animationController_->GetPlayType() == (int)ANIM_TYPE::EVOLUTION_LV2) && animationController_->IsEnd())
+		{
+			Evolution();
+
+			switch (levelRaider_)
+			{
+			case Raider::LEVEL_PL::LV2:
+				transform_->SetModel(resMng_.LoadModelDuplicate(
+					ResourceManager::SRC::MDL_RAIDER_LV2));
+				SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::EXECUTION_LV2);
+				animationController_->Play((int)ANIM_TYPE::ATTACK_END_LV2, false);
+				break;
+			case Raider::LEVEL_PL::LV3:
+				transform_->SetModel(resMng_.LoadModelDuplicate(
+					ResourceManager::SRC::MDL_RAIDER_LV3));
+				SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::EXECUTION_LV1);
+				break;
+			default:
+				break;
+			}
+			animationController_->ChangeModel(transform_->modelId);
+		}
 	}
 
 	exeQube_->pos = transform_->midPos;

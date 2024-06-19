@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include "../ActorBase.h"
 
 class AnimationController;
@@ -38,7 +39,11 @@ public:
 
 private:
 
+	//	Anim初期化
 	void InitAnimation(void);
+
+	//	現在のSTATEに合わせて変わるアニメーション
+	void ChangeStateAnimation(void);
 
 	//	状態遷移
 	void ChangeState(STATE state);
@@ -56,7 +61,7 @@ private:
 	bool isAlive_;
 
 	//	アニメーション
-	AnimationController* animationController_;
+	std::shared_ptr<AnimationController> animationController_;
 
 	//	状態管理
 	STATE state_;

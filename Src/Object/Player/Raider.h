@@ -89,7 +89,9 @@ public:
 		ATTACK_END,
 		ATTACK_SHOT,
 		STUN,
+		SCREAM,
 		EXECUTION_LV1,
+		EVOLUTION_LV1,
 
 		IDLE_LV2,
 		RUN_LV2,
@@ -106,6 +108,7 @@ public:
 		ATTACK_SHOT_LV2,
 		STUN_LV2,
 		EXECUTION_LV2,
+		EVOLUTION_LV2,
 	};
 
 	enum class ATTACK_TYPE

@@ -129,7 +129,7 @@ void GameScene::Update(void)
 		(survivors_[2]->IsStateInPlay(Survivor::STATE_INPLAY::CRAWL) || survivors_[2]->IsStateInPlay(Survivor::STATE_INPLAY::DOWN) || survivors_[2]->GetState() == PlayerBase::STATE::DEAD))
 	{
 		//	ゲームオーバー
-		int a = 0;
+		int	tekitou = 0;
 	}
 
 	colMng_.Update();
