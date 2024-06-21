@@ -39,6 +39,22 @@ public:
 
 	static constexpr float ATTACK_POW = 50.0f;
 
+	static constexpr float ATTACK_END_FLAME_LV1 = 15.0f;
+	static constexpr float ATTACK_END_FLAME_LV2 = 50.0f;
+
+	struct CAPSIZE
+	{
+		VECTOR top;
+		VECTOR bot;
+		float rad;
+	};
+
+	struct COL_CAPSULE_SIZE
+	{
+		CAPSIZE lv1;
+		CAPSIZE lv2;
+	};
+
 	//	空中にいたいか地上にいたいかで処理を変えたい(不可抗力で空中にいてしまってる場合は(落下とか)LANDで、自分から浮いてるときはAIR)
 	enum class STATE_PLPOS
 	{
@@ -164,6 +180,8 @@ public:
 
 	bool IsWaitNow(void);
 			
+	COL_CAPSULE_SIZE levelCapSize_;
+
 private:
 
 	//	ターゲット範囲の最大距離

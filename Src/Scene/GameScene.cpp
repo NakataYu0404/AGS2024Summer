@@ -139,7 +139,6 @@ void GameScene::Draw(void)
 {
 	//	背景
 	skyDome_->Draw();
-	stage_->Draw();
 	
 	raider_->Draw();
 
@@ -160,6 +159,8 @@ void GameScene::Draw(void)
 		}
 		v->Draw();
 	}
+
+	stage_->Draw();
 
 	//	ヘルプ
 	DrawFormatString(840, 20, 0x000000, "移動　　：WASD");

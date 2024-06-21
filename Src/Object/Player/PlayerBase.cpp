@@ -107,7 +107,9 @@ void PlayerBase::ShotDestinationPosUpdate(void)
 
 	auto Hit = colMng_.Line_IsCollision_Stage(SceneManager::GetInstance().GetCamera()->GetPos(), cameraMidRayPos_);
 
-	if (Hit.HitFlag)
+	VECTOR cameraMidRayDir = VNorm(VSub(cameraMidRayPos_, SceneManager::GetInstance().GetCamera()->GetPos()));
+
+	if (Hit.HitFlag && VDot(Hit.Normal, cameraMidRayDir) < 0.0f)
 	{
 		shotDestinationPos_ = Hit.HitPosition;
 	}

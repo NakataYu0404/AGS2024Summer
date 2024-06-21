@@ -47,19 +47,13 @@ void ResourceManager::Init(void)
 	res = new RES(RES_T::MODEL, PATH_MDL + "Player/Victim/Player.mv1");
 	resourcesMap_.emplace(SRC::MDL_PLAYER, res);
 
-	////	レイダー
-	//res = new RES(RES_T::MODEL, PATH_MDL + "Player/BotX.mv1");
-	//resourcesMap_.emplace(SRC::MDL_RAIDER_LV1, res);
-
 	//	レイダー
 	res = new RES(RES_T::MODEL, PATH_MDL + "Player/Raider/Lv1Raider.mv1");
 	resourcesMap_.emplace(SRC::MDL_RAIDER_LV1, res);
-
-	//	レイダー
+	//	
 	res = new RES(RES_T::MODEL, PATH_MDL + "Player/Raider/Lv2Raider.mv1");
 	resourcesMap_.emplace(SRC::MDL_RAIDER_LV2, res);
-
-	//	レイダー
+	//	
 	res = new RES(RES_T::MODEL, PATH_MDL + "Player/BotX.mv1");
 	resourcesMap_.emplace(SRC::MDL_RAIDER_LV3, res);
 
@@ -67,8 +61,8 @@ void ResourceManager::Init(void)
 	res = new RES(RES_T::MODEL, PATH_MDL + "Player/Survivor/BotY.mv1");
 	resourcesMap_.emplace(SRC::MDL_SURVIVOR, res);
 
-	//	サバイバー
-	res = new RES(RES_T::MODEL, PATH_MDL + "exeQube.mv1");
+	//	
+	res = new RES(RES_T::MODEL, PATH_MDL + "exeSphere.mv1");
 	resourcesMap_.emplace(SRC::EXEQUBE, res);
 
 	//	プレイヤー影
@@ -83,41 +77,9 @@ void ResourceManager::Init(void)
 	res = new RES(RES_T::MODEL, PATH_MDL + "Planet/MainPlanet.mv1");
 	resourcesMap_.emplace(SRC::MDL_MAINPLANET, res);
 
-	//	落とし穴の惑星
-	res = new RES(RES_T::MODEL, PATH_MDL + "Planet/FallPlanet.mv1");
-	resourcesMap_.emplace(SRC::MDL_FALLPLANET, res);
-
-	//	平坦な惑星01
-	res = new RES(RES_T::MODEL, PATH_MDL + "Planet/FlatPlanet01.mv1");
-	resourcesMap_.emplace(SRC::MDL_FLATPLANET_01, res);
-
-	//	平坦な惑星02
-	res = new RES(RES_T::MODEL, PATH_MDL + "Planet/FlatPlanet02.mv1");
-	resourcesMap_.emplace(SRC::MDL_FLATPLANET_02, res);
-
-	//	最後の惑星
-	res = new RES(RES_T::MODEL, PATH_MDL + "Planet/LastPlanet.mv1");
-	resourcesMap_.emplace(SRC::MDL_LASTPLANET, res);
-
-	//	特別な惑星
-	res = new RES(RES_T::MODEL, PATH_MDL + "Planet/RoadPlanet.mv1");
-	resourcesMap_.emplace(SRC::MDL_SPECIALPLANET, res);
-
 	//	足煙
 	res = new RES(RES_T::EFFEKSEER, PATH_EFF + "Smoke/Smoke.efkefc");
 	resourcesMap_.emplace(SRC::FOOT_SMOKE, res);
-
-	//	ワープスターモデル
-	res = new RES(RES_T::MODEL, PATH_MDL + "Star/star.mv1");
-	resourcesMap_.emplace(SRC::MDL_WARPSTAR, res);
-
-	//	ワープスター用回転エフェクト
-	res = new RES(RES_T::EFFEKSEER, PATH_EFF + "StarDust/StarDust.efkefc");
-	resourcesMap_.emplace(SRC::WARP_STAR_ROT_EFF, res);
-
-	//	ワープの軌跡線
-	res = new RES(RES_T::EFFEKSEER, PATH_EFF + "Warp/WarpOrbit.efkefc");
-	resourcesMap_.emplace(SRC::WARP_ORBIT, res);
 
 	//	ブラックホール
 	res = new RES(RES_T::EFFEKSEER, PATH_EFF + "BlackHole/BlackHole.efkefc");
@@ -130,14 +92,6 @@ void ResourceManager::Init(void)
 	//	Clear
 	res = new RES(RES_T::IMG, PATH_IMG + "Congratulations.png");
 	resourcesMap_.emplace(SRC::CLEAR, res);
-
-	//	タンク
-	res = new RES(RES_T::MODEL, PATH_MDL + "Tank/Body.mv1");
-	resourcesMap_.emplace(SRC::TANK_BODY, res);
-	res = new RES(RES_T::MODEL, PATH_MDL + "Tank/Wheel.mv1");
-	resourcesMap_.emplace(SRC::TANK_WHEEL, res);
-	res = new RES(RES_T::MODEL, PATH_MDL + "Tank/Barrel.mv1");
-	resourcesMap_.emplace(SRC::TANK_BARREL, res);
 
 	res = new RES(RES_T::MODEL, PATH_MDL + "Shot/Shot.mv1");
 	resourcesMap_.emplace(SRC::SHOT, res);

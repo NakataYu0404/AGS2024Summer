@@ -55,11 +55,22 @@ void Raider::Init(void)
 
 	transform_->MakeCollider(Collider::Category::RAIDER, Collider::TYPE::CAPSULE);
 
+
+	levelCapSize_.lv1.top = { 0.0f, 180.0f, 0.0f };
+	levelCapSize_.lv1.bot = { 0.0f, 50.0f, 0.0f };
+	levelCapSize_.lv1.rad = 40.0f;
+
+	levelCapSize_.lv2.top = { 0.0f, 400.0f, 0.0f };
+	levelCapSize_.lv2.bot = { 0.0f, 90.0f, 0.0f };
+	levelCapSize_.lv2.rad = 80.0f;
+
+
 	//	カプセルコライダ
 	capsule_ = std::make_shared<Capsule>(transform_);
-	capsule_->SetLocalPosTop({ 0.0f, 110.0f, 0.0f });
-	capsule_->SetLocalPosDown({ 0.0f, 30.0f, 0.0f });
-	capsule_->SetRadius(20.0f);
+	
+	capsule_->SetLocalPosTop(levelCapSize_.lv1.top);
+	capsule_->SetLocalPosDown(levelCapSize_.lv1.bot);
+	capsule_->SetRadius(levelCapSize_.lv1.rad);
 	
 	//	丸影画像
 	imgShadow_ = resMng_.Load(ResourceManager::SRC::IMG_PLAYERSHADOW).handleId_;
@@ -107,7 +118,7 @@ void Raider::SetParam(void)
 	rotRad_ = 0.0f;
 
 	levelRaider_ = LEVEL_PL::LV1;
-	exp_ = 0;
+	exp_ = 99;
 
 	for (int i = 0; i < SURVIVOR_NUM; i++)
 	{
@@ -125,7 +136,8 @@ void Raider::SetParam(void)
 	chaseTime_ = CHASE_FLAME;
 	attackCnt_ = ATTACK_FLAME;
 
-	attackEndFlame_ = 15.0f;
+	attackEndFlame_ = ATTACK_END_FLAME_LV1;
+
 	blowOffFlag_ = false;
 }
 
@@ -213,6 +225,7 @@ void Raider::DebugDraw(void)
 	DrawFormatString(0, 0, 0x000000, "jumppowX:%f,jumppowY:%f,jumppowZ:%f", jumpPow_.x, jumpPow_.y, jumpPow_.z);
 	DrawFormatString(0, 30, 0x000000, "exp:%d", exp_);
 
+	capsule_->Draw();
 }
 
 bool Raider::IsStateInPlay(STATE_INPLAY state)
@@ -1242,6 +1255,7 @@ void Raider::ExeEvoUpdate()
 			switch (levelRaider_)
 			{
 			case Raider::LEVEL_PL::LV2:
+
 				SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::FOLLOW_LV2);
 				break;
 			case Raider::LEVEL_PL::LV3:
@@ -1263,6 +1277,10 @@ void Raider::ExeEvoUpdate()
 			case Raider::LEVEL_PL::LV2:
 				transform_->SetModel(resMng_.LoadModelDuplicate(
 					ResourceManager::SRC::MDL_RAIDER_LV2));
+				capsule_->SetLocalPosTop(levelCapSize_.lv2.top);
+				capsule_->SetLocalPosDown(levelCapSize_.lv2.bot);
+				capsule_->SetRadius(levelCapSize_.lv2.rad);
+				attackEndFlame_ = ATTACK_END_FLAME_LV2;
 				SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::EXECUTION_LV2);
 				animationController_->Play((int)ANIM_TYPE::ATTACK_END_LV2, false);
 				break;
@@ -1390,7 +1408,7 @@ void Raider::CollisionGravity(void)
 	//	重力の強さ
 	float gravityPow = 1.0f;
 
-	float checkPow = 10.0f;
+	float checkPow = 30.0f;
 	gravHitPosUp_ = VAdd(movedPos_, VScale(dirUpGravity, gravityPow));
 	gravHitPosUp_ = VAdd(gravHitPosUp_, VScale(dirUpGravity, checkPow * 2.0f));
 	gravHitPosDown_ = VAdd(movedPos_, VScale(dirGravity, checkPow));
