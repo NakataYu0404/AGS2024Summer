@@ -1438,7 +1438,7 @@ void Raider::CollisionGravity(void)
 
 void Raider::CalcGravityPow(void)
 {
-	if (statePlPos_ == STATE_PLPOS::AIR)
+	if (isFly_)
 	{
 		//	”ò‚ñ‚Å‚é‚È‚çd—Í‚ÆƒWƒƒƒ“ƒv—Í‚ğ–³Œø‚É
 		jumpPow_ = AsoUtility::VECTOR_ZERO;

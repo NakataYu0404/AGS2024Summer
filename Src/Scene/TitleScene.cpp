@@ -62,7 +62,7 @@ void TitleScene::Init(void)
 	charactor_.Update();
 
 	//	アニメーションの設定
-	std::string path = Application::PATH_MODEL + "Player/";
+	std::string path = Application::PATH_MODEL + "Player/Anim/";
 	animationController_ = std::make_unique<AnimationController>(charactor_.modelId);
 	animationController_->Add(0, path + "Run.mv1", 20.0f);
 	animationController_->Play(0);
@@ -70,6 +70,10 @@ void TitleScene::Init(void)
 	//	定点カメラ
 	SceneManager::GetInstance().GetCamera()->ChangeMode(Camera::MODE::FIXED_POINT);
 
+	ShaderVertHdl_ = LoadVertexShader("./Data/Shader/LightVertexShader.cso");
+	ShaderPixHdl_ = LoadPixelShader("./Data/Shader/LighPixelShader.cso");
+	cnt_ = 0.0f;
+	lightBuf = CreateShaderConstantBuffer(sizeof(float) * 4);
 }
 
 void TitleScene::Update(void)
@@ -92,15 +96,44 @@ void TitleScene::Update(void)
 
 	skyDome_->Update();
 
+	cnt_++;
 }
 
 void TitleScene::Draw(void)
 {
-
 	skyDome_->Draw();
+
+	MV1SetUseOrigShader(true);
+	SetUseVertexShader(ShaderVertHdl_);
+	SetUsePixelShader(ShaderPixHdl_);
+	SetTextureAddressMode(DX_TEXADDRESS_CLAMP);
+
+	ChangeLightTypeDir({ sinf(AsoUtility::Deg2RadF(cnt_)), 0.0f,sinf(AsoUtility::Deg2RadF(cnt_)+ AsoUtility::Deg2RadF(90.0f))});
+	lightDir.x = sinf(AsoUtility::Deg2RadF(cnt_));
+	lightDir.y = 0.0f;
+	lightDir.z = sinf(AsoUtility::Deg2RadF(cnt_) + AsoUtility::Deg2RadF(90.0f));
+	lightDir.w = 0.0f;
+
+	lightDir.x = VNorm({ lightDir.x ,lightDir.y,lightDir.z }).x;
+	lightDir.y = VNorm({ lightDir.x ,lightDir.y,lightDir.z }).y;
+	lightDir.z = VNorm({ lightDir.x ,lightDir.y,lightDir.z }).z;
+
+	FLOAT4* tmpLightBuf = (FLOAT4*)GetBufferShaderConstantBuffer(lightBuf);
+
+	tmpLightBuf->x = lightDir.x;
+	tmpLightBuf->y = lightDir.y;
+	tmpLightBuf->z = lightDir.z;
+	tmpLightBuf->w = lightDir.w;
+
+	UpdateShaderConstantBuffer(lightBuf);
+	SetShaderConstantBuffer(lightBuf, DX_SHADERTYPE_VERTEX, 4);
+	SetShaderConstantBuffer(lightBuf, DX_SHADERTYPE_PIXEL, 4);
+
 
 	MV1DrawModel(planet_.modelId);
 	MV1DrawModel(movePlanet_.modelId);
+	MV1SetUseOrigShader(false);
+
 	MV1DrawModel(charactor_.modelId);
 
 	DrawRotaGraph(Application::SCREEN_SIZE_X / 2, 250, 1.0, 0.0, imgTitle_, true);

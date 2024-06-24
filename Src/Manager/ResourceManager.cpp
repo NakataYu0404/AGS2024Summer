@@ -48,10 +48,10 @@ void ResourceManager::Init(void)
 	resourcesMap_.emplace(SRC::MDL_PLAYER, res);
 
 	//	ÉåÉCÉ_Å[
-	res = new RES(RES_T::MODEL, PATH_MDL + "Player/Raider/Lv1Raider.mv1");
+	res = new RES(RES_T::MODEL, PATH_MDL + "Player/Raider/Lv1Raiderr.mv1");
 	resourcesMap_.emplace(SRC::MDL_RAIDER_LV1, res);
 	//	
-	res = new RES(RES_T::MODEL, PATH_MDL + "Player/Raider/Lv2Raider.mv1");
+	res = new RES(RES_T::MODEL, PATH_MDL + "Player/Raider/Lv2Raiderr.mv1");
 	resourcesMap_.emplace(SRC::MDL_RAIDER_LV2, res);
 	//	
 	res = new RES(RES_T::MODEL, PATH_MDL + "Player/BotX.mv1");
@@ -76,6 +76,15 @@ void ResourceManager::Init(void)
 	//	ç≈èâÇÃòfêØ
 	res = new RES(RES_T::MODEL, PATH_MDL + "Planet/MainPlanet.mv1");
 	resourcesMap_.emplace(SRC::MDL_MAINPLANET, res);
+
+	//	ÇΩÇ¢Ç∆ÇÈ
+	res = new RES(RES_T::MODEL, PATH_MDL + "Planet/FallPlanet.mv1");
+	resourcesMap_.emplace(SRC::MDL_FALLPLANET, res);
+
+	//	ÇΩÇ¢Ç∆ÇÈ
+	res = new RES(RES_T::MODEL, PATH_MDL + "Planet/LastPlanet.mv1");
+	resourcesMap_.emplace(SRC::MDL_LASTPLANET, res);
+
 
 	//	ë´âå
 	res = new RES(RES_T::EFFEKSEER, PATH_EFF + "Smoke/Smoke.efkefc");

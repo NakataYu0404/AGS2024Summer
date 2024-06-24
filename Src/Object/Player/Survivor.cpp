@@ -455,7 +455,7 @@ void Survivor::CollisionGravity(void)
 		jumpPow_ = AsoUtility::VECTOR_ZERO;
 		stepJump_ = 0.0f;
 
-		if (isJump_)
+		if (isJump_ && !IsStateInPlay(STATE_INPLAY::CRAWL))
 		{
 			statePlay_ = STATE_INPLAY::LAND;
 		}

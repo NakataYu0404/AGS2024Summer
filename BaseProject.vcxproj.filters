@@ -231,4 +231,17 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Src\Shader\Pixel\PixelShader2DHeader.hlsli" />
+    <None Include="Src\Shader\Pixel\PixelShader3DHeader.hlsli" />
+    <None Include="Src\Shader\VertexToPixelHeader.hlsli" />
+    <None Include="Src\Shader\Vertex\CommonShader3DHeader.hlsli" />
+    <None Include="Src\Shader\Vertex\VertexInputType.hlsli" />
+    <None Include="Src\Shader\Vertex\VertexShader3DHeader.hlsli" />
+    <None Include="Src\Shader\Vertex\VertexInput.hlsli" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Src\Shader\Pixel\LightPixelShader.hlsl" />
+    <FxCompile Include="Src\Shader\Vertex\LightVertexShader.hlsl" />
+  </ItemGroup>
 </Project>

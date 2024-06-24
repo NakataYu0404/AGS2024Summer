@@ -5,6 +5,7 @@ class SceneManager;
 class SkyDome;
 class AnimationController;
 
+
 class TitleScene : public SceneBase
 {
 
@@ -43,4 +44,12 @@ private:
 	//	アニメーション
 	std::unique_ptr<AnimationController> animationController_;
 
+	//	シェーダーのハンドル
+	int ShaderPixHdl_;
+	int ShaderVertHdl_;
+
+	FLOAT4 lightDir;
+	int lightBuf;
+
+	float cnt_;
 };
